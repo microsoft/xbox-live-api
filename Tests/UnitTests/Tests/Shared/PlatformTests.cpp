@@ -127,6 +127,7 @@ private:
 public:
     DEFINE_TEST_CASE(TestCustomLocalStorageHandlers)
     {
+        TEST_LOG(L"Test starting: TestCustomLocalStorageHandlers");
         LocalStorageManager storageManager{};
         TestEnvironment env{};
 
@@ -183,6 +184,8 @@ public:
 
     DEFINE_TEST_CASE(TestEnumTraits)
     {
+        TEST_LOG(L"Test starting: TestEnumTraits");
+
         auto s = EnumName(Value1);
         VERIFY_ARE_EQUAL_STR("Value1", s);
 
@@ -214,6 +217,8 @@ public:
 
     DEFINE_TEST_CASE(TestPeriodicTask)
     {
+        TEST_LOG(L"Test starting: TestPeriodicTask");
+
         TestEnvironment env{};
 
         XTaskQueueHandle queueHandle{ nullptr };

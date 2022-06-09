@@ -13,6 +13,8 @@ public:
 
     DEFINE_TEST_CASE(TestXboxLiveContextSettingsApis)
     {
+        TEST_LOG(L"Test starting: TestXboxLiveContextSettingsApis");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto contextHandle{ xboxLiveContext.get() };
@@ -60,6 +62,8 @@ public:
 
     DEFINE_TEST_CASE(TestHttpTimeouts)
     {
+        TEST_LOG(L"Test starting: TestHttpTimeouts");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 

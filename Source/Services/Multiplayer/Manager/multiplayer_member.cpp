@@ -11,6 +11,7 @@ STDAPI_(bool) XblMultiplayerManagerMemberAreMembersOnSameDevice(
     _In_ const XblMultiplayerManagerMember* first,
     _In_ const XblMultiplayerManagerMember* second
 ) XBL_NOEXCEPT
+try
 {
     if (first != nullptr && second != nullptr)
     {
@@ -18,6 +19,7 @@ STDAPI_(bool) XblMultiplayerManagerMemberAreMembersOnSameDevice(
     }
     return false;
 }
+CATCH_RETURN()
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 

@@ -2476,16 +2476,19 @@ STDAPI_(XblMultiplayerSessionHandle) XblMultiplayerSessionCreateHandle(
     _In_opt_ const XblMultiplayerSessionReference* sessionReference,
     _In_opt_ const XblMultiplayerSessionInitArgs* initArgs
 ) XBL_NOEXCEPT
+try
 {
     auto session = MakeShared<XblMultiplayerSession>(xuid, sessionReference, initArgs);
     session->AddRef();
     return session.get();
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI XblMultiplayerSessionDuplicateHandle(
     _In_ XblMultiplayerSessionHandle session,
     _Out_ XblMultiplayerSessionHandle* duplicatedHandle
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(session == nullptr || duplicatedHandle == nullptr);
 
@@ -2494,28 +2497,34 @@ STDAPI XblMultiplayerSessionDuplicateHandle(
 
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblMultiplayerSessionCloseHandle(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session)
     {
         session->DecRef();
     }
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI_(XblTournamentArbitrationStatus) XblMultiplayerSessionArbitrationStatus(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     UNREFERENCED_PARAMETER(session);
     return XblTournamentArbitrationStatus::Incomplete;
 }
+CATCH_RETURN_WITH(XblTournamentArbitrationStatus::Incomplete)
 
 STDAPI_(time_t) XblMultiplayerSessionTimeOfSession(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2524,10 +2533,12 @@ STDAPI_(time_t) XblMultiplayerSessionTimeOfSession(
 
     return session->TimeOfSession();
 }
+CATCH_RETURN()
 
 STDAPI_(const XblMultiplayerSessionInitializationInfo*) XblMultiplayerSessionGetInitializationInfo(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2536,10 +2547,12 @@ STDAPI_(const XblMultiplayerSessionInitializationInfo*) XblMultiplayerSessionGet
 
     return &session->InitializationInfo();
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(XblMultiplayerSessionChangeTypes) XblMultiplayerSessionSubscribedChangeTypes(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2552,12 +2565,14 @@ STDAPI_(XblMultiplayerSessionChangeTypes) XblMultiplayerSessionSubscribedChangeT
     }
     return MultiplayerSessionMember::Get(session->CurrentUserUnsafe())->SubscribedChangeTypes();
 }
+CATCH_RETURN_WITH(XblMultiplayerSessionChangeTypes::None)
 
 STDAPI XblMultiplayerSessionHostCandidates(
     _In_ XblMultiplayerSessionHandle session,
     _Out_ const XblDeviceToken** deviceTokens,
     _Out_ size_t* deviceTokensCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(deviceTokens == nullptr || deviceTokensCount == nullptr);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
@@ -2566,10 +2581,12 @@ STDAPI XblMultiplayerSessionHostCandidates(
     *deviceTokensCount = session->HostCandidates().size();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI_(const XblMultiplayerSessionReference*) XblMultiplayerSessionSessionReference(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2578,10 +2595,12 @@ STDAPI_(const XblMultiplayerSessionReference*) XblMultiplayerSessionSessionRefer
 
     return &session->SessionReference();
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(const XblMultiplayerSessionConstants*) XblMultiplayerSessionSessionConstants(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2590,11 +2609,13 @@ STDAPI_(const XblMultiplayerSessionConstants*) XblMultiplayerSessionSessionConst
 
     return &session->SessionConstantsUnsafe();
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(void) XblMultiplayerSessionConstantsSetMaxMembersInSession(
     _In_ XblMultiplayerSessionHandle session,
     uint32_t maxMembersInSession
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2603,11 +2624,13 @@ STDAPI_(void) XblMultiplayerSessionConstantsSetMaxMembersInSession(
 
     session->SetMaxMembersInSession(maxMembersInSession);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI_(void) XblMultiplayerSessionConstantsSetVisibility(
     _In_ XblMultiplayerSessionHandle session,
     _In_ XblMultiplayerSessionVisibility visibility
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2616,6 +2639,7 @@ STDAPI_(void) XblMultiplayerSessionConstantsSetVisibility(
 
     session->SetVisibility(visibility);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI XblMultiplayerSessionConstantsSetTimeouts(
     _In_ XblMultiplayerSessionHandle session,
@@ -2624,16 +2648,19 @@ STDAPI XblMultiplayerSessionConstantsSetTimeouts(
     _In_ uint64_t memberReadyTimeout,
     _In_ uint64_t sessionEmptyTimeout
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetTimeouts(memberReservedTimeout, memberInactiveTimeout, memberReadyTimeout, sessionEmptyTimeout);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionConstantsSetArbitrationTimeouts(
     _In_ XblMultiplayerSessionHandle session,
     _In_ uint64_t arbitrationTimeout,
     _In_ uint64_t forfeitTimeout
 ) XBL_NOEXCEPT
+try
 {
     UNREFERENCED_PARAMETER(session);
     UNREFERENCED_PARAMETER(arbitrationTimeout);
@@ -2641,6 +2668,7 @@ STDAPI XblMultiplayerSessionConstantsSetArbitrationTimeouts(
 
     return E_NOTIMPL;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionConstantsSetQosConnectivityMetrics(
     _In_ XblMultiplayerSessionHandle session,
@@ -2649,68 +2677,83 @@ STDAPI XblMultiplayerSessionConstantsSetQosConnectivityMetrics(
     _In_ bool enableBandwidthUpMetric,
     _In_ bool enableCustomMetric
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetQosConnectivityMetrics(enableLatencyMetric, enableBandwidthDownMetric, enableBandwidthUpMetric, enableCustomMetric);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionConstantsSetMemberInitialization(
     _In_ XblMultiplayerSessionHandle session,
     _In_ XblMultiplayerMemberInitialization memberInitialization
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetMemberInitialization(std::move(memberInitialization));
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionConstantsSetPeerToPeerRequirements(
     _In_ XblMultiplayerSessionHandle session,
     _In_ XblMultiplayerPeerToPeerRequirements requirements
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetPeerToPeerRequirements(std::move(requirements));
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionConstantsSetPeerToHostRequirements(
     _In_ XblMultiplayerSessionHandle session,
     _In_ XblMultiplayerPeerToHostRequirements requirements
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetPeerToHostRequirements(std::move(requirements));
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionConstantsSetMeasurementServerAddressesJson(
     _In_ XblMultiplayerSessionHandle session,
     _In_ const char* measurementServerAddressesJson
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(session == nullptr || measurementServerAddressesJson == nullptr);
     return session->SetMeasurementServerAddresses(measurementServerAddressesJson);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionConstantsSetCapabilities(
     _In_ XblMultiplayerSessionHandle session,
     _In_ XblMultiplayerSessionCapabilities capabilities
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetSessionCapabilities(std::move(capabilities));
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionConstantsSetCloudComputePackageJson(
     _In_ XblMultiplayerSessionHandle session,
     _In_ const char* sessionCloudComputePackageConstantsJson
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetCloudComputePackageJson(sessionCloudComputePackageConstantsJson);
 }
+CATCH_RETURN()
 
 STDAPI_(const XblMultiplayerSessionProperties*) XblMultiplayerSessionSessionProperties(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2719,21 +2762,25 @@ STDAPI_(const XblMultiplayerSessionProperties*) XblMultiplayerSessionSessionProp
 
     return &session->SessionPropertiesUnsafe();
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI XblMultiplayerSessionPropertiesSetKeywords(
     _In_ XblMultiplayerSessionHandle session,
     _In_ const char** keywords,
     _In_ size_t keywordsCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetKeywords(keywords, keywordsCount);
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblMultiplayerSessionPropertiesSetJoinRestriction(
     _In_ XblMultiplayerSessionHandle session,
     _In_ XblMultiplayerSessionRestriction joinRestriction
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2742,11 +2789,13 @@ STDAPI_(void) XblMultiplayerSessionPropertiesSetJoinRestriction(
 
     session->SetJoinRestriction(joinRestriction);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI_(void) XblMultiplayerSessionPropertiesSetReadRestriction(
     _In_ XblMultiplayerSessionHandle session,
     _In_ XblMultiplayerSessionRestriction readRestriction
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2755,22 +2804,26 @@ STDAPI_(void) XblMultiplayerSessionPropertiesSetReadRestriction(
 
     session->SetReadRestriction(readRestriction);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI XblMultiplayerSessionPropertiesSetTurnCollection(
     _In_ XblMultiplayerSessionHandle session,
     _In_ const uint32_t* turnCollectionMemberIds,
     _In_ size_t turnCollectionMemberIdsCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetTurnCollection(xsapi_internal_vector<uint32_t>(turnCollectionMemberIds, turnCollectionMemberIds + turnCollectionMemberIdsCount));
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionRoleTypes(
     _In_ XblMultiplayerSessionHandle session,
     _Out_ const XblMultiplayerRoleType** roleTypes,
     _Out_ size_t* roleTypesCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF(roleTypes == nullptr || roleTypesCount == nullptr);
@@ -2779,6 +2832,7 @@ STDAPI XblMultiplayerSessionRoleTypes(
     *roleTypesCount = session->RoleTypesUnsafe().Values().size();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionGetRoleByName(
     _In_ XblMultiplayerSessionHandle session,
@@ -2786,12 +2840,14 @@ STDAPI XblMultiplayerSessionGetRoleByName(
     _In_z_ const char* roleName,
     _Out_ const XblMultiplayerRole** role
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF(roleTypeName == nullptr || roleName == nullptr || role == nullptr);
     *role = session->RoleTypesUnsafe().GetRole(roleTypeName, roleName);
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionSetMutableRoleSettings(
     _In_ XblMultiplayerSessionHandle session,
@@ -2800,17 +2856,20 @@ STDAPI XblMultiplayerSessionSetMutableRoleSettings(
     _In_opt_ uint32_t* maxMemberCount,
     _In_opt_ uint32_t* targetMemberCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF(roleTypeName == nullptr || roleName == nullptr);
     return session->SetMutableRoleSettings(roleTypeName, roleName, maxMemberCount, targetMemberCount);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionMembers(
     _In_ XblMultiplayerSessionHandle session,
     _Out_ const XblMultiplayerSessionMember** members,
     _Out_ size_t* membersCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF(members == nullptr || membersCount == nullptr);
@@ -2819,11 +2878,13 @@ STDAPI XblMultiplayerSessionMembers(
     *membersCount = session->MembersUnsafe().size();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI_(const XblMultiplayerSessionMember*) XblMultiplayerSessionGetMember(
     _In_ XblMultiplayerSessionHandle session,
     _In_ uint32_t memberId
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2841,10 +2902,12 @@ STDAPI_(const XblMultiplayerSessionMember*) XblMultiplayerSessionGetMember(
     }
     return nullptr;
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(const XblMultiplayerMatchmakingServer*) XblMultiplayerSessionMatchmakingServer(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2853,16 +2916,19 @@ STDAPI_(const XblMultiplayerMatchmakingServer*) XblMultiplayerSessionMatchmaking
 
     return session->MatchmakingServer().get();
 }
+CATCH_RETURN_WITH(nullptr)
 
 XBL_WARNING_PUSH
 XBL_WARNING_DISABLE_DEPRECATED
 STDAPI_(const XblMultiplayerTournamentsServer*) XblMultiplayerSessionTournamentsServer(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     UNREFERENCED_PARAMETER(session);
     return nullptr;
 }
+CATCH_RETURN_WITH(nullptr)
 XBL_WARNING_POP
 
 XBL_WARNING_PUSH
@@ -2870,15 +2936,18 @@ XBL_WARNING_DISABLE_DEPRECATED
 STDAPI_(const XblMultiplayerArbitrationServer*) XblMultiplayerSessionArbitrationServer(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     UNREFERENCED_PARAMETER(session);
     return nullptr;
 }
+CATCH_RETURN_WITH(nullptr)
 XBL_WARNING_POP
 
 STDAPI_(uint32_t) XblMultiplayerSessionMembersAccepted(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2887,10 +2956,12 @@ STDAPI_(uint32_t) XblMultiplayerSessionMembersAccepted(
 
     return session->MembersAccepted();
 }
+CATCH_RETURN()
 
 STDAPI_(const char*) XblMultiplayerSessionRawServersJson(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2899,19 +2970,23 @@ STDAPI_(const char*) XblMultiplayerSessionRawServersJson(
 
     return session->RawServersJsonUnsafe().data();
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI XblMultiplayerSessionSetRawServersJson(
     _In_ XblMultiplayerSessionHandle session,
     _In_z_ const char* rawServersJson
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetServersJson(rawServersJson);
 }
+CATCH_RETURN()
 
 STDAPI_(const char*) XblMultiplayerSessionEtag(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2920,10 +2995,12 @@ STDAPI_(const char*) XblMultiplayerSessionEtag(
 
     return session->ETagUnsafe().data();
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(const XblMultiplayerSessionMember*) XblMultiplayerSessionCurrentUser(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2932,10 +3009,12 @@ STDAPI_(const XblMultiplayerSessionMember*) XblMultiplayerSessionCurrentUser(
 
     return session->CurrentUserUnsafe();
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(const XblMultiplayerSessionInfo*) XblMultiplayerSessionGetInfo(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2944,10 +3023,12 @@ STDAPI_(const XblMultiplayerSessionInfo*) XblMultiplayerSessionGetInfo(
 
     return &session->SessionInfo();
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(XblWriteSessionStatus) XblMultiplayerSessionWriteStatus(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2959,6 +3040,7 @@ STDAPI_(XblWriteSessionStatus) XblMultiplayerSessionWriteStatus(
         return session->WriteStatus();
     }
 }
+CATCH_RETURN_WITH(XblWriteSessionStatus::Unknown)
 
 STDAPI XblMultiplayerSessionAddMemberReservation(
     _In_ XblMultiplayerSessionHandle session,
@@ -2966,10 +3048,12 @@ STDAPI XblMultiplayerSessionAddMemberReservation(
     _In_opt_z_ const char* memberCustomConstantsJson,
     _In_ bool initializeRequested
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->AddMemberReservation(xuid, memberCustomConstantsJson, initializeRequested);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionJoin(
     _In_ XblMultiplayerSessionHandle session,
@@ -2977,15 +3061,18 @@ STDAPI XblMultiplayerSessionJoin(
     _In_ bool initializeRequested,
     _In_ bool joinWithActiveStatus
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->Join(memberCustomConstantsJson, initializeRequested, joinWithActiveStatus);
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblMultiplayerSessionSetInitializationSucceeded(
     _In_ XblMultiplayerSessionHandle session,
     _In_ bool initializationSucceeded
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -2994,11 +3081,13 @@ STDAPI_(void) XblMultiplayerSessionSetInitializationSucceeded(
 
     session->SetInitializationStatus(initializationSucceeded);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI_(void) XblMultiplayerSessionSetHostDeviceToken(
     _In_ XblMultiplayerSessionHandle session,
     _In_ XblDeviceToken hostDeviceToken
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -3007,11 +3096,13 @@ STDAPI_(void) XblMultiplayerSessionSetHostDeviceToken(
 
     session->SetHostDeviceToken(hostDeviceToken);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI_(void) XblMultiplayerSessionSetMatchmakingServerConnectionPath(
     _In_ XblMultiplayerSessionHandle session,
     _In_z_ const char* serverConnectionPath
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -3020,11 +3111,13 @@ STDAPI_(void) XblMultiplayerSessionSetMatchmakingServerConnectionPath(
 
     return session->SetMatchmakingServerConnectionPath(serverConnectionPath);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI_(void) XblMultiplayerSessionSetClosed(
     _In_ XblMultiplayerSessionHandle session,
     _In_ bool closed
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -3033,11 +3126,13 @@ STDAPI_(void) XblMultiplayerSessionSetClosed(
 
     session->SetClosed(closed);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI_(void) XblMultiplayerSessionSetLocked(
     _In_ XblMultiplayerSessionHandle session,
     _In_ bool locked
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -3046,11 +3141,13 @@ STDAPI_(void) XblMultiplayerSessionSetLocked(
 
     session->SetLocked(locked);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI_(void) XblMultiplayerSessionSetAllocateCloudCompute(
     _In_ XblMultiplayerSessionHandle session,
     _In_ bool allocateCloudCompute
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -3059,11 +3156,13 @@ STDAPI_(void) XblMultiplayerSessionSetAllocateCloudCompute(
 
     session->SetAllocateCloudCompute(allocateCloudCompute);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI_(void) XblMultiplayerSessionSetMatchmakingResubmit(
     _In_ XblMultiplayerSessionHandle session,
     _In_ bool matchResubmit
 ) XBL_NOEXCEPT
+try
 {
     if (session == nullptr)
     {
@@ -3072,57 +3171,69 @@ STDAPI_(void) XblMultiplayerSessionSetMatchmakingResubmit(
 
     session->SetMatchmakingResubmit(matchResubmit);
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI XblMultiplayerSessionSetServerConnectionStringCandidates(
     _In_ XblMultiplayerSessionHandle session,
     _In_reads_(serverConnectionStringCandidatesCount) const char** serverConnectionStringCandidates,
     _In_ size_t serverConnectionStringCandidatesCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetServerConnectionStringCandidates(serverConnectionStringCandidates, serverConnectionStringCandidatesCount);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionSetSessionChangeSubscription(
     _In_ XblMultiplayerSessionHandle session,
     _In_ XblMultiplayerSessionChangeTypes changeTypes
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetSessionChangeSubscription(changeTypes);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionLeave(
     _In_ XblMultiplayerSessionHandle session
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->Leave();
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionCurrentUserSetStatus(
     _In_ XblMultiplayerSessionHandle session,
     _In_ XblMultiplayerSessionMemberStatus status
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetCurrentUserStatus(status);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionCurrentUserSetSecureDeviceAddressBase64(
     _In_ XblMultiplayerSessionHandle session,
     _In_ const char* value
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     return session->SetCurrentUserSecureDeviceAddressBase64(value);
 }
+CATCH_RETURN()
 
 #if HC_PLATFORM != HC_PLATFORM_XDK && HC_PLATFORM != HC_PLATFORM_UWP
 STDAPI XblFormatSecureDeviceAddress(
     _In_ const char* deviceId,
     _Inout_ XblFormattedSecureDeviceAddress* address
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(address);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(deviceId);
@@ -3132,6 +3243,7 @@ STDAPI XblFormatSecureDeviceAddress(
     utils::strcpy(address->value, sizeof(address->value), sda.c_str());
     return S_OK;
 }
+CATCH_RETURN()
 #endif
 
 STDAPI XblMultiplayerSessionCurrentUserSetRoles(
@@ -3139,70 +3251,83 @@ STDAPI XblMultiplayerSessionCurrentUserSetRoles(
     _In_ const XblMultiplayerSessionMemberRole* roles,
     _In_ size_t rolesCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(roles);
     return session->SetCurrentUserRoleInfo(xsapi_internal_vector<XblMultiplayerSessionMemberRole>(roles, roles + rolesCount));
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionCurrentUserSetMembersInGroup(
     _In_ XblMultiplayerSessionHandle session,
     _In_reads_(memberIdsCount) uint32_t* memberIds,
     _In_ size_t memberIdsCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(memberIds);
     return session->SetCurrentUserMembersInGroup(xsapi_internal_vector<uint32_t>(memberIds, memberIds + memberIdsCount));
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionCurrentUserSetGroups(
     _In_ XblMultiplayerSessionHandle session,
     _In_reads_(groupsCount) const char** groups,
     _In_ size_t groupsCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(groups);
     return session->SetCurrentUserGroups(groups, groupsCount);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionCurrentUserSetEncounters(
     _In_ XblMultiplayerSessionHandle session,
     _In_reads_(encountersCount) const char** encounters,
     _In_ size_t encountersCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(encounters);
     return session->SetCurrentUserEncounters(encounters, encountersCount);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionCurrentUserSetQosMeasurements(
     _In_ XblMultiplayerSessionHandle session,
     _In_z_ const char* measurements
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(measurements);
     return session->SetCurrentUserQosMeasurementsJson(measurements);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionCurrentUserSetServerQosMeasurements(
     _In_ XblMultiplayerSessionHandle session,
     _In_z_ const char* measurements
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(measurements);
     return session->SetCurrentUserServerMeasurementsJson(measurements);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionCurrentUserSetCustomPropertyJson(
     _In_ XblMultiplayerSessionHandle session,
     _In_z_ const char* name,
     _In_z_ const char* valueJson
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF(name == nullptr || valueJson == nullptr);
@@ -3215,31 +3340,37 @@ STDAPI XblMultiplayerSessionCurrentUserSetCustomPropertyJson(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionCurrentUserDeleteCustomPropertyJson(
     _In_ XblMultiplayerSessionHandle session,
     _In_z_ const char* name
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(name);
     return session->DeleteCurrentUserMemberCustomPropertyJson(name);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionSetMatchmakingTargetSessionConstantsJson(
     _In_ XblMultiplayerSessionHandle session,
     _In_ const char* matchmakingTargetSessionConstantsJson
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(session == nullptr || matchmakingTargetSessionConstantsJson == nullptr);
     return session->SetMatchmakingTargetSessionConstantsJson(matchmakingTargetSessionConstantsJson);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionSetCustomPropertyJson(
     _In_ XblMultiplayerSessionHandle session,
     _In_z_ const char* name,
     _In_z_ const char* valueJson
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF(name == nullptr || valueJson == nullptr);
@@ -3252,21 +3383,25 @@ STDAPI XblMultiplayerSessionSetCustomPropertyJson(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSessionDeleteCustomPropertyJson(
     _In_ XblMultiplayerSessionHandle session,
     _In_z_ const char* name
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(session);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(name);
     return session->DeleteSessionCustomPropertyJson(name);
 }
+CATCH_RETURN()
 
 STDAPI_(XblMultiplayerSessionChangeTypes) XblMultiplayerSessionCompare(
     _In_ XblMultiplayerSessionHandle currentSessionHandle,
     _In_ XblMultiplayerSessionHandle oldSessionHandle
 ) XBL_NOEXCEPT
+try
 {
     if (currentSessionHandle == nullptr || oldSessionHandle == nullptr)
     {
@@ -3274,3 +3409,4 @@ STDAPI_(XblMultiplayerSessionChangeTypes) XblMultiplayerSessionCompare(
     }
     return currentSessionHandle->CompareMultiplayerSessions(oldSessionHandle->shared_from_this());
 }
+CATCH_RETURN_WITH(XblMultiplayerSessionChangeTypes::None)

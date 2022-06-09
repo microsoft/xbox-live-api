@@ -368,8 +368,8 @@ int XalUserGetId_Lua(lua_State *L)
     HRESULT hr = XalUserGetId(Data()->xalUser, &xboxUserId);
     // CODE SNIPPET END
 
-    LogToScreen("XalUserGetId: hr=%s xboxUserId=%ul", ConvertHR(hr).c_str(), xboxUserId);
-    LogToFile("XalUserGetId: hr=%s xboxUserId=%ul", ConvertHR(hr).c_str(), xboxUserId);
+    LogToScreen("XalUserGetId: hr=%s xboxUserId=%llu", ConvertHR(hr).c_str(), xboxUserId);
+    LogToFile("XalUserGetId: hr=%s xboxUserId=%llu", ConvertHR(hr).c_str(), xboxUserId);
     Data()->xboxUserId = xboxUserId;
     return LuaReturnHR(L, hr);
 }

@@ -38,6 +38,7 @@ STDAPI XblMultiplayerManagerInitialize(
     _In_z_ const char* lobbySessionTemplateName,
     _In_opt_ XTaskQueueHandle asyncQueue
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -47,11 +48,13 @@ STDAPI XblMultiplayerManagerInitialize(
             return S_OK;
         }, false); // doesn't require init
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerDoWork(
     _Deref_out_opt_ const XblMultiplayerEvent** multiplayerEvents,
     _Out_ size_t* multiplayerEventsCount
 ) XBL_NOEXCEPT
+try
 {
     INIT_OUT_PTR_PARAM(multiplayerEvents);
 
@@ -73,11 +76,13 @@ STDAPI XblMultiplayerManagerDoWork(
             return S_OK;
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerJoinLobby(
     _In_z_ const char* handleId,
     _In_ XblUserHandle user
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -85,10 +90,12 @@ STDAPI XblMultiplayerManagerJoinLobby(
             return mpm.JoinLobby(handleId, user);
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerJoinGameFromLobby(
     _In_z_ const char* sessionTemplateName
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -96,6 +103,7 @@ STDAPI XblMultiplayerManagerJoinGameFromLobby(
             return mpm.JoinGameFromLobby(sessionTemplateName);
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerJoinGame(
     _In_z_ const char* sessionName,
@@ -103,6 +111,7 @@ STDAPI XblMultiplayerManagerJoinGame(
     _In_opt_ const uint64_t* xuids,
     _In_ size_t xuidsCount
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -115,20 +124,24 @@ STDAPI XblMultiplayerManagerJoinGame(
             );
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLeaveGame() XBL_NOEXCEPT
+try
 {
     return ApiImpl([](MultiplayerManager& mpm)
         {
             return mpm.LeaveGame();
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerFindMatch(
     _In_z_ const char* hopperName,
     _In_opt_z_ const char* attributesJson,
     _In_ uint32_t timeoutInSeconds
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -152,8 +165,10 @@ STDAPI XblMultiplayerManagerFindMatch(
             );
         });
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblMultiplayerManagerCancelMatch() XBL_NOEXCEPT
+try
 {
     ApiImpl([](MultiplayerManager& mpm)
         {
@@ -161,34 +176,42 @@ STDAPI_(void) XblMultiplayerManagerCancelMatch() XBL_NOEXCEPT
             return S_OK;
         });
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI_(XblMultiplayerMatchStatus) XblMultiplayerManagerMatchStatus() XBL_NOEXCEPT
+try
 {
     return ApiImpl(XblMultiplayerMatchStatus::None, [](MultiplayerManager& mpm)
         {
             return mpm.MatchStatus();
         });
 }
+CATCH_RETURN_WITH(XblMultiplayerMatchStatus::None)
 
 STDAPI_(uint32_t) XblMultiplayerManagerEstimatedMatchWaitTime() XBL_NOEXCEPT
+try
 {
     return ApiImpl(0, [](MultiplayerManager& mpm)
         {
             return static_cast<uint32_t>(mpm.EstimatedMatchWaitTime().count());
         });
 }
+CATCH_RETURN_WITH(0)
 
 STDAPI_(bool) XblMultiplayerManagerAutoFillMembersDuringMatchmaking() XBL_NOEXCEPT
+try
 {
     return ApiImpl(false, [](MultiplayerManager& mpm)
         {
             return mpm.AutoFillMembersDuringMatchmaking();
         });
 }
+CATCH_RETURN_WITH(false)
 
 STDAPI_(void) XblMultiplayerManagerSetAutoFillMembersDuringMatchmaking(
     _In_ bool autoFillMembers
 ) XBL_NOEXCEPT
+try
 {
     ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -196,10 +219,12 @@ STDAPI_(void) XblMultiplayerManagerSetAutoFillMembersDuringMatchmaking(
             return S_OK;
         });
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI XblMultiplayerManagerSetQosMeasurements(
     _In_z_ const char* measurementsJson
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -217,29 +242,35 @@ STDAPI XblMultiplayerManagerSetQosMeasurements(
             return S_OK;
         });
 }
+CATCH_RETURN()
 
 STDAPI_(XblMultiplayerJoinability) XblMultiplayerManagerJoinability() XBL_NOEXCEPT
+try
 {
     return ApiImpl(XblMultiplayerJoinability::None, [](MultiplayerManager& mpm)
         {
             return mpm.Joinability();
         });
 }
+CATCH_RETURN_WITH(XblMultiplayerJoinability::None)
 
 STDAPI XblMultiplayerManagerSetJoinability(
     _In_ XblMultiplayerJoinability joinability,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
             return mpm.SetJoinability(joinability, reinterpret_cast<context_t>(context));
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionCorrelationId(
     _Out_ XblGuid* correlationId
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -248,10 +279,12 @@ STDAPI XblMultiplayerManagerLobbySessionCorrelationId(
             return S_OK;
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionSessionReference(
     _Out_ XblMultiplayerSessionReference* sessionReference
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -260,19 +293,23 @@ STDAPI XblMultiplayerManagerLobbySessionSessionReference(
             return S_OK;
         });
 }
+CATCH_RETURN()
 
 STDAPI_(size_t) XblMultiplayerManagerLobbySessionLocalMembersCount() XBL_NOEXCEPT
+try
 {
     return ApiImpl<size_t>(0, [](MultiplayerManager& mpm)
         {
             return mpm.LobbySession()->LocalMembers().size();
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionLocalMembers(
     _In_ size_t localMembersCount,
     _Out_writes_(localMembersCount) XblMultiplayerManagerMember* localMembers
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -289,19 +326,23 @@ STDAPI XblMultiplayerManagerLobbySessionLocalMembers(
             return S_OK;
         });
 }
+CATCH_RETURN()
 
 STDAPI_(size_t) XblMultiplayerManagerLobbySessionMembersCount() XBL_NOEXCEPT
+try
 {
     return ApiImpl<size_t>(0, [](MultiplayerManager& mpm)
         {
             return mpm.LobbySession()->Members().size();
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionMembers(
     _In_ size_t membersCount,
     _Out_writes_(membersCount) XblMultiplayerManagerMember* members
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -314,10 +355,12 @@ STDAPI XblMultiplayerManagerLobbySessionMembers(
             return S_OK;
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionHost(
     _Out_ XblMultiplayerManagerMember* hostMember
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -332,8 +375,10 @@ STDAPI XblMultiplayerManagerLobbySessionHost(
             }
         });
 }
+CATCH_RETURN()
 
 STDAPI_(const char*) XblMultiplayerManagerLobbySessionPropertiesJson() XBL_NOEXCEPT
+try
 {
     return ApiImpl<const char*>(nullptr, [](MultiplayerManager& mpm)-> const char*
         {
@@ -346,42 +391,51 @@ STDAPI_(const char*) XblMultiplayerManagerLobbySessionPropertiesJson() XBL_NOEXC
         });
     
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(const XblMultiplayerSessionConstants*) XblMultiplayerManagerLobbySessionConstants() XBL_NOEXCEPT
+try
 {
     return ApiImpl<const XblMultiplayerSessionConstants*>(nullptr, [](MultiplayerManager& mpm)
         {
             return &mpm.LobbySession()->SessionConstants();
         });
 }
+CATCH_RETURN_WITH(nullptr)
 
 XBL_WARNING_PUSH
 XBL_WARNING_DISABLE_DEPRECATED
 STDAPI_(const XblTournamentTeamResult*) XblMultiplayerManagerLobbySessionLastTournamentTeamResult() XBL_NOEXCEPT
+try
 {
     return nullptr;
 }
+CATCH_RETURN_WITH(nullptr)
 XBL_WARNING_POP
 
 STDAPI XblMultiplayerManagerLobbySessionAddLocalUser(
     _In_ XblUserHandle user
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
             return mpm.LobbySession()->AddLocalUser(user);
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionRemoveLocalUser(
     _In_ XblUserHandle user
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
             return mpm.LobbySession()->RemoveLocalUser(user);
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionSetLocalMemberProperties(
     _In_ XblUserHandle user,
@@ -389,6 +443,7 @@ STDAPI XblMultiplayerManagerLobbySessionSetLocalMemberProperties(
     _In_z_ const char* valueJson,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -410,12 +465,14 @@ STDAPI XblMultiplayerManagerLobbySessionSetLocalMemberProperties(
             );
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionDeleteLocalMemberProperties(
     _In_ XblUserHandle user,
     _In_z_ const char* name,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -427,12 +484,14 @@ STDAPI XblMultiplayerManagerLobbySessionDeleteLocalMemberProperties(
             );
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress(
     _In_ XblUserHandle user,
     _In_z_ const char* connectionAddress,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -444,22 +503,26 @@ STDAPI XblMultiplayerManagerLobbySessionSetLocalMemberConnectionAddress(
             );
         });
 }
+CATCH_RETURN()
 
 STDAPI_(bool) XblMultiplayerManagerLobbySessionIsHost(
     _In_ uint64_t xuid
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl(false, [&](MultiplayerManager& mpm)
         {
             return mpm.LobbySession()->IsHost(xuid);
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionSetProperties(
     _In_z_ const char* name,
     _In_z_ const char* valueJson,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -480,12 +543,14 @@ STDAPI XblMultiplayerManagerLobbySessionSetProperties(
             );
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionSetSynchronizedProperties(
     _In_z_ const char* name,
     _In_z_ const char* valueJson,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -506,11 +571,13 @@ STDAPI XblMultiplayerManagerLobbySessionSetSynchronizedProperties(
             );
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerLobbySessionSetSynchronizedHost(
     _In_ const char* deviceToken,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -521,6 +588,7 @@ STDAPI XblMultiplayerManagerLobbySessionSetSynchronizedHost(
             );
         });
 }
+CATCH_RETURN()
 
 #if HC_PLATFORM_IS_MICROSOFT
 STDAPI XblMultiplayerManagerLobbySessionInviteFriends(
@@ -528,6 +596,7 @@ STDAPI XblMultiplayerManagerLobbySessionInviteFriends(
     _In_opt_z_ const char* contextStringId,
     _In_opt_z_ const char* customActivationContext
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -538,6 +607,7 @@ STDAPI XblMultiplayerManagerLobbySessionInviteFriends(
             );
         });
 }
+CATCH_RETURN()
 #endif
 
 STDAPI XblMultiplayerManagerLobbySessionInviteUsers(
@@ -547,6 +617,7 @@ STDAPI XblMultiplayerManagerLobbySessionInviteUsers(
     _In_opt_z_ const char* contextStringId,
     _In_opt_z_ const char* customActivationContext
 ) XBL_NOEXCEPT
+try
 {
     return ApiImpl([&](MultiplayerManager& mpm)
         {
@@ -558,6 +629,7 @@ STDAPI XblMultiplayerManagerLobbySessionInviteUsers(
             );
         });
 }
+CATCH_RETURN()
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
@@ -609,41 +681,50 @@ typedef std::shared_ptr<MultiplayerGameSession> GameSessionPtr;
 NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_END
 
 STDAPI_(bool) XblMultiplayerManagerGameSessionActive() XBL_NOEXCEPT
+try
 {
     return ApiImpl(false, [](MultiplayerManager& mpm)
         {
             return mpm.GameSession() != nullptr;
         });
 }
+CATCH_RETURN()
 
 STDAPI_(const char*) XblMultiplayerManagerGameSessionCorrelationId() XBL_NOEXCEPT
+try
 {
     return GameSessionApiImpl<const char*>(nullptr, [](GameSessionPtr gameSession)
         {
             return gameSession->CorrelationId().data();
         });
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(const XblMultiplayerSessionReference*) XblMultiplayerManagerGameSessionSessionReference() XBL_NOEXCEPT
+try
 {
     return GameSessionApiImpl<const XblMultiplayerSessionReference *>(nullptr, [](GameSessionPtr gameSession)
         {
             return &gameSession->SessionReference();
         });
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(size_t) XblMultiplayerManagerGameSessionMembersCount() XBL_NOEXCEPT
+try
 {
     return GameSessionApiImpl<size_t>(0, [](GameSessionPtr gameSession)
         {
             return gameSession->Members().size();
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerGameSessionMembers(
     _In_ size_t membersCount,
     _Out_writes_(membersCount) XblMultiplayerManagerMember* members
 ) XBL_NOEXCEPT
+try
 {
     return GameSessionApiImpl([&](GameSessionPtr gameSession)
         {
@@ -660,10 +741,12 @@ STDAPI XblMultiplayerManagerGameSessionMembers(
             return S_OK;
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerGameSessionHost(
     _Out_ XblMultiplayerManagerMember* hostMember
 ) XBL_NOEXCEPT
+try
 {
     return GameSessionApiImpl([&](GameSessionPtr gameSession)
         {
@@ -678,38 +761,46 @@ STDAPI XblMultiplayerManagerGameSessionHost(
             }
         });
 }
+CATCH_RETURN()
 
 STDAPI_(const char*) XblMultiplayerManagerGameSessionPropertiesJson() XBL_NOEXCEPT
+try
 {
     return GameSessionApiImpl<const char*>(nullptr, [](GameSessionPtr gameSession)
         {
             return gameSession->Properties().data();
         });
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(const XblMultiplayerSessionConstants*) XblMultiplayerManagerGameSessionConstants() XBL_NOEXCEPT
+try
 {
     return GameSessionApiImpl<const XblMultiplayerSessionConstants*>(nullptr, [](GameSessionPtr gameSession)
         {
             return &gameSession->SessionConstants();
         });
 }
+CATCH_RETURN_WITH(nullptr)
 
 STDAPI_(bool) XblMultiplayerManagerGameSessionIsHost(
     _In_ uint64_t xuid
 ) XBL_NOEXCEPT
+try
 {
     return GameSessionApiImpl(false, [&](GameSessionPtr gameSession)
         {
             return gameSession->IsHost(xuid);
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerGameSessionSetProperties(
     _In_z_ const char* name,
     _In_z_ const char* valueJson,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return GameSessionApiImpl([&](GameSessionPtr gameSession)
         {
@@ -730,12 +821,14 @@ STDAPI XblMultiplayerManagerGameSessionSetProperties(
             );
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerGameSessionSetSynchronizedProperties(
     _In_z_ const char* name,
     _In_z_ const char* valueJson,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return GameSessionApiImpl([&](GameSessionPtr gameSession)
         {
@@ -756,11 +849,13 @@ STDAPI XblMultiplayerManagerGameSessionSetSynchronizedProperties(
             );
         });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerManagerGameSessionSetSynchronizedHost(
     _In_ const char* deviceToken,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     return GameSessionApiImpl([&](GameSessionPtr gameSession)
         {
@@ -769,4 +864,5 @@ STDAPI XblMultiplayerManagerGameSessionSetSynchronizedHost(
             return gameSession->SetSynchronizedHost(deviceToken, reinterpret_cast<context_t>(context));
         });
 }
+CATCH_RETURN()
 

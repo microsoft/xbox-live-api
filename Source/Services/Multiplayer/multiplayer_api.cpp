@@ -13,6 +13,7 @@ STDAPI XblMultiplayerSearchHandleDuplicateHandle(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ XblMultiplayerSearchHandle* duplicatedHandle
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || duplicatedHandle == nullptr);
 
@@ -21,42 +22,50 @@ STDAPI XblMultiplayerSearchHandleDuplicateHandle(
 
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblMultiplayerSearchHandleCloseHandle(
     _In_ XblMultiplayerSearchHandle handle
 ) XBL_NOEXCEPT
+try
 {
     if (handle)
     {
         handle->DecRef();
     }
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI XblMultiplayerSearchHandleGetSessionReference(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ XblMultiplayerSessionReference* sessionRef
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || sessionRef == nullptr);
     *sessionRef = handle->SessionReference();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSearchHandleGetId(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ const char** id
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || id == nullptr);
     *id = handle->HandleId().data();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSearchHandleGetSessionOwnerXuids(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ const uint64_t** xuids,
     _Out_ size_t* xuidsCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || xuids == nullptr || xuidsCount == nullptr);
 
@@ -64,12 +73,14 @@ STDAPI XblMultiplayerSearchHandleGetSessionOwnerXuids(
     *xuidsCount = handle->SessionOwnerXuids().size();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSearchHandleGetTags(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ const XblMultiplayerSessionTag** tags,
     _Out_ size_t* tagsCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || tags == nullptr || tagsCount == nullptr);
 
@@ -77,12 +88,14 @@ STDAPI XblMultiplayerSearchHandleGetTags(
     *tagsCount = handle->Tags().size();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSearchHandleGetStringAttributes(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ const XblMultiplayerSessionStringAttribute** attributes,
     _Out_ size_t* attributesCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || attributes == nullptr || attributesCount == nullptr);
 
@@ -90,12 +103,14 @@ STDAPI XblMultiplayerSearchHandleGetStringAttributes(
     *attributesCount = handle->StringAttributes().size();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSearchHandleGetNumberAttributes(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ const XblMultiplayerSessionNumberAttribute** attributes,
     _Out_ size_t* attributesCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || attributes == nullptr || attributesCount == nullptr);
 
@@ -103,42 +118,50 @@ STDAPI XblMultiplayerSearchHandleGetNumberAttributes(
     *attributesCount = handle->NumberAttributes().size();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSearchHandleGetVisibility(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ XblMultiplayerSessionVisibility* visibility
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || visibility == nullptr);
     *visibility = handle->Visibility();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSearchHandleGetJoinRestriction(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ XblMultiplayerSessionRestriction* joinRestriction
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || joinRestriction == nullptr);
     *joinRestriction = handle->JoinRestriction();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSearchHandleGetSessionClosed(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ bool* closed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || closed == nullptr);
     *closed = handle->Closed();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSearchHandleGetMemberCounts(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_opt_ size_t* maxMembers,
     _Out_opt_ size_t* currentMembers
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr);
 
@@ -152,21 +175,25 @@ STDAPI XblMultiplayerSearchHandleGetMemberCounts(
     }
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSearchHandleGetCreationTime(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ time_t* creationTime
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || creationTime == nullptr);
     *creationTime = utils::time_t_from_datetime(handle->HandleCreationTime());
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSearchHandleGetCustomSessionPropertiesJson(
     _In_ XblMultiplayerSearchHandle handle,
     _Out_ const char** customPropertiesJson
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(handle == nullptr || customPropertiesJson == nullptr);
     auto& customPropertiesString{ handle->CustomSessionPropertiesJson() };
@@ -180,6 +207,7 @@ STDAPI XblMultiplayerSearchHandleGetCustomSessionPropertiesJson(
     }
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerCreateSearchHandleAsync(
     _In_ XblContextHandle xblContext,
@@ -192,6 +220,7 @@ STDAPI XblMultiplayerCreateSearchHandleAsync(
     _In_ size_t stringAttributesCount,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContext == nullptr || sessionRef == nullptr || async == nullptr);
     RETURN_HR_INVALIDARGUMENT_IF(tagsCount > 0 && tags == nullptr);
@@ -282,11 +311,13 @@ STDAPI XblMultiplayerCreateSearchHandleAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerCreateSearchHandleResult(
     _In_ XAsyncBlock* async,
     _Out_opt_ XblMultiplayerSearchHandle* handle
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(async);
 
@@ -305,12 +336,14 @@ STDAPI XblMultiplayerCreateSearchHandleResult(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerDeleteSearchHandleAsync(
     _In_ XblContextHandle xblContext,
     _In_ const char* handleId,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContext == nullptr || handleId == nullptr || async == nullptr);
 
@@ -332,6 +365,7 @@ STDAPI XblMultiplayerDeleteSearchHandleAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetSearchHandlesAsync(
     _In_ XblContextHandle xblContext,
@@ -343,6 +377,7 @@ STDAPI XblMultiplayerGetSearchHandlesAsync(
     _In_opt_z_ const char* socialGroup,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContext == nullptr || scid == nullptr || sessionTemplateName == nullptr || async == nullptr);
 
@@ -408,11 +443,13 @@ STDAPI XblMultiplayerGetSearchHandlesAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetSearchHandlesResultCount(
     _In_ XAsyncBlock* async,
     _Out_ size_t* searchHandleCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(async == nullptr || searchHandleCount == nullptr);
 
@@ -425,17 +462,20 @@ STDAPI XblMultiplayerGetSearchHandlesResultCount(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerGetSearchHandlesResult(
     _In_ XAsyncBlock* async,
     _Out_writes_(searchHandlesCount) XblMultiplayerSearchHandle* searchHandles,
     _In_ size_t searchHandlesCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_IF(searchHandlesCount == 0, S_OK);
     RETURN_HR_INVALIDARGUMENT_IF(async == nullptr || searchHandles == nullptr);
     return XAsyncGetResult(async, nullptr, searchHandlesCount * sizeof(XblMultiplayerSearchHandle), searchHandles, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSetTransferHandleAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -443,6 +483,7 @@ STDAPI XblMultiplayerSetTransferHandleAsync(
     _In_ XblMultiplayerSessionReference originSessionReference,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(async);
 
@@ -490,11 +531,14 @@ STDAPI XblMultiplayerSetTransferHandleAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerSetTransferHandleResult(
     _In_ XAsyncBlock* async,
     _Out_ XblMultiplayerSessionHandleId* handleId
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResult(async, nullptr, sizeof(XblMultiplayerSessionHandleId), handleId, nullptr);
 }
+CATCH_RETURN()

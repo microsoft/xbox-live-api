@@ -819,5 +819,8 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\websocket_cleanup_while_connecting.lua">
       <Filter>Tests\libHttp</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\notification\multiple_notification_subscriptions.lua">
+      <Filter>Tests\notification</Filter>
+    </None>
   </ItemGroup>
 </Project>

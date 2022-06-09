@@ -25,7 +25,11 @@ public:
     Subscription() noexcept = default;
     virtual ~Subscription() noexcept = default;
 
-protected:
+    String const& ResourceUri() const
+    {
+        return m_resourceUri;
+    }
+
     virtual void OnSubscribe(const JsonValue& data) noexcept
     {
         UNREFERENCED_PARAMETER(data);
@@ -34,14 +38,8 @@ protected:
     };
     virtual void OnEvent(const JsonValue& event) noexcept = 0;
 
+protected:
     String m_resourceUri;
-
-private:
-    // Subscription state maintained by Connection
-    struct State;
-    std::shared_ptr<State> m_state;
-
-    friend class Connection;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_END

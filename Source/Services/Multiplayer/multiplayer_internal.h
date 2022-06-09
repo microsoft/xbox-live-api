@@ -113,8 +113,8 @@ private:
     xsapi_internal_string m_teamId;
     xsapi_internal_string m_initialTeam;
 
-    xsapi_internal_vector<const char*> m_groups; // TODO these never get deserialized
-    xsapi_internal_vector<const char*> m_encounters; // TODO these never get deserialized
+    xsapi_internal_vector<const char*> m_groups;
+    xsapi_internal_vector<const char*> m_encounters;
     xsapi_internal_vector<uint32_t> m_membersInGroupIds;
 
     XblMultiplayerSessionChangeTypes m_subscribedChangeTypes{ XblMultiplayerSessionChangeTypes::None };

@@ -12,6 +12,7 @@ STDAPI XblMultiplayerEventArgsXuid(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_ uint64_t* xuid
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(argsHandle == nullptr || xuid == nullptr);
     VERIFY_XBL_INITIALIZED();
@@ -38,11 +39,13 @@ STDAPI XblMultiplayerEventArgsXuid(
     }
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerEventArgsMembersCount(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_ size_t* memberCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(argsHandle == nullptr || memberCount == nullptr);
 
@@ -63,12 +66,14 @@ STDAPI XblMultiplayerEventArgsMembersCount(
     }
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerEventArgsMembers(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _In_ size_t membersCount,
     _Out_writes_(membersCount) XblMultiplayerManagerMember* members
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(argsHandle == nullptr || members == nullptr);
 
@@ -96,11 +101,13 @@ STDAPI XblMultiplayerEventArgsMembers(
     }
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerEventArgsMember(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_ XblMultiplayerManagerMember* member
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(argsHandle == nullptr || member == nullptr);
 
@@ -135,11 +142,13 @@ STDAPI XblMultiplayerEventArgsMember(
     }
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerEventArgsPropertiesJson(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_ const char** properties
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(argsHandle == nullptr || properties == nullptr);
 
@@ -160,12 +169,14 @@ STDAPI XblMultiplayerEventArgsPropertiesJson(
     }
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerEventArgsFindMatchCompleted(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_opt_ XblMultiplayerMatchStatus* matchStatus,
     _Out_opt_ XblMultiplayerMeasurementFailure* initializationFailureCause
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(argsHandle);
     auto args = dynamic_cast<FindMatchCompletedEventArgs*>(argsHandle);
@@ -181,34 +192,40 @@ STDAPI XblMultiplayerEventArgsFindMatchCompleted(
     }
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerEventArgsTournamentRegistrationStateChanged(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_opt_ XblTournamentRegistrationState* registrationState,
     _Out_opt_ XblTournamentRegistrationReason* registrationReason
 ) XBL_NOEXCEPT
+try
 {
     UNREFERENCED_PARAMETER(argsHandle);
     UNREFERENCED_PARAMETER(registrationState);
     UNREFERENCED_PARAMETER(registrationReason);
     return E_NOTIMPL;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerEventArgsTournamentGameSessionReady(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_ time_t* startTime
 ) XBL_NOEXCEPT
+try
 {
     UNREFERENCED_PARAMETER(argsHandle);
     UNREFERENCED_PARAMETER(startTime);
 
     return E_NOTIMPL;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerEventArgsPerformQoSMeasurements(
     _In_ XblMultiplayerEventArgsHandle argsHandle,
     _Out_ XblMultiplayerPerformQoSMeasurementsArgs* performQoSMeasurementsArgs
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(argsHandle == nullptr || performQoSMeasurementsArgs == nullptr);
     auto args = dynamic_cast<PerformQosMeasurementsEventArgs*>(argsHandle);
@@ -219,3 +236,4 @@ STDAPI XblMultiplayerEventArgsPerformQoSMeasurements(
 
     return S_OK;
 }
+CATCH_RETURN()
