@@ -41,6 +41,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteStats)
     {
+        TEST_LOG(L"Test starting: TestWriteStats");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto mock{ WriteStatsMock(writeStatsJson) };
@@ -66,6 +68,8 @@ public:
 
     DEFINE_TEST_CASE(TestUpdateStats)
     {
+        TEST_LOG(L"Test starting: TestUpdateStats");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto mock{ WriteStatsMock(patchStatsJson) };
@@ -86,6 +90,8 @@ public:
 
     DEFINE_TEST_CASE(TestDeleteStats)
     {
+        TEST_LOG(L"Test starting: TestDeleteStats");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto mock{ WriteStatsMock(deleteStatsJson) };

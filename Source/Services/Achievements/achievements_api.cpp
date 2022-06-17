@@ -186,9 +186,11 @@ STDAPI XblAchievementsResultGetNextResult(
     _In_ XAsyncBlock* async,
     _Out_ XblAchievementsResultHandle* result
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResult(async, nullptr, sizeof(XblAchievementsResultHandle), result, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI XblAchievementsUpdateAchievementAsyncInternal(
     _In_ XblContextHandle xboxLiveContextHandle,

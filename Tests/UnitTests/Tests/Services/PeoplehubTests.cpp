@@ -319,6 +319,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetSocialUsers)
     {
+        TEST_LOG(L"Test starting: TestGetSocialUsers");
+
         PeoplehubTestEnvironment env{};
 
         JsonDocument jsonResponse;
@@ -360,6 +362,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetSocialGraph)
     {
+        TEST_LOG(L"Test starting: TestGetSocialGraph");
+
         PeoplehubTestEnvironment env{};
 
         JsonDocument jsonResponse;
@@ -401,6 +405,8 @@ public:
 
     DEFINE_TEST_CASE(TestInvalidResponse)
     {
+        TEST_LOG(L"Test starting: TestInvalidResponse");
+
         PeoplehubTestEnvironment env{};
 
         JsonDocument peoplehubInvalidJson;
@@ -430,6 +436,8 @@ public:
 
     DEFINE_TEST_CASE(TestPartialTitleHistory)
     {
+        TEST_LOG(L"Test starting: TestPartialTitleHistory");
+
         // In some cases PeopleHub service returns a TitleHistory object that isn't fully populated. By design we should
         // deserialize the provided fields and ignore those that are "null"
 

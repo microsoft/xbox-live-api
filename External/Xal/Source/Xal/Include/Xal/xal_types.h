@@ -64,6 +64,10 @@ extern "C"
 #define E_XAL_FAILEDTORESOLVE               MAKE_E_HC(0x5112L) // 0x89235112
 #define E_XAL_NOACCOUNTPROVIDER             MAKE_E_HC(0x5113L) // 0x89235113
 #define E_XAL_MISMATCHEDTITLEANDCLIENTIDS   MAKE_E_HC(0x5114L) // 0x89235114
+#define E_XAL_INVALIDAPPCONFIGURATION       MAKE_E_HC(0x5115L) // 0x89235115
+#define E_XAL_MALFORMEDCLIENTID             MAKE_E_HC(0x5116L) // 0x89235116
+#define E_XAL_MISSINGCLIENTID               MAKE_E_HC(0x5117L) // 0x89235117
+#define E_XAL_MISSINGTITLEID                MAKE_E_HC(0x5118L) // 0x89235118
 
 // E_XAL_INTERNAL_* values should never be returned to callers of XAL.
 #define E_XAL_INTERNAL_SWITCHUSER           MAKE_E_HC(0x5171L) // 0x89235171
@@ -84,15 +88,25 @@ extern "C"
 #undef E_XAL_NOTOKENREQUIRED
 #undef E_XAL_NODEFAULTUSER
 #undef E_XAL_FAILEDTORESOLVE
+#undef E_XAL_MISMATCHEDTITLEANDCLIENTIDS
+#undef E_XAL_INVALIDAPPCONFIGURATION
+#undef E_XAL_MALFORMEDCLIENTID
+#undef E_XAL_MISSINGCLIENTID
+#undef E_XAL_MISSINGTITLEID
 
-#define E_XAL_USERSETFULL                   E_GAMEUSER_MAX_USERS_ADDED              // 0x89245100
-#define E_XAL_USERSIGNEDOUT                 E_GAMEUSER_SIGNED_OUT                   // 0x89245101
-#define E_XAL_UIREQUIRED                    E_GAMEUSER_RESOLVE_USER_ISSUE_REQUIRED  // 0x89245102
-#define E_XAL_DEFERRALNOTAVAILABLE          E_GAMEUSER_DEFERRAL_NOT_AVAILABLE       // 0x89245103
-#define E_XAL_USERNOTFOUND                  E_GAMEUSER_USER_NOT_FOUND               // 0x89245104
-#define E_XAL_NOTOKENREQUIRED               E_GAMEUSER_NO_TOKEN_REQUIRED            // 0x89245105
-#define E_XAL_NODEFAULTUSER                 E_GAMEUSER_NO_DEFAULT_USER              // 0x89245106
-#define E_XAL_FAILEDTORESOLVE               E_GAMEUSER_FAILED_TO_RESOLVE            // 0x89245107
+#define E_XAL_USERSETFULL                   E_GAMEUSER_MAX_USERS_ADDED                      // 0x89245100
+#define E_XAL_USERSIGNEDOUT                 E_GAMEUSER_SIGNED_OUT                           // 0x89245101
+#define E_XAL_UIREQUIRED                    E_GAMEUSER_RESOLVE_USER_ISSUE_REQUIRED          // 0x89245102
+#define E_XAL_DEFERRALNOTAVAILABLE          E_GAMEUSER_DEFERRAL_NOT_AVAILABLE               // 0x89245103
+#define E_XAL_USERNOTFOUND                  E_GAMEUSER_USER_NOT_FOUND                       // 0x89245104
+#define E_XAL_NOTOKENREQUIRED               E_GAMEUSER_NO_TOKEN_REQUIRED                    // 0x89245105
+#define E_XAL_NODEFAULTUSER                 E_GAMEUSER_NO_DEFAULT_USER                      // 0x89245106
+#define E_XAL_FAILEDTORESOLVE               E_GAMEUSER_FAILED_TO_RESOLVE                    // 0x89245107
+#define E_XAL_MISSINGTITLEID                E_GAMEUSER_NO_TITLE_ID                          // 0x89245108
+#define E_XAL_INVALIDAPPCONFIGURATION       E_GAMEUSER_INVALID_APP_CONFIGURATION            // 0x89245112
+#define E_XAL_MALFORMEDCLIENTID             E_GAMEUSER_MALFORMED_MSAAPPID                   // 0x89245113
+#define E_XAL_MISMATCHEDTITLEANDCLIENTIDS   E_GAMEUSER_INCONSISTENT_MSAAPPID_AND_TITLEID    // 0x89245114
+#define E_XAL_MISSINGCLIENTID               E_GAMEUSER_NO_MSAAPPID                          // 0x89245115
 #endif
 
 //------------------------------------------------------------------------------
@@ -154,7 +168,9 @@ typedef enum XalPrivilege
     XalPrivilege_SocialNetworkSharing   = 220,
     /// <summary>Access user generated content in game</summary>
     XalPrivilege_Ugc                    = 247,
-    /// <summary>Use real time voice and text communication</summary>
+    /// <summary>Use real time voice and text communication with users in their friends list</summary>
+    XalPrivilege_CommsFriendsOnly       = 251,
+    /// <summary>Use real time voice and text communication with all users</summary>
     XalPrivilege_Comms                  = 252,
     /// <summary>Join multiplayer sessions</summary>
     XalPrivilege_Multiplayer            = 254,

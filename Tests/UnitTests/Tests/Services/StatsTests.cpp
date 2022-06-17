@@ -211,6 +211,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetSingleUserStatistics1)
     {
+        TEST_LOG(L"Test starting: TestGetSingleUserStatistics1");
+
         const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d40" };
         const char* statName{ "OverallReputation" };
 
@@ -219,6 +221,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetSingleUserStatistics2)
     {
+        TEST_LOG(L"Test starting: TestGetSingleUserStatistics2");
+
         const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d41" };
         const char* statName{ "UserContentReputation" };
 
@@ -227,6 +231,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetSingleUserStatisticsWithLargeBuffer1)
     {
+        TEST_LOG(L"Test starting: TestGetSingleUserStatisticsWithLargeBuffer1");
+
         const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d40" };
         const char* statName{ "OverallReputation" };
 
@@ -235,6 +241,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetSingleUserStatisticsWithLargeBuffer2)
     {
+        TEST_LOG(L"Test starting: TestGetSingleUserStatisticsWithLargeBuffer2");
+
         const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d41" };
         const char* statName{ "UserContentReputation" };
 
@@ -276,6 +284,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetSingleUserStatistics)
     {
+        TEST_LOG(L"Test starting: TestGetSingleUserStatistics");
+
         const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d40" };
         std::vector<const char*> statNames{ "OverallReputation", "UserContentReputation" };
 
@@ -284,6 +294,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetSingleUserStatisticsWithLargeBuffer)
     {
+        TEST_LOG(L"Test starting: TestGetSingleUserStatisticsWithLargeBuffer");
+
         const char* scid{ "7492baca-c1b4-440d-a391-b7ef364a8d40" };
         std::vector<const char*> statNames{ "OverallReputation", "UserContentReputation" };
 
@@ -292,6 +304,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetBatchUserStatistics)
     {
+        TEST_LOG(L"Test starting: TestGetBatchUserStatistics");
+
         TestEnvironment env{};
 
         const uint32_t xuidCount{ 2 };
@@ -301,11 +315,11 @@ public:
         const char* statNames[nameCount]{ "namename" };
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock mock("POST", batchUrl, 200);
-        mock.SetResponseBody(defaultBatchUsersStatsResponse);
+        auto mock = std::make_shared<HttpMock>("POST", batchUrl, 200);
+        mock->SetResponseBody(defaultBatchUsersStatsResponse);
         
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed, xuids, scid, statNames](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -360,6 +374,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetBatchUserStatisticsWithLargeBuffer)
     {
+        TEST_LOG(L"Test starting: TestGetBatchUserStatisticsWithLargeBuffer");
+
         TestEnvironment env{};
 
         const uint32_t xuidCount{ 2 };
@@ -369,11 +385,11 @@ public:
         const char* statNames[nameCount]{ "namename" };
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock mock("POST", batchUrl, 200);
-        mock.SetResponseBody(defaultBatchUsersStatsResponse);
+        auto mock = std::make_shared<HttpMock>("POST", batchUrl, 200);
+        mock->SetResponseBody(defaultBatchUsersStatsResponse);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed, xuids, scid, statNames](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
         {
             UNREFERENCED_PARAMETER(mock);
@@ -430,6 +446,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetBatchUserStatisticsForMultipleServiceConfigs)
     {
+        TEST_LOG(L"Test starting: TestGetBatchUserStatisticsForMultipleServiceConfigs");
+
         TestEnvironment env{};
 
         const uint32_t xuidCount{ 1 };
@@ -444,11 +462,11 @@ public:
         };
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock mock("POST", batchUrl, 200);
-        mock.SetResponseBody(defaultBatchUsersStatsResponse);
+        auto mock = std::make_shared<HttpMock>("POST", batchUrl, 200);
+        mock->SetResponseBody(defaultBatchUsersStatsResponse);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed, xuids, requestedStats](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -508,6 +526,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetBatchUserStatisticsForMultipleServiceConfigsWithLargeBuffer)
     {
+        TEST_LOG(L"Test starting: TestGetBatchUserStatisticsForMultipleServiceConfigsWithLargeBuffer");
+
         TestEnvironment env{};
 
         const uint32_t xuidCount{ 1 };
@@ -522,11 +542,11 @@ public:
         };
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock mock("POST", batchUrl, 200);
-        mock.SetResponseBody(defaultBatchUsersStatsResponse);
+        auto mock = std::make_shared<HttpMock>("POST", batchUrl, 200);
+        mock->SetResponseBody(defaultBatchUsersStatsResponse);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&requestWellFormed, xuids, requestedStats](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
         {
             UNREFERENCED_PARAMETER(mock);
@@ -588,6 +608,8 @@ public:
 
     DEFINE_TEST_CASE(TestRTAStatistics)
     {
+        TEST_LOG(L"Test starting: TestRTAStatistics");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(xuid);
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };

@@ -14,7 +14,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 typedef Callback<class HttpMock* /*matchedMock*/, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/> MockMatchedCallback;
 
 // RAII wrapper around HCMockCallHandle
-class HttpMock
+class HttpMock : public std::enable_shared_from_this<HttpMock>
 {
 public:
     HttpMock(

@@ -3,7 +3,7 @@
 
 #include "pch.h"
 #include "UnitTestIncludes.h"
-#define TEST_CLASS_OWNER L"jasonsa"
+#define TEST_CLASS_OWNER L"XBL"
 #include "DefineTestMacros.h"
 #include "Utils.h"
 
@@ -29,6 +29,8 @@ public:
     TEST_METHOD(TestConvertExceptionToHRESULT)
     {
         DEFINE_TEST_CASE_PROPERTIES();
+
+        TEST_LOG("Test starting: TestConvertExceptionToHRESULT");
 
         VERIFY_EXCEPTION_TO_HR(std::bad_alloc(), E_OUTOFMEMORY);
         VERIFY_EXCEPTION_TO_HR(std::bad_cast(), E_NOINTERFACE);

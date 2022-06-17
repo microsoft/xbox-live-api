@@ -88,6 +88,7 @@ CATCH_RETURN()
 void XblSetApiType(
     _In_ XblApiType apiType
 ) XBL_NOEXCEPT
+try
 {
     auto state = GlobalState::Get();
     if (state)
@@ -95,3 +96,4 @@ void XblSetApiType(
         state->ApiType = apiType;
     }
 }
+CATCH_RETURN_WITH(;)

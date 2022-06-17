@@ -280,6 +280,11 @@ enum class XblMultiplayerEventType : uint32_t
     /// <summary>
     /// Indicates that the invite API operation has been completed.
     /// </summary>
+    /// <remarks>
+    /// On Xbox, receiving this event does not necessarily mean an invite has been sent successfully. 
+    /// You will receive this event as long as the game invite UI flow was successfully invoked, 
+    /// even if the user cancelled the UI flow without sending an invite, or the invite failed to submit to the service for various reasons. 
+    /// </remarks>
     InviteSent,
 
     /// <summary>

@@ -58,6 +58,8 @@ public:
 
     DEFINE_TEST_CASE(TestUpdateRecentPlayers)
     {
+        TEST_LOG(L"Test starting: TestUpdateRecentPlayers");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -67,8 +69,8 @@ public:
         bool requestWellFormed{ true };
         const XblMultiplayerActivityRecentPlayerUpdate updates[] = { {1}, {2}, {3} };
 
-        HttpMock mock{ "POST", url.str(), 204 };
-        mock.SetMockMatchedCallback(
+        auto mock = std::make_shared<HttpMock>( "POST", url.str(), 204 );
+        mock->SetMockMatchedCallback(
             [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
         {
             rapidjson::Document d;
@@ -95,6 +97,8 @@ public:
 
     DEFINE_TEST_CASE(TestUpdateRecentPlayersNoFlush)
     {
+        TEST_LOG(L"Test starting: TestUpdateRecentPlayersNoFlush");
+
         auto env = std::make_unique<TestEnvironment>();
         auto xboxLiveContext = env->CreateMockXboxLiveContext();
 
@@ -106,8 +110,8 @@ public:
         size_t httpRequestCount{ 0 };
 
 
-        HttpMock mock{ "POST", url.str(), 204 };
-        mock.SetMockMatchedCallback(
+        auto mock = std::make_shared<HttpMock>( "POST", url.str(), 204 );
+        mock->SetMockMatchedCallback(
             [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
         {
             httpRequestCount++;
@@ -169,6 +173,8 @@ public:
 
     DEFINE_TEST_CASE(TestSetActivity)
     {
+        TEST_LOG(L"Test starting: TestSetActivity");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -181,10 +187,10 @@ public:
 
         Stringstream url;
         url << "https://multiplayeractivity.xboxlive.com/titles/" << MOCK_TITLEID << "/users/" << xboxLiveContext->Xuid() << "/activities";
-        HttpMock mock{ "PUT", url.str(), 204 };
+        auto mock = std::make_shared<HttpMock>( "PUT", url.str(), 204 );
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
             {
                 JsonDocument d;
@@ -263,15 +269,17 @@ public:
 
     DEFINE_TEST_CASE(TestGetActivities)
     {
+        TEST_LOG(L"Test starting: TestGetActivities");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock mock{ "POST", "https://multiplayeractivity.xboxlive.com" };
-        mock.SetResponseBody(getActivityResponse);
+        auto mock = std::make_shared<HttpMock>( "POST", "https://multiplayeractivity.xboxlive.com" );
+        mock->SetResponseBody(getActivityResponse);
 
         uint64_t xuids[] = { 1, 2 };
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
             {
                 JsonDocument b;
@@ -311,15 +319,17 @@ public:
 
     DEFINE_TEST_CASE(TestGetActivitiesWithLargeBuffer)
     {
+        TEST_LOG(L"Test starting: TestGetActivitiesWithLargeBuffer");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
-        HttpMock mock{ "POST", "https://multiplayeractivity.xboxlive.com" };
-        mock.SetResponseBody(getActivityResponse);
+        auto mock = std::make_shared<HttpMock>( "POST", "https://multiplayeractivity.xboxlive.com" );
+        mock->SetResponseBody(getActivityResponse);
 
         uint64_t xuids[] = { 1, 2 };
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
         {
             JsonDocument b;
@@ -362,6 +372,8 @@ public:
 
     DEFINE_TEST_CASE(TestDeleteActivity)
     {
+        TEST_LOG(L"Test starting: TestDeleteActivity");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -376,6 +388,8 @@ public:
 
     DEFINE_TEST_CASE(TestSendInvites)
     {
+        TEST_LOG(L"Test starting: TestSendInvites");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -393,10 +407,10 @@ public:
         Stringstream url;
         url << "https://multiplayeractivity.xboxlive.com/titles/" << MOCK_TITLEID << "/invites";
 
-        HttpMock mock{ "POST", url.str(), 204 };
+        auto mock = std::make_shared<HttpMock>( "POST", url.str(), 204 );
 
         bool requestWellFormed{ false };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* /*mock*/, xsapi_internal_string /*url*/, xsapi_internal_string body)
             {
                 requestWellFormed = VerifyJson(expectedRequestBody, body.data());

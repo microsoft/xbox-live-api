@@ -438,6 +438,16 @@ Result<XblMultiplayerSessionMember> MultiplayerSessionMember::Deserialize(
                 RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<xsapi_internal_string>(JsonUtils::JsonStringExtractor, propertiesSystemSubscriptionJson, "changeTypes", changeTypes, false));
                 returnResultInternal->m_subscribedChangeTypes = Serializers::MultiplayerSessionChangeTypesFromStringVector(changeTypes);
             }
+
+            if (propertiesSystemJson.IsObject() && propertiesSystemJson.HasMember("groups"))
+            {
+                RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<const char*>(JsonUtils::JsonUtf8Extractor, propertiesSystemJson, "groups", returnResultInternal->m_groups, false));
+            }
+
+            if (propertiesSystemJson.IsObject() && propertiesSystemJson.HasMember("encounters"))
+            {
+                RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<const char*>(JsonUtils::JsonUtf8Extractor, propertiesSystemJson, "encounters", returnResultInternal->m_encounters, false));
+            }
         }
         else
         {
@@ -456,6 +466,10 @@ Result<XblMultiplayerSessionMember> MultiplayerSessionMember::Deserialize(
     returnResult.QosMeasurementsJson = returnResultInternal->m_qosMeasurementsJson.data();
     returnResult.MembersInGroupIds = returnResultInternal->m_membersInGroupIds.data();
     returnResult.MembersInGroupCount = static_cast<uint32_t>(returnResultInternal->m_membersInGroupIds.size());
+    returnResult.Groups = returnResultInternal->m_groups.data();
+    returnResult.GroupsCount = static_cast<uint32_t>(returnResultInternal->m_groups.size());
+    returnResult.Encounters = returnResultInternal->m_encounters.data();
+    returnResult.EncountersCount = static_cast<uint32_t>(returnResultInternal->m_encounters.size());
     returnResult.CustomPropertiesJson = returnResultInternal->m_customPropertiesString.data();
 
     if (active)

@@ -206,6 +206,22 @@ HRESULT MultiplayerActivityService::FlushRecentPlayers(
     return S_OK;
 }
 
+uint64_t MultiplayerActivityService::GetSequenceNumber()
+{
+    uint64_t dateTime = xbox::services::datetime::utc_now().to_interval(); // eg. 131472330440000000
+    const uint64_t dateTimeFromJan1st2015 = 130645440000000000;
+    if (dateTime < dateTimeFromJan1st2015)
+    {
+        return static_cast<int64_t>(time(nullptr)); // Clock is wrong and is not yet sync'd with internet time so just revert to old logic
+    }
+    else
+    {
+        uint64_t dateTimeSince2015 = dateTime - dateTimeFromJan1st2015; // eg. 826888900000000
+        uint64_t dateTimeTrimmed = dateTimeSince2015 >> 16; // divide by 2^16 to get it to sub second range.  eg. 12617323303
+        return dateTimeTrimmed;
+    }
+}
+
 HRESULT MultiplayerActivityService::SetActivity(
     _In_ const ActivityInfo& info,
     _In_ bool allowCrossPlatformJoin,
@@ -218,7 +234,7 @@ HRESULT MultiplayerActivityService::SetActivity(
     JsonDocument requestBody{ rapidjson::kObjectType };
     auto& a{ requestBody.GetAllocator() };
 
-    requestBody.AddMember("sequenceNumber", static_cast<int64_t>(time(nullptr)), a);
+    requestBody.AddMember("sequenceNumber", GetSequenceNumber(), a);
     requestBody.AddMember("connectionString", JsonValue{ info.connectionString.data(), a }, a);
     requestBody.AddMember("joinRestriction", JsonValue{ EnumName(info.joinRestriction).data(), a }, a);
     if (info.maxPlayers)
@@ -320,7 +336,7 @@ HRESULT MultiplayerActivityService::DeleteActivity(
     JsonDocument requestBody{ rapidjson::kObjectType };
     auto& a{ requestBody.GetAllocator() };
 
-    requestBody.AddMember("sequenceNumber", static_cast<int64_t>(time(nullptr)), a);
+    requestBody.AddMember("sequenceNumber", GetSequenceNumber(), a);
 
     Result<User> userResult = m_user.Copy();
     RETURN_HR_IF_FAILED(userResult.Hresult());

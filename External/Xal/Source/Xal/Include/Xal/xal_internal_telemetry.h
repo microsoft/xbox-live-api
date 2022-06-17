@@ -20,42 +20,30 @@ extern "C"
 /// Controls if the event is to be uploaded immediately or can be batched.
 /// </summary>
 /// <remarks>
-/// This is a copy of cll::Latency and should be kept in sync with it.
+/// This is a copy of MAE::EventLatency and should be kept in sync with it.
 /// </remarks>
 typedef enum XalTelemetryLatency
 {
-    XalTelemetryLatency_Unspecified = 0,
+    XalTelemetryLatency_Unspecified = -1,
+    XalTelemetryLatency_Off = 0,
     XalTelemetryLatency_Normal = 0x0100,
-    XalTelemetryLatency_Realtime = 0x0200,
+    XalTelemetryLatency_CostDeferred = 0x0200,
+    XalTelemetryLatency_Realtime = 0x0300,
+    XalTelemetryLatency_Max = 0x0400,
 } XalTelemetryLatency;
 
 /// <summary>
-/// Controls the priority of keeping the event in case cll needs to evict some.
+/// Controls the priority of keeping the event in case 1DS needs to evict some.
 /// </summary>
 /// <remarks>
-/// This is a copy of cll::Persistence and should be kept in sync with it.
+/// This is a copy of MAE::EventPersistence and should be kept in sync with it.
 /// </remarks>
 typedef enum XalTelemetryPersistence
 {
-    XalTelemetryPersistence_Unspecified = 0,
-    XalTelemetryPersistence_Normal = 0x01,
-    XalTelemetryPersistence_Critical = 0x02,
+    XalTelemetryPersistence_Normal = 0x00,
+    XalTelemetryPersistence_Critical = 0x01,
+    XalTelemetryPersistence_DoNotStoreOnDisk = 0x02,
 } XalTelemetryPersistence;
-
-/// <summary>
-/// Controls the sensitivity of the event.
-/// </summary>
-/// <remarks>
-/// This is a copy of cll::Sensitivity and should be kept in sync with it.
-/// </remarks>
-typedef enum XalTelemetrySensitivity
-{
-    XalTelemetrySensitivityUnspecified = 0x000001,
-    XalTelemetrySensitivity_None = 0x000000,
-    XalTelemetrySensitivity_Mark = 0x080000,
-    XalTelemetrySensitivity_Hash = 0x100000,
-    XalTelemetrySensitivity_Drop = 0x200000,
-} XalTelemetrySensitivity;
 
 /// <summary>
 /// Controls the sampling rate of the event.
@@ -112,10 +100,9 @@ typedef struct XalTelemetryTicket
 /// be properly formatted JSON.</param>
 /// <param name="ticketCount">The number of tickets to send with the event.</param>
 /// <param name="tickets">Information about the tickets to send.</param>
-/// <param name="latency">The cll latency for this event.</param>
-/// <param name="persistence">The cll persistence for this event.</param>
-/// <param name="sensitivity">The cll sensitivity for this event.</param>
-/// <param name="sampleRate">The cll sampleRate for this event.</param>
+/// <param name="latency">The 1DS latency for this event.</param>
+/// <param name="persistence">The 1DS persistence for this event.</param>
+/// <param name="sampleRate">The 1DS sampleRate for this event.</param>
 STDAPI XalTelemetryWriteEvent(
     _In_ XalUserHandle user,
     _In_z_ char const* iKey,
@@ -125,7 +112,6 @@ STDAPI XalTelemetryWriteEvent(
     _In_reads_(ticketCount) XalTelemetryTicket* tickets,
     _In_ XalTelemetryLatency latency,
     _In_ XalTelemetryPersistence persistence,
-    _In_ XalTelemetrySensitivity sensitivity,
     _In_ XalTelemetrySampleRate sampleRate
 ) noexcept;
 

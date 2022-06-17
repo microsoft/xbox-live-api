@@ -158,6 +158,8 @@ private:
 
     DEFINE_TEST_CASE(TestGetSocialRelationshipsAsync)
     {
+        TEST_LOG(L"Test starting: TestGetSocialRelationshipsAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -241,6 +243,8 @@ private:
 
     DEFINE_TEST_CASE(TestGetSocialRelationshipsResultPaging)
     {
+        TEST_LOG(L"Test starting: TestGetSocialRelationshipsResultPaging");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -294,6 +298,8 @@ private:
 
     DEFINE_TEST_CASE(TestRTASocialRelationshipChange)
     {
+        TEST_LOG(L"Test starting: TestRTASocialRelationshipChange");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
@@ -343,6 +349,8 @@ private:
 
     DEFINE_TEST_CASE(CppTestGetSocialRelationships)
     {
+        TEST_LOG(L"Test starting: CppTestGetSocialRelationships");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
 
@@ -387,6 +395,8 @@ private:
 
     DEFINE_TEST_CASE(CppTestRTASocialRelationshipChange)
     {
+        TEST_LOG(L"Test starting: CppTestRTASocialRelationshipChange");
+
         TestEnvironment env{};
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
         auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext(1);

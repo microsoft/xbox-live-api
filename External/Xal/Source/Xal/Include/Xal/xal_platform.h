@@ -82,6 +82,15 @@ STDAPI XalPlatformWebSetEventHandler(
 ) noexcept;
 
 /// <summary>
+/// Clears the show url event handler.
+/// </summary>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// Must be called before XalInitialize or after XalCleanupAsync completes.
+/// </remarks>
+STDAPI XalPlatformWebClearEventHandler() noexcept;
+
+/// <summary>
 /// Completes a show url operation.
 /// </summary>
 /// <param name="operation">The handle for this operation.</param>
@@ -118,6 +127,15 @@ STDAPI XalPlatformStorageSetEventHandlers(
     _In_opt_ XTaskQueueHandle queue,
     _In_ XalPlatformStorageEventHandlers2* handlers
 ) noexcept;
+
+/// <summary>
+/// Clears the storage event handlers.
+/// </summary>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// Must be called before XalInitialize or after XalCleanupAsync completes.
+/// </remarks>
+STDAPI XalPlatformStorageClearEventHandlers() noexcept;
 
 /// <summary>
 /// Completes write to storage operation.
@@ -192,6 +210,15 @@ STDAPI XalPlatformRemoteConnectSetEventHandlers(
     _In_opt_ XTaskQueueHandle queue,
     _In_ XalPlatformRemoteConnectEventHandlers2* handlers
 ) noexcept;
+
+/// <summary>
+/// Clears the remote connect event handlers.
+/// </summary>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// Must be called before XalInitialize or after XalCleanupAsync completes.
+/// </remarks>
+STDAPI XalPlatformRemoteConnectClearEventHandlers() noexcept;
 
 /// <summary>
 /// Signal to Xal that the remote connect prompt has been dismissed by the user.

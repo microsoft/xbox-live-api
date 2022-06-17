@@ -13,6 +13,8 @@ public:
 
     DEFINE_TEST_CASE(TestXboxLiveContext)
     {
+        TEST_LOG(L"Test starting: TestXboxLiveContext");
+
         TestEnvironment env{};
 
         uint64_t mockXuid{ 1 };

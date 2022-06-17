@@ -2,5 +2,6 @@
 <RunSettings>
   <RunConfiguration>
     <TargetPlatform>x64</TargetPlatform>
+    <BatchSize>1</BatchSize>
   </RunConfiguration>
 </RunSettings>
