@@ -3536,6 +3536,8 @@ public:
 
     DEFINE_TEST_CASE(TestAddLocalUser)
     {
+        TEST_LOG(L"Test starting: TestAddLocalUser");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
@@ -3544,6 +3546,8 @@ public:
 
     DEFINE_TEST_CASE(TestRemoveLocalUser)
     {
+        TEST_LOG(L"Test starting: TestRemoveLocalUser");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
@@ -3552,6 +3556,8 @@ public:
 
     DEFINE_TEST_CASE(TestReAddAfterRemovingLocalUser)
     {
+        TEST_LOG(L"Test starting: TestReAddAfterRemovingLocalUser");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
@@ -3561,6 +3567,8 @@ public:
 
     DEFINE_TEST_CASE(TestDeleteLocalMemberProperties)
     {
+        TEST_LOG(L"Test starting: TestDeleteLocalMemberProperties");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
@@ -3607,6 +3615,8 @@ public:
 
     DEFINE_TEST_CASE(TestSetSynchronizedLobbyProperties)
     {
+        TEST_LOG(L"Test starting: TestSetSynchronizedLobbyProperties");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
         AddLocalUserHelperWithSyncUpdate(xboxLiveContext.get());
@@ -3666,6 +3676,8 @@ public:
 
     DEFINE_TEST_CASE(TestSetSynchronizedGameProperties)
     {
+        TEST_LOG(L"Test starting: TestSetSynchronizedGameProperties");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
         JoinGameHelper(xboxLiveContext.get());
@@ -3725,6 +3737,8 @@ public:
 
     DEFINE_TEST_CASE(TestLeaveGame)
     {
+        TEST_LOG(L"Test starting: TestLeaveGame");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
         JoinGameHelper(xboxLiveContext.get());
@@ -3778,6 +3792,8 @@ public:
 
     DEFINE_TEST_CASE(TestInviteUsers)
     {
+        TEST_LOG(L"Test starting: TestInviteUsers");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
         AddLocalUserHelperWithSyncUpdate(xboxLiveContext.get());
@@ -3886,6 +3902,8 @@ public:
     */
     DEFINE_TEST_CASE(TestJoinLobbyWithValidHandleId)
     {
+        TEST_LOG(L"Test starting: TestJoinLobbyWithValidHandleId");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
@@ -3894,6 +3912,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinLobbyWithValidHandleIdWithEventArgs)
     {
+        TEST_LOG(L"Test starting: TestJoinLobbyWithValidHandleIdWithEventArgs");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
@@ -3902,6 +3922,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinLobbyWithInvalidArgs_1)
     {
+        TEST_LOG(L"Test starting: TestJoinLobbyWithInvalidArgs_1");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
@@ -3910,6 +3932,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinLobbyWithInvalidArgs_2)
     {
+        TEST_LOG(L"Test starting: TestJoinLobbyWithInvalidArgs_2");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
@@ -3918,6 +3942,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinLobbyWithInvalidHandleId)
     {
+        TEST_LOG(L"Test starting: TestJoinLobbyWithInvalidHandleId");
+
         MPMTestEnvironment env{};
         XTaskQueueHandle queue{};
 
@@ -3959,6 +3985,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinLobbyWithValidTransferHandle)
     {
+        TEST_LOG(L"Test starting: TestJoinLobbyWithValidTransferHandle");
+
         MPMTestEnvironment env{};
         XTaskQueueHandle queue{};
 
@@ -4009,6 +4037,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinLobbyWithInvalidTransferHandle)
     {
+        TEST_LOG(L"Test starting: TestJoinLobbyWithInvalidTransferHandle");
+
         MPMTestEnvironment env{};
         XTaskQueueHandle queue{};
 
@@ -4123,6 +4153,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinGameFromLobbyWithTransferHandle)
     {
+        TEST_LOG(L"Test starting: TestJoinGameFromLobbyWithTransferHandle");
+
         MPMTestEnvironment env{};
         XTaskQueueHandle queue{};
 
@@ -4166,6 +4198,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinGameFromLobbyWithTransferHandleMultipleUsers)
     {
+        TEST_LOG(L"Test starting: TestJoinGameFromLobbyWithTransferHandleMultipleUsers");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext1 = env.CreateMockXboxLiveContext(1234);
         auto xboxLiveContext2 = env.CreateMockXboxLiveContext(2345);
@@ -4181,6 +4215,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinGameFromLobbyFailedToJoin)
     {
+        TEST_LOG(L"Test starting: TestJoinGameFromLobbyFailedToJoin");
+
         MPMTestEnvironment env{};
         XTaskQueueHandle queue{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
@@ -4248,6 +4284,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinGameFromLobbyNoHandleCreateNewGame)
     {
+        TEST_LOG(L"Test starting: TestJoinGameFromLobbyNoHandleCreateNewGame");
+
         MPMTestEnvironment env{};
         XTaskQueueHandle queue{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
@@ -4306,6 +4344,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinGameFromLobbyNoHandleFailedToCreateNewGame)
     {
+        TEST_LOG(L"Test starting: TestJoinGameFromLobbyNoHandleFailedToCreateNewGame");
+
         MPMTestEnvironment env{};
         XTaskQueueHandle queue{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
@@ -4475,6 +4515,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinGame)
     {
+        TEST_LOG(L"Test starting: TestJoinGame");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
@@ -4483,6 +4525,8 @@ public:
 
     DEFINE_TEST_CASE(TestJoinGameWithXuids)
     {
+        TEST_LOG(L"Test starting: TestJoinGameWithXuids");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
@@ -4683,36 +4727,50 @@ public:
 
     DEFINE_TEST_CASE(TestLeaveMultiplayer_1)
     {
+        TEST_LOG(L"Test starting: TestLeaveMultiplayer_1");
+
         TestLeaveMultiplayerHelper(CallingPatternType::Sync);
     }
 
     DEFINE_TEST_CASE(TestLeaveMultiplayer_2)
     {
+        TEST_LOG(L"Test starting: TestLeaveMultiplayer_2");
+
         TestLeaveMultiplayerHelper(CallingPatternType::Async);
     }
 
     DEFINE_TEST_CASE(TestLeaveMultiplayer_3)
     {
+        TEST_LOG(L"Test starting: TestLeaveMultiplayer_3");
+
         TestLeaveMultiplayerHelper(CallingPatternType::Combination);
     }
 
     DEFINE_TEST_CASE(TestLeaveMultiplayer_4)
     {
+        TEST_LOG(L"Test starting: TestLeaveMultiplayer_4");
+
         TestLeaveMultiplayerHelper(CallingPatternType::ReverseSync);
     }
 
     DEFINE_TEST_CASE(TestLeaveMultiplayer_5)
     {
+        TEST_LOG(L"Test starting: TestLeaveMultiplayer_5");
+
         TestLeaveMultiplayerHelper(CallingPatternType::ReverseAsync);
     }
 
     DEFINE_TEST_CASE(TestLeaveMultiplayer_6)
     {
+        TEST_LOG(L"Test starting: TestLeaveMultiplayer_6");
+
         TestLeaveMultiplayerHelper(CallingPatternType::ReverseCombination);
     }
 
     DEFINE_TEST_CASE(TestMultipleLocalUsers_1)
     {
+        TEST_LOG(L"Test starting: TestMultipleLocalUsers_1");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext1 = env.CreateMockXboxLiveContext(1234);
         auto xboxLiveContext2 = env.CreateMockXboxLiveContext(2345);
@@ -4759,6 +4817,8 @@ public:
     // Add multiple users while removing a user (on diff threads)
     DEFINE_TEST_CASE(TestMultipleLocalUsers_2)
     {
+        TEST_LOG(L"Test starting: TestMultipleLocalUsers_2");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext1 = env.CreateMockXboxLiveContext(1234);
         auto xboxLiveContext2 = env.CreateMockXboxLiveContext(2345);
@@ -4818,6 +4878,8 @@ public:
     // Constantly add/remove users
     DEFINE_TEST_CASE(TestMultipleLocalUsers_3)
     {
+        TEST_LOG(L"Test starting: TestMultipleLocalUsers_3");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext1 = env.CreateMockXboxLiveContext(1234);
         auto xboxLiveContext2 = env.CreateMockXboxLiveContext(2345);
@@ -4978,36 +5040,50 @@ public:
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_1)
     {
+        TEST_LOG(L"Test starting: TestJoinGameWhileRemovingLocalUser_1");
+
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::Sync);
     }
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_2)
     {
+        TEST_LOG(L"Test starting: TestJoinGameWhileRemovingLocalUser_2");
+
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::Async);
     }
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_3)
     {
+        TEST_LOG(L"Test starting: TestJoinGameWhileRemovingLocalUser_3");
+
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::Combination);
     }
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_4)
     {
+        TEST_LOG(L"Test starting: TestJoinGameWhileRemovingLocalUser_4");
+
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::ReverseSync);
     }
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_5)
     {
+        TEST_LOG(L"Test starting: TestJoinGameWhileRemovingLocalUser_5");
+
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::ReverseAsync);
     }
 
     DEFINE_TEST_CASE(TestJoinGameWhileRemovingLocalUser_6)
     {
+        TEST_LOG(L"Test starting: TestJoinGameWhileRemovingLocalUser_6");
+
         TestJoinGameWhileRemovingLocalUserHelper(CallingPatternType::ReverseCombination);
     }
 
     DEFINE_TEST_CASE(TestSubscriptionsLostEvent)
     {
+        TEST_LOG(L"Test starting: TestSubscriptionsLostEvent");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
         AddLocalUserHelperWithSyncUpdate(xboxLiveContext.get());
@@ -5104,6 +5180,8 @@ public:
 
     DEFINE_TEST_CASE(TestBackToBackSessionWriteLogic_1)
     {
+        TEST_LOG(L"Test starting: TestBackToBackSessionWriteLogic_1");
+
         std::vector<const char*> responses
         {
             defaultLobbySessionResponse,             // change #1
@@ -5116,6 +5194,8 @@ public:
 
     DEFINE_TEST_CASE(TestBackToBackSessionWriteLogic_2)
     {
+        TEST_LOG(L"Test starting: TestBackToBackSessionWriteLogic_2");
+
         std::vector<const char*> responses
         {
             lobbyWithCompletedTransferHandleResponse, // change #3
@@ -5133,11 +5213,11 @@ public:
         AddLocalUserHelper(xboxLiveContext.get());
 
         uint32_t mockCount{ 0 };
-        HttpMock mock(GET, defaultMpsdUri);
-        mock.SetResponseBody(getResponses[0]);
-        mock.SetResponseHttpStatus(getStatuses[0]);
-        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        mock.SetMockMatchedCallback([getResponses, getStatuses, &mockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        auto mock = std::make_shared<HttpMock>(GET, defaultMpsdUri);
+        mock->SetResponseBody(getResponses[0]);
+        mock->SetResponseHttpStatus(getStatuses[0]);
+        mock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        mock->SetMockMatchedCallback([getResponses, getStatuses, &mockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (mockCount < getResponses.size())
             {
@@ -5175,6 +5255,8 @@ public:
 
     DEFINE_TEST_CASE(TestMultipleTaps_1)
     {
+        TEST_LOG(L"Test starting: TestMultipleTaps_1");
+
         // Set up initial http responses
         std::vector<const char*> getResponses
         {
@@ -5191,6 +5273,8 @@ public:
 
     DEFINE_TEST_CASE(TestMultipleTaps_2)
     {
+        TEST_LOG(L"Test starting: TestMultipleTaps_2");
+
         std::vector<const char*> getResponses
         {
             lobbyWithPendingTransferHandleResponse,   // change #2
@@ -5271,6 +5355,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionWithTaps_1)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionWithTaps_1");
+
         // Set up initial http responses
         std::vector<const char*> writeResponses
         {
@@ -5304,10 +5390,10 @@ public:
         AddLocalUserHelper(xboxLiveContext.get());
 
         uint32_t mockCount{ 0 };
-        HttpMock mock(POST, defaultMpsdUri, 201);
-        mock.SetResponseBody(writeResponses[0]);
-        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        mock.SetMockMatchedCallback([writeResponses, &mockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        auto mock = std::make_shared<HttpMock>(POST, defaultMpsdUri, 201);
+        mock->SetResponseBody(writeResponses[0]);
+        mock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        mock->SetMockMatchedCallback([writeResponses, &mockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (mockCount < writeResponses.size())
             {
@@ -5373,7 +5459,7 @@ public:
 
         sessionEvent.Wait();
         XAsyncBlock async{};
-        mock.SetResponseBody(getResponse);
+        mock->SetResponseBody(getResponse);
         RunAsync(&async, __FUNCTION__,
             [maxChangeNumberForTap, &sessionEvent, session, sessionWriter](XAsyncOp op, const XAsyncProviderData* data)
             {
@@ -5412,6 +5498,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionWithTaps_2)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionWithTaps_2");
+
         std::vector<const char*> writeResponses
         {
             sessionChangeNum6,                     // change #6
@@ -5427,6 +5515,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionWithTaps_3)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionWithTaps_3");
+
         std::vector<const char*> writeResponses
         {
             sessionChangeNum6,                     // change #6
@@ -5443,6 +5533,8 @@ public:
     // multiplayer_session_writer:
     DEFINE_TEST_CASE(TestSessionWriterLeaveRemoteSession)
     {
+        TEST_LOG(L"Test starting: TestSessionWriterLeaveRemoteSession");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
         JoinGameHelper(xboxLiveContext.get());
@@ -5483,6 +5575,8 @@ public:
 
     DEFINE_TEST_CASE(TestTransferHandleState)
     {
+        TEST_LOG(L"Test starting: TestTransferHandleState");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
         JoinGameHelper(xboxLiveContext.get());
@@ -5732,16 +5826,22 @@ public:
 
     DEFINE_TEST_CASE(TestLeaveRemoteSession)
     {
+        TEST_LOG(L"Test starting: TestLeaveRemoteSession");
+
         LeaveRemoteSession();
     }
 
     DEFINE_TEST_CASE(TestRemoveStaleUsersFromRemoteSession)
     {
+        TEST_LOG(L"Test starting: TestRemoveStaleUsersFromRemoteSession");
+
         RemoveStaleUsersFromRemoteSession(gameSessionResponseDiffXuid, gameSessionResponseDiffXuidJson().GetObject());
     }
 
     DEFINE_TEST_CASE(TestErrorHandling)
     {
+        TEST_LOG(L"Test starting: TestErrorHandling");
+
         MPMTestEnvironment env{};
         XTaskQueueHandle queue{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
@@ -5913,10 +6013,10 @@ public:
         }
 
         uint32_t lobbyMockCount{ 0 };
-        HttpMock lobbyMock(GET, defaultMpsdUri, 200);
-        lobbyMock.SetResponseBody(lobbyResponses[0]);
-        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        auto lobbyMock = std::make_shared<HttpMock>(GET, defaultMpsdUri, 200);
+        lobbyMock->SetResponseBody(lobbyResponses[0]);
+        lobbyMock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -5926,10 +6026,10 @@ public:
         });
 
         uint32_t gameMockCount{ 0 };
-        HttpMock gameMock(GET, defaultGameUri, 200);
-        gameMock.SetResponseBody(gameResponses[0]);
-        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        auto gameMock = std::make_shared<HttpMock>(GET, defaultGameUri, 200);
+        gameMock->SetResponseBody(gameResponses[0]);
+        gameMock->SetResponseHeaders(defaultGameHttpResponseHeaders);
+        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (gameMockCount < gameResponses.size())
             {
@@ -6093,10 +6193,10 @@ public:
         }
 
         uint32_t lobbyMockCount{ 0 };
-        HttpMock lobbyMock(GET, defaultMpsdUri, 200);
-        lobbyMock.SetResponseBody(lobbyResponses[0]);
-        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        auto lobbyMock = std::make_shared<HttpMock>(GET, defaultMpsdUri, 200);
+        lobbyMock->SetResponseBody(lobbyResponses[0]);
+        lobbyMock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -6106,10 +6206,10 @@ public:
         });
 
         uint32_t gameMockCount{ 0 };
-        HttpMock gameMock(GET, defaultGameUri, 200);
-        gameMock.SetResponseBody(gameResponses[0]);
-        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        auto gameMock = std::make_shared<HttpMock>(GET, defaultGameUri, 200);
+        gameMock->SetResponseBody(gameResponses[0]);
+        gameMock->SetResponseHeaders(defaultGameHttpResponseHeaders);
+        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (gameMockCount < gameResponses.size())
             {
@@ -6251,31 +6351,43 @@ public:
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSCompleted)
     {
+        TEST_LOG(L"Test starting: TestFindMatchNoQoSCompleted");
+
         FindMatchNoQoSHelper(MatchCallingPatternType::Completed);
     }
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSRemoteClientFailedToJoin)
     {
+        TEST_LOG(L"Test starting: TestFindMatchNoQoSRemoteClientFailedToJoin");
+
         FindMatchNoQoSHelper(MatchCallingPatternType::RemoteClientFailedToJoin);
     }
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSExpiredByNextTimer)
     {
+        TEST_LOG(L"Test starting: TestFindMatchNoQoSExpiredByNextTimer");
+
         FindMatchNoQoSHelper(MatchCallingPatternType::ExpiredByNextTimer);
     }
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSExpiredByService)
     {
+        TEST_LOG(L"Test starting: TestFindMatchNoQoSExpiredByService");
+
         FindMatchNoQoSHelper(MatchCallingPatternType::ExpiredByService);
     }
 
     DEFINE_TEST_CASE(TestFindMatchWithQoSCompleted)
     {
+        TEST_LOG(L"Test starting: TestFindMatchWithQoSCompleted");
+
         FindMatchWithQoSHelper(MatchCallingPatternType::Completed);
     }
 
     DEFINE_TEST_CASE(TestFindMatchWithQoSRemoteClientFailedToUploadQoS)
     {
+        TEST_LOG(L"Test starting: TestFindMatchWithQoSRemoteClientFailedToUploadQoS");
+
         FindMatchWithQoSHelper(MatchCallingPatternType::RemoteClientFailedToUploadQoS);
     }
 
@@ -6300,9 +6412,9 @@ public:
         };
 
         uint32_t lobbyMockCount{ 0 };
-        HttpMock lobbyMock(GET, defaultMpsdUri, 200);
-        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        auto lobbyMock = std::make_shared<HttpMock>(GET, defaultMpsdUri, 200);
+        lobbyMock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -6312,9 +6424,9 @@ public:
         });
 
         uint32_t gameMockCount{ 0 };
-        HttpMock gameMock(GET, defaultGameUri, 200);
-        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        auto gameMock = std::make_shared<HttpMock>(GET, defaultGameUri, 200);
+        gameMock->SetResponseHeaders(defaultGameHttpResponseHeaders);
+        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (gameMockCount < gameResponses.size())
             {
@@ -6409,11 +6521,15 @@ public:
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSRemoteClientJoiningMatchSession)
     {
+        TEST_LOG(L"Test starting: TestFindMatchNoQoSRemoteClientJoiningMatchSession");
+
         FindMatchNoQoSRemoteClientJoiningMatchSessionHelper();
     }
 
     DEFINE_TEST_CASE(TestFindMatchNoQoSInvalidArg)
     {
+        TEST_LOG(L"Test starting: TestFindMatchNoQoSInvalidArg");
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
         AddLocalUserHelper(xboxLiveContext.get());
@@ -6449,10 +6565,10 @@ public:
         }
 
         uint32_t lobbyMockCount{ 0 };
-        HttpMock lobbyMock(GET, defaultMpsdUri, 200);
-        lobbyMock.SetResponseBody(lobbyResponses[0]);
-        lobbyMock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock.SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        auto lobbyMock = std::make_shared<HttpMock>(GET, defaultMpsdUri, 200);
+        lobbyMock->SetResponseBody(lobbyResponses[0]);
+        lobbyMock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -6462,10 +6578,10 @@ public:
         });
 
         uint32_t gameMockCount{ 0 };
-        HttpMock gameMock(GET, defaultGameUri, 200);
-        gameMock.SetResponseBody(gameResponses[0]);
-        gameMock.SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock.SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        auto gameMock = std::make_shared<HttpMock>(GET, defaultGameUri, 200);
+        gameMock->SetResponseBody(gameResponses[0]);
+        gameMock->SetResponseHeaders(defaultGameHttpResponseHeaders);
+        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
         {
             if (gameMockCount < gameResponses.size())
             {
@@ -6552,28 +6668,36 @@ public:
 
     DEFINE_TEST_CASE(TestCancelMatch)
     {
+        TEST_LOG(L"Test starting: TestCancelMatch");
+
         CancelMatchHelper(MatchCallingPatternType::Canceled);
     }
 
     DEFINE_TEST_CASE(TestCancelMatchByService)
     {
+        TEST_LOG(L"Test starting: TestCancelMatchByService");
+
         CancelMatchHelper(MatchCallingPatternType::CanceledByService);
     }
 
     DEFINE_TEST_CASE(TestRtaResync)
     {
+        TEST_LOG(L"Test starting: TestRtaResync");
+
+        DEFINE_TEST_CASE_PROPERTIES_FOCUS();
+
         MPMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext(1234);
 
         AddLocalUserHelper(xboxLiveContext.get());
 
-        HttpMock mock("GET", defaultMpsdUri, 201);
-        mock.SetResponseBody(defaultLobbySessionResponse);
-        mock.SetResponseHeaders(defaultLobbyHttpResponseHeaders);
+        auto mock = std::make_shared<HttpMock>("GET", defaultMpsdUri, 201);
+        mock->SetResponseBody(defaultLobbySessionResponse);
+        mock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
 
         // Wait for MPM to refresh the lobby
         Event e;
-        mock.SetMockMatchedCallback([&](HttpMock*, xsapi_internal_string, xsapi_internal_string)
+        mock->SetMockMatchedCallback([&](HttpMock*, xsapi_internal_string, xsapi_internal_string)
         {
             e.Set();
         });

@@ -174,6 +174,8 @@ public:
 
     DEFINE_TEST_CASE(TestCheckAvoidList)
     {
+        TEST_LOG(L"Test starting: TestCheckAvoidList");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -200,6 +202,8 @@ public:
 
     DEFINE_TEST_CASE(TestCheckMuteList)
     {
+        TEST_LOG(L"Test starting: TestCheckMuteList");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -221,6 +225,8 @@ public:
 
     DEFINE_TEST_CASE(TestCheckPermissionAsync)
     {
+        TEST_LOG(L"Test starting: TestCheckPermissionAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -245,6 +251,8 @@ public:
 
     DEFINE_TEST_CASE(TestCheckPermissionWithLargeBufferAsync)
     {
+        TEST_LOG(L"Test starting: TestCheckPermissionWithLargeBufferAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -271,6 +279,8 @@ public:
 
     DEFINE_TEST_CASE(TestCheckPermissionForAnonymousUserAsync)
     {
+        TEST_LOG(L"Test starting: TestCheckPermissionForAnonymousUserAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -300,6 +310,8 @@ public:
 
     DEFINE_TEST_CASE(TestCheckPermissionForAnonymousUserWithLargeBufferAsync)
     {
+        TEST_LOG(L"Test starting: TestCheckPermissionForAnonymousUserWithLargeBufferAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -331,6 +343,8 @@ public:
 
     DEFINE_TEST_CASE(TestBatchCheckPermissionAsync)
     {
+        TEST_LOG(L"Test starting: TestBatchCheckPermissionAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -369,6 +383,8 @@ public:
 
     DEFINE_TEST_CASE(TestBatchCheckPermissionWithLargeBufferAsync)
     {
+        TEST_LOG(L"Test starting: TestBatchCheckPermissionWithLargeBufferAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -409,6 +425,8 @@ public:
 
     DEFINE_TEST_CASE(TestInvalidArgs)
     {
+        TEST_LOG(L"Test starting: TestInvalidArgs");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -476,6 +494,8 @@ public:
 
     DEFINE_TEST_CASE(CppTestCheckAvoidList)
     {
+        TEST_LOG(L"Test starting: CppTestCheckAvoidList");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
 
@@ -498,6 +518,8 @@ public:
 
     DEFINE_TEST_CASE(CppTestCheckMuteList)
     {
+        TEST_LOG(L"Test starting: CppTestCheckMuteList");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
 
@@ -567,6 +589,8 @@ public:
 
     DEFINE_TEST_CASE(CppTestCheckPermissionWithTargetUser)
     {
+        TEST_LOG(L"Test starting: CppTestCheckPermissionWithTargetUser");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
 
@@ -584,6 +608,8 @@ public:
 
     DEFINE_TEST_CASE(CppTestCheckMultiplePermissionsWithMultipleTargetUsers)
     {
+        TEST_LOG(L"Test starting: CppTestCheckMultiplePermissionsWithMultipleTargetUsers");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
 

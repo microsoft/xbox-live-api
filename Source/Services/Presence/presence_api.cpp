@@ -14,27 +14,32 @@ STDAPI XblPresenceRecordGetXuid(
     _In_ XblPresenceRecordHandle record,
     _Out_ uint64_t* xuid
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(record == nullptr || xuid == nullptr);
     *xuid = record->Xuid();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceRecordGetUserState(
     _In_ XblPresenceRecordHandle record,
     _Out_ XblPresenceUserState* userState
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(record == nullptr || userState == nullptr);
     *userState = record->UserState();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceRecordGetDeviceRecords(
     _In_ XblPresenceRecordHandle record,
     _Out_ const XblPresenceDeviceRecord** deviceRecords,
     _Out_ size_t* deviceRecordsCount
 ) XBL_NOEXCEPT 
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(record == nullptr || deviceRecords == nullptr || deviceRecordsCount == nullptr);
 
@@ -42,11 +47,13 @@ STDAPI XblPresenceRecordGetDeviceRecords(
     *deviceRecordsCount = record->DeviceRecords().size();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceRecordDuplicateHandle(
     _In_ XblPresenceRecordHandle record,
     _Out_ XblPresenceRecordHandle* duplicatedHandle
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(record == nullptr || duplicatedHandle == nullptr);
 
@@ -55,16 +62,19 @@ STDAPI XblPresenceRecordDuplicateHandle(
 
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblPresenceRecordCloseHandle(
     _In_ XblPresenceRecordHandle record
 ) XBL_NOEXCEPT
+try
 {
     if (record)
     {
         record->DecRef();
     }
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI XblPresenceSetPresenceAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -72,6 +82,7 @@ STDAPI XblPresenceSetPresenceAsync(
     _In_opt_ XblPresenceRichPresenceIds* richPresenceIds,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || async == nullptr);
     VERIFY_XBL_INITIALIZED();
@@ -100,12 +111,14 @@ STDAPI XblPresenceSetPresenceAsync(
         } // end switch
     });
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceGetPresenceAsync(
     _In_ XblContextHandle xblContextHandle,
     _In_ uint64_t xuid,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || async == nullptr);
     VERIFY_XBL_INITIALIZED();
@@ -154,20 +167,24 @@ STDAPI XblPresenceGetPresenceAsync(
         } // end switch
     });
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceGetPresenceResult(
     _In_ XAsyncBlock* async,
     _Out_ XblPresenceRecordHandle* presenceRecordHandle
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResult(async, nullptr, sizeof(XblPresenceRecordHandle), presenceRecordHandle, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI GetBatchPresenceProvider(
     _In_ XblContextHandle xblContextHandle,
     _In_ UserBatchRequest&& request,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     return RunAsync(async, __FUNCTION__,
         [
@@ -216,6 +233,7 @@ STDAPI GetBatchPresenceProvider(
         } // end switch
     });
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceGetPresenceForMultipleUsersAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -224,6 +242,7 @@ STDAPI XblPresenceGetPresenceForMultipleUsersAsync(
     _In_opt_ XblPresenceQueryFilters* filters,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || xuids == nullptr || async == nullptr);
     VERIFY_XBL_INITIALIZED();
@@ -234,11 +253,13 @@ STDAPI XblPresenceGetPresenceForMultipleUsersAsync(
         async
     );
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceGetPresenceForMultipleUsersResultCount(
     _In_ XAsyncBlock* async,
     _Out_ size_t* resultCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(resultCount);
 
@@ -251,18 +272,21 @@ STDAPI XblPresenceGetPresenceForMultipleUsersResultCount(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceGetPresenceForMultipleUsersResult(
     _In_ XAsyncBlock* async,
     _Out_writes_(presenceRecordHandlesCount) XblPresenceRecordHandle* presenceRecordHandles,
     _In_ size_t presenceRecordHandlesCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_IF(presenceRecordHandlesCount == 0, S_OK);
     RETURN_HR_INVALIDARGUMENT_IF(presenceRecordHandles == nullptr);
 
     return XAsyncGetResult(async, nullptr, sizeof(XblPresenceRecordHandle) * presenceRecordHandlesCount, presenceRecordHandles, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceGetPresenceForSocialGroupAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -271,6 +295,7 @@ STDAPI XblPresenceGetPresenceForSocialGroupAsync(
     _In_opt_ XblPresenceQueryFilters* filters,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || socialGroupName == nullptr || async == nullptr);
     VERIFY_XBL_INITIALIZED();
@@ -281,23 +306,28 @@ STDAPI XblPresenceGetPresenceForSocialGroupAsync(
         async
     );
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceGetPresenceForSocialGroupResultCount(
     _In_ XAsyncBlock* async,
     _Out_ size_t* resultCount
 ) XBL_NOEXCEPT
+try
 {
     return XblPresenceGetPresenceForMultipleUsersResultCount(async, resultCount);
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceGetPresenceForSocialGroupResult(
     _In_ XAsyncBlock* async,
     _Out_ XblPresenceRecordHandle* presenceRecordHandles,
     _In_ size_t presenceRecordHandlesCount
 ) XBL_NOEXCEPT
+try
 {
     return XblPresenceGetPresenceForMultipleUsersResult(async, presenceRecordHandles, presenceRecordHandlesCount);
 }
+CATCH_RETURN()
 
 namespace xbox {
     namespace services {
@@ -364,6 +394,7 @@ STDAPI XblPresenceSubscribeToDevicePresenceChange(
     _In_ uint64_t xuid,
     _Out_ XblRealTimeActivitySubscriptionHandle* subscriptionHandle
 ) XBL_NOEXCEPT
+try
 {
     INIT_OUT_PTR_PARAM(subscriptionHandle);
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || subscriptionHandle == nullptr);
@@ -371,17 +402,20 @@ STDAPI XblPresenceSubscribeToDevicePresenceChange(
     *subscriptionHandle = Make<presence::legacy::Subscription>(xblContextHandle->PresenceService(), xuid);
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceUnsubscribeFromDevicePresenceChange(
     _In_ XblContextHandle xblContextHandle,
     _In_ XblRealTimeActivitySubscriptionHandle subscriptionHandle
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || subscriptionHandle == nullptr);
 
     Delete(subscriptionHandle);
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceSubscribeToTitlePresenceChange(
     _In_ XblContextHandle xblContextHandle,
@@ -389,6 +423,7 @@ STDAPI XblPresenceSubscribeToTitlePresenceChange(
     _In_ uint32_t titleId,
     _Out_ XblRealTimeActivitySubscriptionHandle* subscriptionHandle
 ) XBL_NOEXCEPT
+try
 {
     INIT_OUT_PTR_PARAM(subscriptionHandle);
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || subscriptionHandle == nullptr);
@@ -396,23 +431,27 @@ STDAPI XblPresenceSubscribeToTitlePresenceChange(
     *subscriptionHandle = Make<presence::legacy::TitleSubscription>(xblContextHandle->PresenceService(), xuid, titleId);
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceUnsubscribeFromTitlePresenceChange(
     _In_ XblContextHandle xblContext,
     _In_ XblRealTimeActivitySubscriptionHandle subscriptionHandle
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContext == nullptr || subscriptionHandle == nullptr);
 
     Delete(subscriptionHandle);
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI_(XblFunctionContext) XblPresenceAddDevicePresenceChangedHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblPresenceDevicePresenceChangedHandler* handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     if (xblContext == nullptr || handler == nullptr)
     {
@@ -436,22 +475,26 @@ STDAPI_(XblFunctionContext) XblPresenceAddDevicePresenceChangedHandler(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceRemoveDevicePresenceChangedHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblFunctionContext token
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xblContext);
     xblContext->PresenceService()->RemoveDevicePresenceChangedHandler(token);
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI_(XblFunctionContext) XblPresenceAddTitlePresenceChangedHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblPresenceTitlePresenceChangedHandler* handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     if (xblContext == nullptr || handler == nullptr)
     {
@@ -475,16 +518,19 @@ STDAPI_(XblFunctionContext) XblPresenceAddTitlePresenceChangedHandler(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceRemoveTitlePresenceChangedHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblFunctionContext token
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xblContext);
     xblContext->PresenceService()->RemoveTitlePresenceChangedHandler(token);
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceTrackUsers(
     _In_ XblContextHandle xblContext,
@@ -503,27 +549,33 @@ STDAPI XblPresenceStopTrackingUsers(
     _In_ const uint64_t* xuids,
     _In_ size_t xuidsCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContext == nullptr || xuids == nullptr);
     return xblContext->PresenceService()->StopTrackingUsers(Vector<uint64_t>(xuids, xuids + xuidsCount));
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceTrackAdditionalTitles(
     _In_ XblContextHandle xblContext,
     _In_ const uint32_t* titleIds,
     _In_ size_t titleIdsCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContext == nullptr || titleIds == nullptr);
     return xblContext->PresenceService()->TrackAdditionalTitles(Vector<uint32_t>(titleIds, titleIds + titleIdsCount));
 }
+CATCH_RETURN()
 
 STDAPI XblPresenceStopTrackingAdditionalTitles(
     _In_ XblContextHandle xblContext,
     _In_ const uint32_t* titleIds,
     _In_ size_t titleIdsCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContext == nullptr || titleIds == nullptr);
     return xblContext->PresenceService()->StopTrackingAdditionalTitles(Vector<uint32_t>(titleIds, titleIds + titleIdsCount));
 }
+CATCH_RETURN()

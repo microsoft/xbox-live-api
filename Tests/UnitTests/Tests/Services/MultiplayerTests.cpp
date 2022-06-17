@@ -101,9 +101,10 @@ public:
     class MPTestEnv : public TestEnvironment
     {
     public:
-        MPTestEnv() noexcept : m_baseMock{ "", "" } 
+        MPTestEnv() noexcept 
         {
-            m_baseMock.SetMockMatchedCallback(
+            m_baseMock = std::make_shared<HttpMock>("", "");
+            m_baseMock->SetMockMatchedCallback(
                 [](HttpMock* /*mock*/, xsapi_internal_string uri, xsapi_internal_string /*body*/)
                 {
                     LOGS_DEBUG << "Unmocked HttpCall, uri=" << uri;
@@ -121,7 +122,7 @@ public:
         }
 
     private:
-        HttpMock m_baseMock;
+        std::shared_ptr<HttpMock> m_baseMock;
         std::shared_ptr<XblContext> m_xboxLiveContext;
     };
 
@@ -230,11 +231,11 @@ public:
             mockUri << "/sessionTemplates/" << sessionReference->SessionTemplateName;
             mockUri << "/sessions/" << sessionReference->SessionName;
 
-            HttpMock mock{ "PUT", mockUri.str() };
-            mock.SetResponseBody(responseBody);
+            auto mock = std::make_shared<HttpMock>( "PUT", mockUri.str() );
+            mock->SetResponseBody(responseBody);
 
             bool requestWellFormed{ true };
-            mock.SetMockMatchedCallback(
+            mock->SetMockMatchedCallback(
                 [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
                 {
                     requestWellFormed &= VerifyJson(expectedRequestBody, body.data());
@@ -802,11 +803,11 @@ public:
             const JsonValue& responseJson = testJson["searchHandleJson"]
         ) noexcept
         {
-            HttpMock mock{ "POST", MPSD_URI "/handles" };
-            mock.SetResponseBody(responseJson);
+            auto mock = std::make_shared<HttpMock>( "POST", MPSD_URI "/handles" );
+            mock->SetResponseBody(responseJson);
 
             bool requestWellFormed{ true };
-            mock.SetMockMatchedCallback(
+            mock->SetMockMatchedCallback(
                 [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string requestBody)
                 {
                     UNREFERENCED_PARAMETER(mock);
@@ -851,11 +852,11 @@ public:
         {
             const auto& responseBody{ testJson["searchHandlesResponseJson"] };
 
-            HttpMock mock{ "POST", MPSD_URI "/handles/query" };
-            mock.SetResponseBody(responseBody);
+            auto mock = std::make_shared<HttpMock>( "POST", MPSD_URI "/handles/query" );
+            mock->SetResponseBody(responseBody);
 
             bool requestWellFormed{ true };
-            mock.SetMockMatchedCallback(
+            mock->SetMockMatchedCallback(
                 [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
                 {
                     UNREFERENCED_PARAMETER(mock);
@@ -1041,11 +1042,11 @@ public:
         const JsonValue& responseJson = testJson["defaultQuerySessionsResponse"]
     ) noexcept
     {
-        HttpMock mock{ "", "https://sessiondirectory.xboxlive.com" };
-        mock.SetResponseBody(responseJson);
+        auto mock = std::make_shared<HttpMock>( "", "https://sessiondirectory.xboxlive.com" );
+        mock->SetResponseBody(responseJson);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -1163,24 +1164,32 @@ public:
 
     DEFINE_TEST_CASE(TestGetSessionAsync)
     {
+        TEST_LOG(L"Test starting: TestGetSessionAsync");
+
         MPTestEnv testEnv{};
         MultiplayerSession::Get(testEnv.XboxLiveContext());
     }
 
     DEFINE_TEST_CASE(TestGetSessionWithHandleAsync)
     {
+        TEST_LOG(L"Test starting: TestGetSessionWithHandleAsync");
+
         MPTestEnv testEnv{};
         MultiplayerSession::Get(testEnv.XboxLiveContext(), "testHandle");
     }
 
     DEFINE_TEST_CASE(TestGetLargeSessionAsync)
     {
+        TEST_LOG(L"Test starting: TestGetLargeSessionAsync");
+
         MPTestEnv testEnv{};
         MultiplayerSession::Get(testEnv.XboxLiveContext(), defaultSessionReference, testJson["largeSessionDocument"]);
     }
 
     DEFINE_TEST_CASE(TestQuerySessions)
     {
+        TEST_LOG(L"Test starting: TestQuerySessions");
+
         MPTestEnv env{};
         std::vector<uint64_t> xuidFilters{ 1 };
 
@@ -1244,6 +1253,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteNewSession)
     {
+        TEST_LOG(L"Test starting: TestWriteNewSession");
+
         MPTestEnv env{};
 
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
@@ -1298,6 +1309,8 @@ public:
 
     DEFINE_TEST_CASE(TestEmptyWrite)
     {
+        TEST_LOG(L"Test starting: TestEmptyWrite");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1307,6 +1320,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionCapabilities)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionCapabilities");
+
         MPTestEnv env{};
 
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
@@ -1332,6 +1347,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithServersJson)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithServersJson");
+
         MPTestEnv env{};
 
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
@@ -1349,6 +1366,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetSessionCustomPropertyJson)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetSessionCustomPropertyJson");
+
         MPTestEnv env{};
 
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
@@ -1375,6 +1394,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetMatchmakingProperties)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetMatchmakingProperties");
+
         MPTestEnv env{};
 
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
@@ -1390,6 +1411,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithAddMemberReservation)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithAddMemberReservation");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1401,6 +1424,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithDeleteSessionCustomPropertyJson)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithDeleteSessionCustomPropertyJson");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1419,6 +1444,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithJoin1)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithJoin1");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1429,6 +1456,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithJoin2)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithJoin2");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1439,6 +1468,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithJoin3)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithJoin3");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1449,6 +1480,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithLeave)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithLeave");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1458,6 +1491,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserInactive)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetCurrentUserInactive");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1469,6 +1504,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserActive)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetCurrentUserActive");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1480,6 +1517,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserSecureDeviceAddressBase64)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetCurrentUserSecureDeviceAddressBase64");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1491,6 +1530,8 @@ public:
 
     DEFINE_TEST_CASE(TestXblFormatSecureDeviceAddress)
     {
+        TEST_LOG(L"Test starting: TestXblFormatSecureDeviceAddress");
+
         String deviceId;
         XblFormattedSecureDeviceAddress address{};
         
@@ -1510,6 +1551,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserMemberCustomPropertyJson)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetCurrentUserMemberCustomPropertyJson");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1537,6 +1580,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithDeleteCurrentUserMemberCustomPropertyJson)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithDeleteCurrentUserMemberCustomPropertyJson");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1557,6 +1602,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithTurnCollection)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithTurnCollection");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1572,6 +1619,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithKeywords)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithKeywords");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1587,6 +1636,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithJoinRestriction)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithJoinRestriction");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1601,6 +1652,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithReadRestriction)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithReadRestriction");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1615,6 +1668,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetTimeouts)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetTimeouts");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
@@ -1631,6 +1686,8 @@ public:
        
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetQualityOfServiceConnectivityMetrics)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetQualityOfServiceConnectivityMetrics");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
@@ -1647,6 +1704,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetCloudComputePackageJson)
     {
+        TEST_LOG(L"Test starting: TestGetCloudComputePackageJson");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
@@ -1661,6 +1720,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetMemberInitialization)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetMemberInitialization");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
@@ -1687,6 +1748,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetPeerToPeerRequirements)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetPeerToPeerRequirements");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
@@ -1702,6 +1765,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetPeerToHostRequirements)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetPeerToHostRequirements");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
@@ -1719,6 +1784,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetInitializationStatus)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetInitializationStatus");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
@@ -1730,6 +1797,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetHostDeviceToken)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetHostDeviceToken");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1746,6 +1815,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetMatchmakingServerConnectionPath)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetMatchmakingServerConnectionPath");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1759,6 +1830,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetMatchmakingResubmit)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetMatchmakingResubmit");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1771,6 +1844,8 @@ public:
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetServerConnectionStringCandidates)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetServerConnectionStringCandidates");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1788,6 +1863,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserMembersInGroup)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetCurrentUserMembersInGroup");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
 
@@ -1808,6 +1885,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithClosed)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithClosed");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1834,6 +1913,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserQualityOfServiceMeasurements)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetCurrentUserQualityOfServiceMeasurements");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1848,6 +1929,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetCurrentUserQualityOfServiceServerMeasurementsJson)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetCurrentUserQualityOfServiceServerMeasurementsJson");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1862,6 +1945,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestWriteSessionAsyncWithSetMutableRoleSettings)
     {
+        TEST_LOG(L"Test starting: TestWriteSessionAsyncWithSetMutableRoleSettings");
+
         MPTestEnv env{};
         auto session = MultiplayerSession::Get(env.XboxLiveContext());
 
@@ -1894,11 +1979,13 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestSetActivityAsync)
     {
+        TEST_LOG(L"Test starting: TestSetActivityAsync");
+
         MPTestEnv env{};
-        HttpMock mock{ "POST", MPSD_URI "/handles" };
+        auto mock = std::make_shared<HttpMock>( "POST", MPSD_URI "/handles" );
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock*, xsapi_internal_string, xsapi_internal_string body)
             {
                 requestWellFormed &= VerifyJson(testJson["activityJson"], body.data());
@@ -1919,6 +2006,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestClearActivityAsync)
     {
+        TEST_LOG(L"Test starting: TestClearActivityAsync");
+
         MPTestEnv env{};
 
         // XblMultiplayerClearActivityAsync results in 2 service calls; first to query the activity, and then to clear it. Set up
@@ -1935,14 +2024,16 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestSetTransferHandleAsync)
     {
+        TEST_LOG(L"Test starting: TestSetTransferHandleAsync");
+
         MPTestEnv env{};
 
         const auto& responseBody{ testJson["transferHandleResponseJson"] };
-        HttpMock mock{ "POST", MPSD_URI "/handles" };
-        mock.SetResponseBody(responseBody);
+        auto mock = std::make_shared<HttpMock>( "POST", MPSD_URI "/handles" );
+        mock->SetResponseBody(responseBody);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock*, xsapi_internal_string, xsapi_internal_string body)
             {
                 requestWellFormed &= VerifyJson(testJson["transferHandleJson"], body.data());
@@ -1974,6 +2065,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestGetSearchHandlesAsync_1)
     {
+        TEST_LOG(L"Test starting: TestGetSearchHandlesAsync_1");
+
         MPTestEnv env{};
 
         MultiplayerSearchDetails::Query(
@@ -1988,6 +2081,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestGetSearchHandlesAsync_2)
     {
+        TEST_LOG(L"Test starting: TestGetSearchHandlesAsync_2");
+
         MPTestEnv env{};
 
         MultiplayerSearchDetails::Query(
@@ -2004,6 +2099,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestSetSearchHandleAsync)
     {
+        TEST_LOG(L"Test starting: TestSetSearchHandleAsync");
+
         MPTestEnv env{};
 
         XblMultiplayerSessionReference sessionRef
@@ -2028,6 +2125,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestClearSearchHandleAsync)
     {
+        TEST_LOG(L"Test starting: TestClearSearchHandleAsync");
+
         MPTestEnv env{};
 
         HttpMock mock{"DELETE", MPSD_URI "/handles/TestHandleId" };
@@ -2039,11 +2138,13 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestSendInvitesAsync)
     {
+        TEST_LOG(L"Test starting: TestSendInvitesAsync");
+
         MPTestEnv env{};
 
         std::vector<uint64_t> xuids{ 1111, 2222 };
 
-        HttpMock mock{ "POST", MPSD_URI "/handles" };
+        auto mock = std::make_shared<HttpMock>( "POST", MPSD_URI "/handles" );
 
         // Inviting multiple Xuids results in multiple Http calls. Make sure the expected number of calls go out
         size_t requestCount{ 0 };
@@ -2057,7 +2158,7 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
         expectedRequestBodyJson.Parse(inviteRequestJson.c_str());
         responseBodyJson.Parse(inviteResponseJson.c_str());
 
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
             {
                 UNREFERENCED_PARAMETER(uri);
@@ -2114,11 +2215,11 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     void VerifyGetActivitiesForUsers(MPTestEnv& env, bool withProperties)
     {
-        HttpMock mock{ "POST", MPSD_URI "/handles" };
-        mock.SetResponseBody(testJson["activitiesForUserResponseJson"]);
+        auto mock = std::make_shared<HttpMock>( "POST", MPSD_URI "/handles" );
+        mock->SetResponseBody(testJson["activitiesForUserResponseJson"]);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback([&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
+        mock->SetMockMatchedCallback([&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
         {
             UNREFERENCED_PARAMETER(mock);
             UNREFERENCED_PARAMETER(uri);
@@ -2188,11 +2289,11 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     void VerifyGetActivitiesForSocialGroup(MPTestEnv& env, bool withProperties)
     {
-        HttpMock mock{ "POST", MPSD_URI "/handles" };
-        mock.SetResponseBody(testJson["activitiesForSocialGroupResponseJson"]);
+        auto mock = std::make_shared<HttpMock>( "POST", MPSD_URI "/handles" );
+        mock->SetResponseBody(testJson["activitiesForSocialGroupResponseJson"]);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback([&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
+        mock->SetMockMatchedCallback([&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
         {
             UNREFERENCED_PARAMETER(mock);
             UNREFERENCED_PARAMETER(uri);
@@ -2240,6 +2341,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestGetActivitiesForUsersAsync)
     {
+        TEST_LOG(L"Test starting: TestGetActivitiesForUsersAsync");
+
         MPTestEnv env{};
 
         VerifyGetActivitiesForUsers(env, false);
@@ -2248,6 +2351,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestGetActivitiesForSocialGroupAsync)
     {
+        TEST_LOG(L"Test starting: TestGetActivitiesForSocialGroupAsync");
+
         MPTestEnv env{};
 
         VerifyGetActivitiesForSocialGroup(env, false);
@@ -2256,6 +2361,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestCompareMultiplayerSessions)
     {
+        TEST_LOG(L"Test starting: TestCompareMultiplayerSessions");
+
         MPTestEnv env{};
 
         {
@@ -2374,6 +2481,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestRTAMultiplayer)
     {
+        TEST_LOG(L"Test starting: TestRTAMultiplayer");
+
         MPTestEnv env{};
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
         
@@ -2439,6 +2548,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestRTADisableMultiplayerSubscriptions)
     {
+        TEST_LOG(L"Test starting: TestRTADisableMultiplayerSubscriptions");
+
         MPTestEnv env{};
 
         // Auto confirm subscriptions
@@ -2465,6 +2576,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestMultiplayerSubscribeChangeTypes)
     {
+        TEST_LOG(L"Test starting: TestMultiplayerSubscribeChangeTypes");
+
         MPTestEnv env{};
 
         auto session = MultiplayerSession::Create(env.XboxLiveContext());
@@ -2487,11 +2600,11 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
         VERIFY_SUCCEEDED(XblMultiplayerSessionSetSessionChangeSubscription(session.Handle(), changeTypes));
         VERIFY_IS_TRUE(XblMultiplayerSessionSubscribedChangeTypes(session.Handle()) == changeTypes);
 
-        HttpMock mock{ "PUT", MPSD_URI };
-        mock.SetResponseBody(defaultSessionJson);
+        auto mock = std::make_shared<HttpMock>( "PUT", MPSD_URI );
+        mock->SetResponseBody(defaultSessionJson);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* /*mock*/, xsapi_internal_string /*uri*/, xsapi_internal_string body)
             {
                 // Skip verification of the subId since its a random GUID
@@ -2525,6 +2638,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(Test204Response)
     {
+        TEST_LOG(L"Test starting: Test204Response");
+
         MPTestEnv env{};
 
         HttpMock mock{ "", MPSD_URI, 204 };
@@ -2565,6 +2680,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestMultiplayerInvalidArgs)
     {
+        TEST_LOG(L"Test starting: TestMultiplayerInvalidArgs");
+
 #pragma warning(push)
 #pragma warning(disable : 6387)
         MPTestEnv env{};
@@ -2723,6 +2840,8 @@ session.Write(testJson["serverConnectionStringCandidatesJson"]);
 
     DEFINE_TEST_CASE(TestTournamentsDeprecated)
     {
+        TEST_LOG(L"Test starting: TestTournamentsDeprecated");
+
         XBL_WARNING_PUSH;
         XBL_WARNING_DISABLE_DEPRECATED;
         XblTournamentReference xbltourref{};

@@ -253,10 +253,10 @@ public:
             xboxLiveContext->Xuid()
         };
 
-        HttpMock mock{ "PUT", "https://titlestorage.xboxlive.com" };
+        auto mock = std::make_shared<HttpMock>( "PUT", "https://titlestorage.xboxlive.com" );
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -299,12 +299,12 @@ public:
         uint32_t bufferSizeMultiplier
     )
     {
-        HttpMock mock{ "GET", "https://titlestorage.xboxlive.com" };
+        auto mock = std::make_shared<HttpMock>( "GET", "https://titlestorage.xboxlive.com" );
         const uint8_t* responseBody{ nullptr };
         size_t responseBodySize{ 0 };
         bool requestWellFormed{ true };
 
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
         {
             requestWellFormed &= requestBody.empty();
@@ -400,10 +400,10 @@ public:
         XblTitleStorageBlobType blobType
     )
     {
-        HttpMock mock{ "DELETE", "https://titlestorage.xboxlive.com" };
+        auto mock = std::make_shared<HttpMock>( "DELETE", "https://titlestorage.xboxlive.com" );
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -442,11 +442,11 @@ public:
         XblTitleStorageType type
     )
     {
-        HttpMock mock{ "GET", "https://titlestorage.xboxlive.com" };
+        auto mock = std::make_shared<HttpMock>( "GET", "https://titlestorage.xboxlive.com" );
         JsonDocument responseJson;
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 requestWellFormed &= requestBody.empty();
@@ -502,11 +502,11 @@ public:
         XblTitleStorageType type
     )
     {
-        HttpMock mock{ "GET", "https://titlestorage.xboxlive.com" };
-        mock.SetResponseBody(quotaResponse);
+        auto mock = std::make_shared<HttpMock>( "GET", "https://titlestorage.xboxlive.com" );
+        mock->SetResponseBody(quotaResponse);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -532,6 +532,8 @@ public:
 
     DEFINE_TEST_CASE(GetQuotaTest)
     {
+        TEST_LOG(L"Test starting: GetQuotaTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -542,6 +544,8 @@ public:
 
     DEFINE_TEST_CASE(GetBlobMetadataTest)
     {
+        TEST_LOG(L"Test starting: GetBlobMetadataTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -552,6 +556,8 @@ public:
 
     DEFINE_TEST_CASE(DeleteBlobTest)
     {
+        TEST_LOG(L"Test starting: DeleteBlobTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -563,6 +569,8 @@ public:
 
     DEFINE_TEST_CASE(DownloadBlobTest)
     {
+        TEST_LOG(L"Test starting: DownloadBlobTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -577,6 +585,8 @@ public:
 
     DEFINE_TEST_CASE(DownloadBlobWithLargeBufferTest)
     {
+        TEST_LOG(L"Test starting: DownloadBlobWithLargeBufferTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -591,6 +601,8 @@ public:
 
     DEFINE_TEST_CASE(UploadBlobTest)
     {
+        TEST_LOG(L"Test starting: UploadBlobTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -633,6 +645,8 @@ public:
 
     DEFINE_TEST_CASE(UploadBlobWithLargeBufferTest)
     {
+        TEST_LOG(L"Test starting: UploadBlobWithLargeBufferTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -675,6 +689,8 @@ public:
 
     DEFINE_TEST_CASE(UploadBlobMultipleChunksTest)
     {
+        TEST_LOG(L"Test starting: UploadBlobMultipleChunksTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -700,11 +716,11 @@ public:
 
         // This should result in multiple Http calls (1 per chunk), but intermediate results should not be
         // propagated to the client
-        HttpMock mock{ "PUT", "https://titlestorage.xboxlive.com" };
+        auto mock = std::make_shared<HttpMock>( "PUT", "https://titlestorage.xboxlive.com" );
 
         uint32_t requestCount{ 0 };
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
                 UNREFERENCED_PARAMETER(requestBody);
@@ -753,6 +769,8 @@ public:
 
     DEFINE_TEST_CASE(TitleStorageInvalidArgsTest)
     {
+        TEST_LOG(L"Test starting: TitleStorageInvalidArgsTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 

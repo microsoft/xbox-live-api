@@ -98,6 +98,8 @@ public:
 
     DEFINE_TEST_CASE(SubscriptionTest)
     {
+        TEST_LOG(L"Test starting: SubscriptionTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto& mockRta{ MockRealTimeActivityService::Instance() };
@@ -125,6 +127,8 @@ public:
 
     DEFINE_TEST_CASE(TestUnexpectedDataReceived)
     {
+        TEST_LOG(L"Test starting: TestUnexpectedDataReceived");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto& mockRta{ MockRealTimeActivityService::Instance() };
@@ -138,6 +142,8 @@ public:
 
     DEFINE_TEST_CASE(SubscriptionStressTest)
     {
+        TEST_LOG(L"Test starting: SubscriptionStressTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto& mockRta{ MockRealTimeActivityService::Instance() };
@@ -201,6 +207,8 @@ public:
 
     DEFINE_TEST_CASE(TestUnsubscribeOnPendingSubscribeState)
     {
+        TEST_LOG(L"Test starting: TestUnsubscribeOnPendingSubscribeState");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto rtaManager{ GlobalState::Get()->RTAManager() };
@@ -238,6 +246,8 @@ public:
 
     DEFINE_TEST_CASE(NoConnectionTest)
     {
+        TEST_LOG(L"Test starting: NoConnectionTest");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto rtaManager{ GlobalState::Get()->RTAManager() };
@@ -259,6 +269,8 @@ public:
 
     DEFINE_TEST_CASE(TestConnectionInterrupt)
     {
+        TEST_LOG(L"Test starting: TestConnectionInterrupt");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto rtaManager{ GlobalState::Get()->RTAManager() };
@@ -297,6 +309,8 @@ public:
 
     DEFINE_TEST_CASE(RTAResync)
     {
+        TEST_LOG(L"Test starting: RTAResync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto rtaManager{ GlobalState::Get()->RTAManager() };
@@ -323,6 +337,8 @@ public:
 
     DEFINE_TEST_CASE(TestServiceThrottleError)
     {
+        TEST_LOG(L"Test starting: TestServiceThrottleError");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto rtaManager{ GlobalState::Get()->RTAManager() };

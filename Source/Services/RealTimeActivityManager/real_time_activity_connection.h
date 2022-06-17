@@ -6,7 +6,10 @@
 #include "xsapi-c/real_time_activity_c.h"
 #include "real_time_activity_manager.h"
 #include "web_socket.h"
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_BEGIN
+
+struct ServiceSubscription;
 
 class Connection : public std::enable_shared_from_this<Connection>
 {
@@ -49,16 +52,18 @@ private:
         ResyncHandler resyncHandler
     ) noexcept;
 
-    JsonDocument AssembleSubscribeMessage(std::shared_ptr<Subscription> sub) const noexcept;
+    JsonDocument AssembleSubscribeMessage(
+        std::shared_ptr<ServiceSubscription> sub
+    ) const noexcept;
 
     // RTA protocol implementation
     HRESULT SendSubscribeMessage(
-        std::shared_ptr<Subscription> subscription,
+        std::shared_ptr<ServiceSubscription> subscription,
         std::unique_lock<std::mutex>&& lock
     ) const noexcept;
 
     HRESULT SendUnsubscribeMessage(
-        std::shared_ptr<Subscription> subscription,
+        std::shared_ptr<ServiceSubscription> subscription,
         std::unique_lock<std::mutex>&& lock
     ) const noexcept;
 
@@ -84,10 +89,9 @@ private:
     const ConnectionStateChangedHandler m_stateChangedHandler;
     const real_time_activity::ResyncHandler m_resyncHandler;
 
-    Map<uint32_t, std::shared_ptr<Subscription>> m_subs;
-    Map<uint32_t, AsyncContext<Result<void>>> m_subscribeAsyncContexts;
-    Map<uint32_t, AsyncContext<Result<void>>> m_unsubscribeAsyncContexts;
-    Map<uint32_t, Map<uint32_t, std::shared_ptr<Subscription>>> m_activeSubs;
+    Map<String, std::shared_ptr<ServiceSubscription>> m_subsByUri; // needed to add/remove client subscription
+    Map<uint32_t, std::shared_ptr<ServiceSubscription>> m_subsByClientId; // needed for subscribe/unsubscribe handshake
+    Map<uint32_t, std::shared_ptr<ServiceSubscription>> m_subsByServiceId; // needed to handle subscription events
 
     uint32_t m_nextSubId{ 1 };
 

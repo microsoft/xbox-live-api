@@ -493,6 +493,8 @@ private:
 public:
     DEFINE_TEST_CASE(TestAddLocalUser)
     {
+        TEST_LOG(L"Test starting: TestAddLocalUser");
+
         SMTestEnvironment env{};
         auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
         env.AddLocalUser(xboxLiveContext->User());
@@ -500,6 +502,8 @@ public:
 
     DEFINE_TEST_CASE(TestBasicCreateFilterGroup)
     {
+        TEST_LOG(L"Test starting: TestBasicCreateFilterGroup");
+
         SMTestEnvironment env{};
         auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
         env.AddLocalUser(xboxLiveContext->User());
@@ -579,6 +583,8 @@ public:
 
     DEFINE_TEST_CASE(TestPresenceRtaUpdates)
     {
+        TEST_LOG(L"Test starting: TestPresenceRtaUpdates");
+
         SMTestEnvironment env{};
         auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
         env.AddLocalUser(xboxLiveContext->User());
@@ -689,6 +695,8 @@ public:
 
     DEFINE_TEST_CASE(TestMultipleLocalUsers)
     {
+        TEST_LOG(L"Test starting: TestMultipleLocalUsers");
+
         SMTestEnvironment env{};
         auto xboxLiveContext1 = env.CreateMockXboxLiveContext();
         auto xboxLiveContext2 = env.CreateMockXboxLiveContext(202020202020, "MockLocalUser2");
@@ -820,6 +828,8 @@ public:
 
     DEFINE_TEST_CASE(TestAddRemoveLocalUser)
     {
+        TEST_LOG(L"Test starting: TestAddRemoveLocalUser");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -833,6 +843,8 @@ public:
 
     DEFINE_TEST_CASE(TestSocialRelationshipChangedRtaUpdate)
     {
+        TEST_LOG(L"Test starting: TestSocialRelationshipChangedRtaUpdate");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         env.AddLocalUser(xboxLiveContext->User());
@@ -951,6 +963,8 @@ public:
 
     DEFINE_TEST_CASE(TestListGroupWithSocialRelationshipChanged)
     {
+        TEST_LOG(L"Test starting: TestListGroupWithSocialRelationshipChanged");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         env.AddLocalUser(xboxLiveContext->User());
@@ -1080,6 +1094,8 @@ public:
 
     DEFINE_TEST_CASE(TestFilterGroupChanges)
     {
+        TEST_LOG(L"Test starting: TestFilterGroupChanges");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         env.AddLocalUser(xboxLiveContext->User());
@@ -1142,6 +1158,8 @@ public:
 
     DEFINE_TEST_CASE(TestMultipleListGroups)
     {
+        TEST_LOG(L"Test starting: TestMultipleListGroups");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         env.AddLocalUser(xboxLiveContext->User());
@@ -1364,6 +1382,8 @@ public:
 
     DEFINE_TEST_CASE(TestSocialUserGroupFromListLarge)
     {
+        TEST_LOG(L"Test starting: TestSocialUserGroupFromListLarge");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         env.AddLocalUser(xboxLiveContext->User());
@@ -1430,6 +1450,8 @@ public:
     // Tests refresh for RTA resync
     DEFINE_TEST_CASE(TestRtaResync)
     {
+        TEST_LOG(L"Test starting: TestRtaResync");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         env.AddLocalUser(xboxLiveContext->User());
@@ -1478,8 +1500,10 @@ public:
         VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
     }
 
-    DEFINE_TEST_CASE(TestInvalidArgs)
+    DEFINE_TEST_CASE(TestSMInvalidArgs)
     {
+        TEST_LOG(L"Test starting: TestSMInvalidArgs");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         env.AddLocalUser(xboxLiveContext->User());
@@ -1519,6 +1543,8 @@ public:
 #if 0
     DEFINE_TEST_CASE(TestImproperCallingPattern)
     {
+        TEST_LOG(L"Test starting: TestImproperCallingPattern");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -1537,6 +1563,8 @@ public:
 
     DEFINE_TEST_CASE(TestCreateGroupBeforeUserAddedCompletes)
     {
+        TEST_LOG(L"Test starting: TestCreateGroupBeforeUserAddedCompletes");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -1574,6 +1602,8 @@ public:
 
     DEFINE_TEST_CASE(TestSocialRelationshipChangedDuringInitialization)
     {
+        TEST_LOG(L"Test starting: TestSocialRelationshipChangedDuringInitialization");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -1635,6 +1665,7 @@ public:
 
     DEFINE_TEST_CASE(TestFilters)
     {
+        TEST_LOG(L"Test starting: TestFilters");
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         env.AddLocalUser(xboxLiveContext->User());
@@ -1764,6 +1795,7 @@ public:
 
     DEFINE_TEST_CASE(TestRichPresencePolling)
     {
+        TEST_LOG(L"Test starting: TestRichPresencePolling");
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         env.AddLocalUser(xboxLiveContext->User());
@@ -1820,6 +1852,8 @@ public:
 
     DEFINE_TEST_CASE(TestEventUserHandleLifetime)
     {
+        TEST_LOG(L"Test starting: TestEventUserHandleLifetime");
+
         SMTestEnvironment env{};
 
         uint64_t const presenceChangedXuid{ 1 };
@@ -1910,6 +1944,8 @@ public:
 
     DEFINE_TEST_CASE(CppTestBasicCreateFilterGroup)
     {
+        TEST_LOG(L"Test starting: CppTestBasicCreateFilterGroup");
+
         SMTestEnvironment env{};
         auto xboxLiveContext = env.CreateLegacyMockXboxLiveContext();
         xbox_live_user_t userHandle = xboxLiveContext->user();

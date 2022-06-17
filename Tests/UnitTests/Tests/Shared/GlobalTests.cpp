@@ -45,6 +45,8 @@ public:
 
     DEFINE_TEST_CASE(TestXblInitializeAndCleanup)
     {
+        TEST_LOG(L"Test starting: TestXblInitializeAndCleanup");
+
         XTaskQueueHandle queueHandle{};
         VERIFY_SUCCEEDED(XTaskQueueCreate(XTaskQueueDispatchMode::ThreadPool, XTaskQueueDispatchMode::ThreadPool, &queueHandle));
         TaskQueue queue{ queueHandle };
@@ -72,6 +74,8 @@ public:
 
     DEFINE_TEST_CASE(TestServiceCallRouted)
     {
+        TEST_LOG(L"Test starting: TestServiceCallRouted");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -152,6 +156,8 @@ public:
 
     DEFINE_TEST_CASE(TestMemoryHook)
     {
+        TEST_LOG(L"Test starting: TestMemoryHook");
+
         class MemoryManager
         {
         public:
@@ -250,6 +256,8 @@ public:
 
     DEFINE_TEST_CASE(TestCancellation)
     {
+        TEST_LOG(L"Test starting: TestCancellation");
+
         XTaskQueueHandle queue{ nullptr };
         VERIFY_SUCCEEDED(XTaskQueueCreate(XTaskQueueDispatchMode::ThreadPool, XTaskQueueDispatchMode::ThreadPool, &queue));
 

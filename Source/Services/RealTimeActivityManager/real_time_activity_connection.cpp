@@ -10,9 +10,12 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_BEGIN
 constexpr char s_rtaUri[]{ "wss://rta.xboxlive.com/connect" };
 constexpr char s_rtaSubprotocol[]{ "rta.xboxlive.com.V2" };
 
-struct Subscription::State
+struct ServiceSubscription
 {
-    State(uint32_t _clientId) noexcept : clientId{ _clientId } {}
+    ServiceSubscription(String _uri, uint32_t _clientId) noexcept : uri{ std::move(_uri) }, clientId { _clientId } {}
+
+    // Resource uri for the subscription
+    String const uri;
 
     // Client ID is assigned by XSAPI and used to identify subscriptions.
     // Used as the unique SEQUENCE_N during RTA Sub/Unsub handshakes.
@@ -22,7 +25,7 @@ struct Subscription::State
     uint32_t serviceId{ 0 };
 
     // Current status with respect to RTA service
-    enum class ServiceStatus : uint32_t
+    enum class Status : uint32_t
     {
         // RTA service has no knowledge of this subscription
         Inactive,
@@ -38,9 +41,13 @@ struct Subscription::State
         PendingUnsubscribe,
         // We've sent unsubscribe message to RTA service but has not yet received the handshake response
         Unsubscribing
-    } serviceStatus{ ServiceStatus::Inactive };
+    } status{ Status::Inactive };
 
     uint32_t subscribeAttempt{ 0 };
+
+    Set<std::shared_ptr<Subscription>> clientSubscriptions;
+    List<AsyncContext<Result<void>>> subscribeAsyncContexts;
+    List<AsyncContext<Result<void>>> unsubscribeAsyncContexts;
 };
 
 // RTA message types and error codes define by service here http://xboxwiki/wiki/Real_Time_Activity
@@ -131,17 +138,15 @@ void Connection::Cleanup()
     }
 
     List<AsyncContext<Result<void>>> pendingAsyncContexts;
-    for (auto& pair : m_subscribeAsyncContexts)
+    for (auto& subPair : m_subsByClientId)
     {
-        pendingAsyncContexts.emplace_back(std::move(pair.second));
-    }
-    for (auto& pair : m_unsubscribeAsyncContexts)
-    {
-        pendingAsyncContexts.emplace_back(std::move(pair.second));
+        auto& sub{ subPair.second };
+        pendingAsyncContexts.insert(pendingAsyncContexts.end(), sub->subscribeAsyncContexts.begin(), sub->subscribeAsyncContexts.end());
+        sub->subscribeAsyncContexts.clear();
+        pendingAsyncContexts.insert(pendingAsyncContexts.end(), sub->unsubscribeAsyncContexts.begin(), sub->unsubscribeAsyncContexts.end());      
+        sub->unsubscribeAsyncContexts.clear();
     }
 
-    m_subscribeAsyncContexts.clear();
-    m_unsubscribeAsyncContexts.clear();
     lock.unlock();
 
     m_queue.Terminate(
@@ -163,57 +168,80 @@ HRESULT Connection::AddSubscription(
     assert(sub);
     std::unique_lock<std::mutex> lock{ m_lock };
 
-    if (!sub->m_state)
+    std::shared_ptr<ServiceSubscription> serviceSub{ nullptr };
+    auto serviceSubIter = m_subsByUri.find(sub->ResourceUri());
+    if (serviceSubIter != m_subsByUri.end())
     {
-        // Initialize subscription state
-        sub->m_state = MakeShared<Subscription::State>(m_nextSubId++);
+        serviceSub = serviceSubIter->second;
+    }
+    else
+    {
+        serviceSub = MakeShared<ServiceSubscription>(sub->ResourceUri(), m_nextSubId++);
+        assert(m_subsByClientId.find(serviceSub->clientId) == m_subsByClientId.end());
+        m_subsByClientId[serviceSub->clientId] = serviceSub;
+        m_subsByUri[serviceSub->uri] = serviceSub;
     }
 
-    m_subs[sub->m_state->clientId] = sub;
+    serviceSub->clientSubscriptions.emplace(sub);
 
-    LOGS_DEBUG << __FUNCTION__ << ": [" << sub->m_state->clientId << "] Uri=" << sub->m_resourceUri;
+    LOGS_DEBUG << __FUNCTION__ << ": [" << serviceSub->clientId << "] Uri=" << serviceSub->uri << ", ServiceStatus=" << EnumName(serviceSub->status);
 
-    switch (sub->m_state->serviceStatus)
+    switch (serviceSub->status)
     {
-    case Subscription::State::ServiceStatus::Inactive:
+    case ServiceSubscription::Status::Inactive:
     {
-        m_subscribeAsyncContexts[sub->m_state->clientId] = std::move(async);
+        serviceSub->subscribeAsyncContexts.push_back(std::move(async));
 
         // If our connection is active, immediately register with RTA service
         if (m_state == XblRealTimeActivityConnectionState::Connected)
         {
-            return SendSubscribeMessage(sub, std::move(lock));
+            return SendSubscribeMessage(serviceSub, std::move(lock));
         }
         return S_OK;
     }
-    case Subscription::State::ServiceStatus::PendingUnsubscribe:
+    case ServiceSubscription::Status::PendingUnsubscribe:
     {
-        // Client previously removed subscription while we were subscribing.
-        // Reset the state to subscribing and collapse the existing & new async contexts
-        sub->m_state->serviceStatus = Subscription::State::ServiceStatus::Subscribing;
+        // Client previously removed subscription while we were subscribing. Reset the state to subscribing and complete unsubscribe
+        // operations with E_ABORT
 
-        auto asyncIter{ m_subscribeAsyncContexts.find(sub->m_state->clientId) };
-        assert(asyncIter != m_subscribeAsyncContexts.end());
-        asyncIter->second = AsyncContext<Result<void>>::Collapse({ std::move(asyncIter->second), async });
+        serviceSub->status = ServiceSubscription::Status::Subscribing;
+        serviceSub->subscribeAsyncContexts.push_back(std::move(async));
+
+        List<AsyncContext<Result<void>>> unsubscribeAsyncContexts{ std::move(serviceSub->unsubscribeAsyncContexts) };
+
+        lock.unlock();
+
+        for (auto& asyncContext : unsubscribeAsyncContexts)
+        {
+            asyncContext.Complete(E_ABORT);
+        }
 
         return S_OK;
     }
-    case Subscription::State::ServiceStatus::Unsubscribing:
+    case ServiceSubscription::Status::Unsubscribing:
     {
         // Wait for unsubscribe to finish before resubscribing
-        sub->m_state->serviceStatus = Subscription::State::ServiceStatus::PendingSubscribe;
-        m_subscribeAsyncContexts[sub->m_state->clientId] = std::move(async);
+        serviceSub->status = ServiceSubscription::Status::PendingSubscribe;
+        serviceSub->subscribeAsyncContexts.push_back(std::move(async));
         return S_OK;
     }
-    case Subscription::State::ServiceStatus::Active:
-    case Subscription::State::ServiceStatus::PendingSubscribe:
-    case Subscription::State::ServiceStatus::Subscribing:
+    case ServiceSubscription::Status::Active:
+    {
+        // Subscription is already active, trivially complete
+        lock.unlock();
+        async.Complete(S_OK);
+        return S_OK;
+    }
+    case ServiceSubscription::Status::PendingSubscribe:
+    case ServiceSubscription::Status::Subscribing:
+    {
+        serviceSub->subscribeAsyncContexts.push_back(std::move(async));
+        return S_OK;
+    }
     default:
     {
-        // These are all technically ok, but they indicate the subscription was added multiple
-        // times, which likely indicates a bug in a dependent service
         assert(false);
-        return S_OK;
+        return E_UNEXPECTED;
     }
     }
 }
@@ -226,58 +254,87 @@ HRESULT Connection::RemoveSubscription(
     assert(sub);
     std::unique_lock<std::mutex> lock{ m_lock };
 
-    auto iter{ m_subs.find(sub->m_state->clientId) };
-    assert(iter != m_subs.end());
-    (void)(iter); // suppress unused warning
-
-    LOGS_DEBUG << __FUNCTION__ << ": [" << sub->m_state->clientId << "] Uri=" << sub->m_resourceUri << ", ServiceStatus=" << EnumName(sub->m_state->serviceStatus);
-
-    switch (sub->m_state->serviceStatus)
+    std::shared_ptr<ServiceSubscription> serviceSub{ nullptr };
+    auto serviceSubIter = m_subsByUri.find(sub->ResourceUri());
+    if (serviceSubIter != m_subsByUri.end())
     {
-    case Subscription::State::ServiceStatus::Inactive:
+        serviceSub = serviceSubIter->second;
+    }
+    else
     {
-        // RTA service has no knowledge of inactive subs. Just remove from our local
-        // state and complete the AsyncContext.
-        m_subs.erase(sub->m_state->clientId);
+        return S_OK;
+    }
+
+    serviceSub->clientSubscriptions.erase(sub);
+
+    LOGS_DEBUG << __FUNCTION__ << ": [" << serviceSub->clientId << "] Uri=" << serviceSub->uri << ", ServiceStatus=" << EnumName(serviceSub->status);
+
+    if (!serviceSub->clientSubscriptions.empty())
+    {
+        // Service subscription still needed by other clients. Complete asyncContext but don't unsubscribe from service
+        lock.unlock();
+
+        async.Complete(S_OK);
+        return S_OK;
+    }
+
+    switch (serviceSub->status)
+    {
+    case ServiceSubscription::Status::Inactive:
+    {
+        // RTA service has no knowledge of inactive subs. Just remove from our local state and complete the AsyncContext.
+        assert(serviceSub->serviceId == 0);
+        m_subsByClientId.erase(serviceSub->clientId);
+        m_subsByUri.erase(serviceSub->uri);
 
         lock.unlock();
 
         async.Complete(S_OK);
         return S_OK;
     }
-    case Subscription::State::ServiceStatus::Active:
+    case ServiceSubscription::Status::Active:
     {
         // Unregister subscription from RTA service
-        m_unsubscribeAsyncContexts[sub->m_state->clientId] = std::move(async);
-        return SendUnsubscribeMessage(sub, std::move(lock));
+        serviceSub->unsubscribeAsyncContexts.push_back(std::move(async));
+        return SendUnsubscribeMessage(serviceSub, std::move(lock));
     }
-    case Subscription::State::ServiceStatus::PendingSubscribe:
+    case ServiceSubscription::Status::PendingSubscribe:
     {
-        // Client previously added the subscription while we were unsubscribing.
-        // Reset the state to unsubscribe and collapse the existing & new async contexts
-        sub->m_state->serviceStatus = Subscription::State::ServiceStatus::Unsubscribing;
+        // Client previously added the subscription while we were unsubscribing. Reset the state to unsubscribe and complete
+        // subscribe operations with E_ABORT
 
-        auto asyncIter{ m_unsubscribeAsyncContexts.find(sub->m_state->clientId) };
-        assert(asyncIter != m_unsubscribeAsyncContexts.end());
-        asyncIter->second = AsyncContext<Result<void>>::Collapse({ std::move(asyncIter->second), async });
+        serviceSub->status = ServiceSubscription::Status::Unsubscribing;
+        serviceSub->unsubscribeAsyncContexts.push_back(std::move(async));
+        List<AsyncContext<Result<void>>> subscribeAsyncContexts{ std::move(serviceSub->subscribeAsyncContexts) };
+        
+        lock.unlock();
+
+        for (auto& asyncContext : subscribeAsyncContexts)
+        {
+            asyncContext.Complete(E_ABORT);
+        }
 
         return S_OK;
     }
-    case Subscription::State::ServiceStatus::Subscribing:
+    case ServiceSubscription::Status::Subscribing:
     {
         // We are in the process of subscribing. RTA protocol doesn't allow us to unsubscribe
         // until subscription is complete, so just mark the subscription as pending unsubscribe.
         // After the subscription completes, we will unsubscribe and complete the AsyncContext.
-        m_unsubscribeAsyncContexts[sub->m_state->clientId] = std::move(async);
-        sub->m_state->serviceStatus = Subscription::State::ServiceStatus::PendingUnsubscribe;
+        serviceSub->status = ServiceSubscription::Status::PendingUnsubscribe;
+        serviceSub->unsubscribeAsyncContexts.push_back(std::move(async));
+
         return S_OK;
     }
-    case Subscription::State::ServiceStatus::PendingUnsubscribe:
-    case Subscription::State::ServiceStatus::Unsubscribing:
+    case ServiceSubscription::Status::PendingUnsubscribe:
+    case ServiceSubscription::Status::Unsubscribing:
+    {
+        serviceSub->unsubscribeAsyncContexts.push_back(std::move(async));
+
+        return S_OK;
+    }
     default:
     {
-        // These are all technically ok, but they indicate the subscription was removed multiple
-        // times, which likely indicates a bug in a dependent service
         assert(false);
         return E_UNEXPECTED;
     }
@@ -287,34 +344,34 @@ HRESULT Connection::RemoveSubscription(
 size_t Connection::SubscriptionCount() const noexcept
 {
     std::unique_lock<std::mutex> lock{ m_lock };
-    return m_subs.size();
+    return m_subsByClientId.size();
 }
 
-JsonDocument Connection::AssembleSubscribeMessage(std::shared_ptr<Subscription> sub) const noexcept
+JsonDocument Connection::AssembleSubscribeMessage(std::shared_ptr<ServiceSubscription> sub) const noexcept
 {
     // Payload format [<API_ID>, <SEQUENCE_N>, “<RESOURCE_URI>”]
 
-    sub->m_state->serviceStatus = Subscription::State::ServiceStatus::Subscribing;
+    sub->status = ServiceSubscription::Status::Subscribing;
 
     JsonDocument request{ rapidjson::kArrayType };
     auto& a{ request.GetAllocator() };
 
     request.PushBack(static_cast<uint32_t>(MessageType::Subscribe), a);
-    request.PushBack(sub->m_state->clientId, a);
-    request.PushBack(JsonValue{ sub->m_resourceUri.data(), a }, a);
+    request.PushBack(sub->clientId, a);
+    request.PushBack(JsonValue{ sub->uri.data(), a }, a);
 
     return request;
 }
 
 HRESULT Connection::SendSubscribeMessage(
-    std::shared_ptr<Subscription> sub,
+    std::shared_ptr<ServiceSubscription> sub,
     std::unique_lock<std::mutex>&& lock
 ) const noexcept
 {
     JsonDocument request = AssembleSubscribeMessage(sub);
 
     lock.unlock();
-    
+
     return SendAssembledMessage(request);
 }
 
@@ -327,20 +384,20 @@ HRESULT Connection::SendAssembledMessage(_In_ const JsonValue& request) const no
 }
 
 HRESULT Connection::SendUnsubscribeMessage(
-    std::shared_ptr<Subscription> sub,
+    std::shared_ptr<ServiceSubscription> sub,
     std::unique_lock<std::mutex>&& lock
 ) const noexcept
 {
     // Payload format [<API_ID>, <SEQUENCE_N>, <SUB_ID>]
 
-    sub->m_state->serviceStatus = Subscription::State::ServiceStatus::Unsubscribing;
+    sub->status = ServiceSubscription::Status::Unsubscribing;
 
     JsonDocument request{ rapidjson::kArrayType };
     auto& a{ request.GetAllocator() };
 
     request.PushBack(static_cast<uint32_t>(MessageType::Unsubscribe), a);
-    request.PushBack(sub->m_state->clientId, a);
-    request.PushBack(sub->m_state->serviceId, a);
+    request.PushBack(sub->clientId, a);
+    request.PushBack(sub->serviceId, a);
 
     lock.unlock();
 
@@ -359,46 +416,39 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
     auto clientId = message[1].GetUint();
     auto errorCode = static_cast<ErrorCode>(message[2].GetUint());
 
-    auto subIter{ m_subs.find(clientId) };
-    if (subIter == m_subs.end())
+    auto subIter{ m_subsByClientId.find(clientId) };
+    if (subIter == m_subsByClientId.end())
     {
         // Ignore unexpected message
+        assert(false);
         LOGS_DEBUG << "__FUNCTION__" << ": [" << clientId << "] Ignoring unexpected message";
         return;
     }
-    auto sub{ subIter->second };
+    auto serviceSub{ subIter->second };
 
     switch (errorCode)
     {
     case ErrorCode::Success:
     {
-        sub->m_state->serviceId = message[3].GetInt();
+        serviceSub->serviceId = message[3].GetInt();
         const auto& data = message[4];
 
-        if (m_activeSubs.find(sub->m_state->serviceId) == m_activeSubs.end())
-        {
-            m_activeSubs[sub->m_state->serviceId] = { { sub->m_state->clientId, sub } };
-        }
-        else
-        {
-            m_activeSubs[sub->m_state->serviceId][sub->m_state->clientId] = sub;
-        }
+        m_subsByServiceId[serviceSub->serviceId] = serviceSub;
+        List<AsyncContext<Result<void>>> subscribeAsyncContexts{ std::move(serviceSub->subscribeAsyncContexts) };
+        List<std::shared_ptr<Subscription>> clientSubs{ serviceSub->clientSubscriptions.begin(), serviceSub->clientSubscriptions.end() };
 
-        AsyncContext<Result<void>> asyncContext{ std::move(m_subscribeAsyncContexts[sub->m_state->clientId]) };
-        m_subscribeAsyncContexts.erase(sub->m_state->clientId);
-
-        switch (sub->m_state->serviceStatus)
+        switch (serviceSub->status)
         {
-        case Subscription::State::ServiceStatus::Subscribing:
+        case ServiceSubscription::Status::Subscribing:
         {
-            sub->m_state->serviceStatus = Subscription::State::ServiceStatus::Active;
+            serviceSub->status = ServiceSubscription::Status::Active;
             break;
         }
-        case Subscription::State::ServiceStatus::PendingUnsubscribe:
+        case ServiceSubscription::Status::PendingUnsubscribe:
         {
             // Client has removed the subscription while subscribe handshake was happening,
             // so immediately begin unsubscribing.
-            SendUnsubscribeMessage(sub, std::move(lock));
+            SendUnsubscribeMessage(serviceSub, std::move(lock));
             break;
         }
         default:
@@ -414,8 +464,14 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
             lock.unlock();
         }
 
-        asyncContext.Complete(ConvertRTAErrorCode(errorCode));
-        sub->OnSubscribe(data);
+        for (auto& asyncContext : subscribeAsyncContexts)
+        {
+            asyncContext.Complete(ConvertRTAErrorCode(errorCode));
+        }
+        for (auto& clientSub : clientSubs)
+        {
+            clientSub->OnSubscribe(data);
+        }
 
         return;
     }
@@ -430,19 +486,26 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
     case ErrorCode::Throttled:
     case ErrorCode::ServiceUnavailable:
     {
-        auto serviceStatus{ sub->m_state->serviceStatus };
-        sub->m_state->serviceStatus = Subscription::State::ServiceStatus::Inactive;
+        auto serviceStatus{ serviceSub->status };
+        serviceSub->status = ServiceSubscription::Status::Inactive;
 
         switch (serviceStatus)
         {
-        case Subscription::State::ServiceStatus::Subscribing:
+        case ServiceSubscription::Status::Subscribing:
         {
-            uint64_t backoff = __min(std::pow(sub->m_state->subscribeAttempt++, 2), 60) * 1000;
-            m_queue.RunWork([sub, weakThis = std::weak_ptr<Connection>{ shared_from_this() }]
+            uint64_t backoff = __min(std::pow(serviceSub->subscribeAttempt++, 2), 60) * 1000;
+            m_queue.RunWork([weakSub = std::weak_ptr<ServiceSubscription>{ serviceSub }, weakThis = std::weak_ptr<Connection>{ shared_from_this() }]
                 {
-                    if (auto sharedThis{ weakThis.lock() })
+                    auto sharedThis{ weakThis.lock() };
+                    if (sharedThis)
                     {
-                        sharedThis->AddSubscription(sub, AsyncContext<Result<void>>{ sharedThis->m_queue });
+                        std::unique_lock<std::mutex> lock{ sharedThis->m_lock };
+
+                        auto serviceSub{ weakSub.lock() };
+                        if (serviceSub && serviceSub->status == ServiceSubscription::Status::Inactive)
+                        {
+                            sharedThis->SendSubscribeMessage(serviceSub, std::move(lock));
+                        }
                     }
                 },
                 backoff
@@ -450,16 +513,29 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
 
             return;
         }
-        case Subscription::State::ServiceStatus::PendingUnsubscribe:
+        case ServiceSubscription::Status::PendingUnsubscribe:
         {
-            // Don't retry subscription in this case because client has already removed it.
-            AsyncContext<Result<void>> asyncContext{ std::move(m_subscribeAsyncContexts[sub->m_state->clientId]) };
-            m_subscribeAsyncContexts.erase(sub->m_state->clientId);
-            m_subs.erase(sub->m_state->clientId);
+            m_subsByClientId.erase(serviceSub->clientId);
+            m_subsByUri.erase(serviceSub->uri);
+            
+            // Complete subscribe operations with error, but don't retry since the client has since removed the subscription
+            List<AsyncContext<Result<void>>> subscribeAsyncContexts{ std::move(serviceSub->subscribeAsyncContexts) };               
+
+            // Unsubscribe operations are also trivially done at this point
+            List<AsyncContext<Result<void>>> unsubscribeAsyncContexts{ std::move(serviceSub->unsubscribeAsyncContexts) };
 
             lock.unlock();
 
-            asyncContext.Complete(ConvertRTAErrorCode(errorCode));
+            for (auto& asyncContext : subscribeAsyncContexts)
+            {
+                asyncContext.Complete(ConvertRTAErrorCode(errorCode));
+            }
+
+            for (auto& asyncContext : unsubscribeAsyncContexts)
+            {
+                asyncContext.Complete(S_OK);
+            }
+
             return;
         }
         default:
@@ -492,35 +568,36 @@ void Connection::UnsubscribeResponseHandler(_In_ const JsonValue& message) noexc
         LOGS_ERROR << __FUNCTION__ << ": Failed with error code [" << static_cast<uint32_t>(errorCode) << "]";
     }
 
-    auto subIter{ m_subs.find(clientId) };
-    if (subIter == m_subs.end())
+    auto subIter{ m_subsByClientId.find(clientId) };
+    if (subIter == m_subsByClientId.end())
     {
         // Ignore unexpected message
         LOGS_DEBUG << "__FUNCTION__" << ": [" << clientId << "] Ignoring unexpected message";
         return;
     }
-    auto sub{ subIter->second };
-    m_activeSubs[sub->m_state->serviceId].erase(clientId);
+    auto serviceSub{ subIter->second };
+    m_subsByServiceId.erase(serviceSub->serviceId);
+    serviceSub->serviceId = 0;
 
-    LOGS_DEBUG << __FUNCTION__ << ": [" << sub->m_state->clientId <<"] ServiceStatus=" << EnumName(sub->m_state->serviceStatus);
+    LOGS_DEBUG << __FUNCTION__ << ": [" << serviceSub->clientId <<"] ServiceStatus=" << EnumName(serviceSub->status);
 
-    AsyncContext<Result<void>> asyncContext{ std::move(m_unsubscribeAsyncContexts[clientId]) };
-    m_unsubscribeAsyncContexts.erase(clientId);
+    List<AsyncContext<Result<void>>> unsubscribeAsyncContexts{ std::move(serviceSub->unsubscribeAsyncContexts) };
 
-    switch (sub->m_state->serviceStatus)
+    switch (serviceSub->status)
     {
-    case Subscription::State::ServiceStatus::Unsubscribing:
+    case ServiceSubscription::Status::Unsubscribing:
     {
         // We can now remove the subscription from our state entirely
-        sub->m_state->serviceStatus = Subscription::State::ServiceStatus::Inactive;
-        m_subs.erase(subIter);
+        m_subsByClientId.erase(serviceSub->clientId);
+        m_subsByUri.erase(serviceSub->uri);
+        serviceSub->status = ServiceSubscription::Status::Inactive;
         break;
     }
-    case Subscription::State::ServiceStatus::PendingSubscribe:
+    case ServiceSubscription::Status::PendingSubscribe:
     {
         // Client has re-added the subscription while unsubscibe handshake was happening,
         // so immediately begin subscribing.
-        SendSubscribeMessage(sub, std::move(lock));
+        SendSubscribeMessage(serviceSub, std::move(lock));
         break;
     }
     default:
@@ -535,7 +612,10 @@ void Connection::UnsubscribeResponseHandler(_In_ const JsonValue& message) noexc
         lock.unlock();
     }
 
-    asyncContext.Complete(ConvertRTAErrorCode(errorCode));
+    for (auto& asyncContext : unsubscribeAsyncContexts)
+    {
+        asyncContext.Complete(ConvertRTAErrorCode(errorCode));
+    }
 }
 
 void Connection::EventHandler(_In_ const JsonValue& message) const noexcept
@@ -547,15 +627,15 @@ void Connection::EventHandler(_In_ const JsonValue& message) const noexcept
     auto serviceId = message[1].GetInt();
     const auto& data = message[2];
 
-    auto subIter{ m_activeSubs.find(serviceId) };
-    assert(subIter != m_activeSubs.end());
-    auto subs = subIter->second;
+    auto subIter{ m_subsByServiceId.find(serviceId) };
+    assert(subIter != m_subsByServiceId.end());
+    auto serviceSub = subIter->second;
 
     lock.unlock();
 
-    for (auto& subPair : subs)
+    for (auto& clientSub : serviceSub->clientSubscriptions)
     {
-        subPair.second->OnEvent(data);
+        clientSub->OnEvent(data);
     }
 }
 
@@ -571,12 +651,12 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
         m_connectTime = std::chrono::system_clock::now();
         m_connectAttempt = 0;
 
-        assert(m_activeSubs.empty());
+        assert(m_subsByServiceId.empty());
 
         List<JsonDocument> subMessages{};
-        for (auto& pair : m_subs)
+        for (auto& pair : m_subsByClientId)
         {
-            assert(pair.second->m_state->serviceStatus == Subscription::State::ServiceStatus::Inactive);
+            assert(pair.second->status == ServiceSubscription::Status::Inactive);
             subMessages.push_back(AssembleSubscribeMessage(pair.second));
         }
 
@@ -637,7 +717,7 @@ void Connection::ScheduleConnect() noexcept
         {
             std::unique_lock<std::mutex> lock{ m_lock };
 
-            LOGS_DEBUG << "RTA::Connection Initializing WebSocket and attempting connect. Subcount=" << m_subs.size();
+            LOGS_DEBUG << "RTA::Connection Initializing WebSocket and attempting connect. Subcount=" << m_subsByClientId.size();
 
             auto hr = InitializeWebsocket();
             if (FAILED(hr))
@@ -669,46 +749,47 @@ void Connection::DisconnectHandler(WebSocketCloseStatus status) noexcept
     std::unique_lock<std::mutex> lock{ m_lock };
 
     // All subs are inactive if we are disconnected
-    m_activeSubs.clear();
+    m_subsByServiceId.clear();
 
     // Update state of our subs
-    for (auto subsIter = m_subs.begin(); subsIter != m_subs.end();)
+    for (auto subsIter = m_subsByClientId.begin(); subsIter != m_subsByClientId.end();)
     {
-        auto subState{ subsIter->second->m_state };
-        switch (subState->serviceStatus)
+        auto serviceSub{ subsIter->second };
+        switch (serviceSub->status)
         {
-        case Subscription::State::ServiceStatus::Inactive:
-        case Subscription::State::ServiceStatus::Active:
-        case Subscription::State::ServiceStatus::Subscribing:
+        case ServiceSubscription::Status::Inactive:
+        case ServiceSubscription::Status::Active:
+        case ServiceSubscription::Status::Subscribing:
         {
             ++subsIter;
             break;
         }
-        case Subscription::State::ServiceStatus::PendingSubscribe:
+        case ServiceSubscription::Status::PendingSubscribe:
         {
             // Complete the Unsubscribe AsyncContext, but since the client re-added the subscription,
             // don't remove it from our state
-            unsubscribeAsyncContexts.emplace_back(std::move(m_unsubscribeAsyncContexts[subState->clientId]));
-            m_unsubscribeAsyncContexts.erase(subState->clientId);
+            unsubscribeAsyncContexts.insert(unsubscribeAsyncContexts.end(), serviceSub->unsubscribeAsyncContexts.begin(), serviceSub->unsubscribeAsyncContexts.end());
+            serviceSub->unsubscribeAsyncContexts.clear();
 
             ++subsIter;
             break;
         }
         // For subscriptions which removed by clients, complete the relevant AsyncContexts and erase the
         // subscription from our state
-        case Subscription::State::ServiceStatus::PendingUnsubscribe:
+        case ServiceSubscription::Status::PendingUnsubscribe:
         {
-            subscribeAsyncContexts.emplace_back(std::move(m_subscribeAsyncContexts[subState->clientId]));
-            m_subscribeAsyncContexts.erase(subState->clientId);
+            subscribeAsyncContexts.insert(subscribeAsyncContexts.end(), serviceSub->subscribeAsyncContexts.begin(), serviceSub->subscribeAsyncContexts.end());
+            serviceSub->subscribeAsyncContexts.clear();
 
             // Intentional fallthrough
         }
-        case Subscription::State::ServiceStatus::Unsubscribing:
+        case ServiceSubscription::Status::Unsubscribing:
         {
-            unsubscribeAsyncContexts.emplace_back(std::move(m_unsubscribeAsyncContexts[subState->clientId]));
-            m_unsubscribeAsyncContexts.erase(subState->clientId);
+            unsubscribeAsyncContexts.insert(unsubscribeAsyncContexts.end(), serviceSub->unsubscribeAsyncContexts.begin(), serviceSub->unsubscribeAsyncContexts.end());
+            serviceSub->unsubscribeAsyncContexts.clear();
 
-            subsIter = m_subs.erase(subsIter);
+            m_subsByUri.erase(serviceSub->uri);
+            subsIter = m_subsByClientId.erase(subsIter);
             break;
         }
         default:
@@ -718,9 +799,9 @@ void Connection::DisconnectHandler(WebSocketCloseStatus status) noexcept
         }
         }
 
-        subState->serviceId = 0;
-        subState->subscribeAttempt = 0;
-        subState->serviceStatus = Subscription::State::ServiceStatus::Inactive;
+        serviceSub->serviceId = 0;
+        serviceSub->subscribeAttempt = 0;
+        serviceSub->status = ServiceSubscription::Status::Inactive;
     }
 
     m_state = XblRealTimeActivityConnectionState::Disconnected;

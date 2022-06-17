@@ -77,19 +77,23 @@ STDAPI XblStringVerifyStringAsync(
     _In_ const char* stringToVerify,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xboxLiveContextHandle == nullptr || stringToVerify == nullptr || async == nullptr);
 
     return XblStringVerifyStringsAsync(xboxLiveContextHandle, &stringToVerify, 1, async);
 }
+CATCH_RETURN()
 
 STDAPI XblStringVerifyStringResultSize(
     _In_ XAsyncBlock* asyncBlock,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResultSize(asyncBlock, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 STDAPI XblStringVerifyStringResult(
     _In_ XAsyncBlock* asyncBlock,
@@ -98,6 +102,7 @@ STDAPI XblStringVerifyStringResult(
     _Outptr_ XblVerifyStringResult** ptrToBuffer,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(ptrToBuffer);
     auto hr = XAsyncGetResult(asyncBlock, nullptr, bufferSize, buffer, bufferUsed);
@@ -107,6 +112,7 @@ STDAPI XblStringVerifyStringResult(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblStringVerifyStringsAsync(
     _In_ XblContextHandle xboxLiveContextHandle,
@@ -114,6 +120,7 @@ STDAPI XblStringVerifyStringsAsync(
     _In_ const uint64_t stringsCount,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     xsapi_internal_vector<xsapi_internal_string> strings;
     for (uint32_t i = 0; i < stringsCount; i++) {
@@ -214,14 +221,17 @@ STDAPI XblStringVerifyStringsAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblStringVerifyStringsResultSize(
     _In_ XAsyncBlock* asyncBlock,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResultSize(asyncBlock, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 STDAPI XblStringVerifyStringsResult(
     _In_ XAsyncBlock* asyncBlock,
@@ -231,6 +241,7 @@ STDAPI XblStringVerifyStringsResult(
     _Out_ size_t* stringsCount,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(ptrToBuffer);
 
@@ -249,3 +260,4 @@ STDAPI XblStringVerifyStringsResult(
     }
     return hr;
 }
+CATCH_RETURN()

@@ -95,6 +95,8 @@ public:
 
     DEFINE_TEST_CASE(TestCreateMatchTicketAsync)
     {
+        TEST_LOG(L"Test starting: TestCreateMatchTicketAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -112,11 +114,11 @@ public:
         JsonDocument expectedResponse; 
         expectedResponse.Parse(R"({"ticketId":"0584338f-a2ff-4eb9-b167-c0e8ddecae72", "waitTime":60 })");
 
-        HttpMock mock{ "POST", matchmakingUri };
-        mock.SetResponseBody(expectedResponse);
+        auto mock = std::make_shared<HttpMock>( "POST", matchmakingUri );
+        mock->SetResponseBody(expectedResponse);
 
         bool requestWellFormed { true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -153,6 +155,8 @@ public:
 
     DEFINE_TEST_CASE(TestCreateMatchTicketAsync_EmptyResult)
     {
+        TEST_LOG(L"Test starting: TestCreateMatchTicketAsync_EmptyResult");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -168,11 +172,11 @@ public:
 
         xsapi_internal_string matchmakingUri = "https://smartmatch.xboxlive.com/serviceconfigs/07617C5B-3423-4505-B6C6-10A16E1E5DDB/hoppers/DeathMatch";
 
-        HttpMock mock{ "POST", matchmakingUri };
-        mock.SetResponseBody(expectedResponse);
+        auto mock = std::make_shared<HttpMock>( "POST", matchmakingUri );
+        mock->SetResponseBody(expectedResponse);
 
         bool requestWellFormed{ true };
-        mock.SetMockMatchedCallback(
+        mock->SetMockMatchedCallback(
             [&](HttpMock* mock, xsapi_internal_string uri, xsapi_internal_string body)
             {
                 UNREFERENCED_PARAMETER(mock);
@@ -199,6 +203,8 @@ public:
 
     DEFINE_TEST_CASE(TestDeleteMatchTicketAsync)
     {
+        TEST_LOG(L"Test starting: TestDeleteMatchTicketAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -220,6 +226,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetMatchTicketAsync)
     {
+        TEST_LOG(L"Test starting: TestGetMatchTicketAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -254,6 +262,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetMatchTicketWithLargeBufferAsync)
     {
+        TEST_LOG(L"Test starting: TestGetMatchTicketWithLargeBufferAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -290,6 +300,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetStatsForHopperAsync)
     {
+        TEST_LOG(L"Test starting: TestGetStatsForHopperAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -327,6 +339,8 @@ public:
 
     DEFINE_TEST_CASE(TestGetStatsForHopperWithLargeBufferAsync)
     {
+        TEST_LOG(L"Test starting: TestGetStatsForHopperWithLargeBufferAsync");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 
@@ -366,6 +380,8 @@ public:
 
     DEFINE_TEST_CASE(TestInvalidArgument)
     {
+        TEST_LOG(L"Test starting: TestInvalidArgument");
+
         TestEnvironment env{};
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
 

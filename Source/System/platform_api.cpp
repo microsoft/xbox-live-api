@@ -10,12 +10,14 @@ STDAPI XblLocalStorageWriteComplete(
     _In_ XblClientOperationResult result,
     _In_ size_t dataSize
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(operation);
 
     auto writeOp{ static_cast<LocalStorage::WriteOperation*>(operation) };
     return writeOp->Complete({ dataSize, XblClientOperation::HresultFromResult(result) });
 }
+CATCH_RETURN()
 
 STDAPI XblLocalStorageReadComplete(
     _In_ XblClientOperationHandle operation,
@@ -23,6 +25,7 @@ STDAPI XblLocalStorageReadComplete(
     _In_ size_t dataSize,
     _In_reads_bytes_opt_(dataSize) void const* data
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(operation);
     RETURN_HR_INVALIDARGUMENT_IF(dataSize && !data);
@@ -34,17 +37,20 @@ STDAPI XblLocalStorageReadComplete(
 
     return readOp->Complete(Result<Vector<uint8_t>>{ std::move(dataVector), XblClientOperation::HresultFromResult(result) });
 }
+CATCH_RETURN()
 
 STDAPI XblLocalStorageClearComplete(
     _In_ XblClientOperationHandle operation,
     _In_ XblClientOperationResult result
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(operation);
 
     auto clearOp{ static_cast<LocalStorage::ClearOperation*>(operation) };
     return clearOp->Complete(XblClientOperation::HresultFromResult(result));
 }
+CATCH_RETURN()
 
 STDAPI XblLocalStorageSetHandlers(
     _In_opt_ XTaskQueueHandle queue,
@@ -53,6 +59,7 @@ STDAPI XblLocalStorageSetHandlers(
     _In_ XblLocalStorageClearHandler clearHandler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     if (GlobalState::Get())
     {
@@ -76,3 +83,4 @@ STDAPI XblLocalStorageSetHandlers(
 
     return S_OK;
 }
+CATCH_RETURN()

@@ -16,6 +16,7 @@ STDAPI XblHttpCallCreate(
     _In_z_ const char* url,
     _Out_ XblHttpCallHandle* call
 ) XBL_NOEXCEPT
+try
 {
     VERIFY_XBL_INITIALIZED();
 
@@ -31,12 +32,14 @@ STDAPI XblHttpCallCreate(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallPerformAsync(
     _In_ XblHttpCallHandle call,
     _In_ XblHttpCallResponseBodyType type,
     _Inout_ XAsyncBlock* asyncBlock
 ) XBL_NOEXCEPT
+try
 {
     UNREFERENCED_PARAMETER(type);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
@@ -72,11 +75,13 @@ STDAPI XblHttpCallPerformAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallDuplicateHandle(
     _In_ XblHttpCallHandle call,
     _Out_ XblHttpCallHandle* duplicatedHandle
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(call == nullptr || duplicatedHandle == nullptr);
     call->AddRef();
@@ -84,10 +89,12 @@ STDAPI XblHttpCallDuplicateHandle(
 
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI_(void) XblHttpCallCloseHandle(
     _In_ XblHttpCallHandle call
 ) XBL_NOEXCEPT
+try
 {
     if (call)
     {
@@ -95,27 +102,32 @@ STDAPI_(void) XblHttpCallCloseHandle(
     }
     return;
 }
+CATCH_RETURN_WITH(;)
 
 STDAPI XblHttpCallSetTracing(
     _In_ XblHttpCallHandle call,
     _In_ bool traceCall
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
 
     return call->SetTracing(traceCall);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallGetRequestUrl(
     _In_ XblHttpCallHandle call,
     _Out_ const char** url
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(url);
 
     return call->GetRequestUrl(url);
 }
+CATCH_RETURN()
 
 // HttpCallRequest Set APIs
 STDAPI XblHttpCallRequestSetRequestBodyBytes(
@@ -123,19 +135,23 @@ STDAPI XblHttpCallRequestSetRequestBodyBytes(
     _In_reads_bytes_(requestBodySize) const uint8_t* requestBodyBytes,
     _In_ uint32_t requestBodySize
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     return call->SetRequestBody(requestBodyBytes, requestBodySize);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallRequestSetRequestBodyString(
     _In_ XblHttpCallHandle call,
     _In_z_ const char* requestBodyString
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     return call->SetRequestBody(requestBodyString);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallRequestSetHeader(
     _In_ XblHttpCallHandle call,
@@ -143,6 +159,7 @@ STDAPI XblHttpCallRequestSetHeader(
     _In_z_ const char* headerValue,
     _In_ bool allowTracing
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(headerName);
@@ -152,21 +169,25 @@ STDAPI XblHttpCallRequestSetHeader(
 
     return call->SetHeader(headerNameString, headerValueString, allowTracing);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallRequestSetRetryAllowed(
     _In_ XblHttpCallHandle call,
     _In_ bool retryAllowed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
 
     return call->SetRetryAllowed(retryAllowed);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallRequestSetRetryCacheId(
     _In_ XblHttpCallHandle call,
     _In_ uint32_t retryAfterCacheId
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
 
@@ -178,36 +199,43 @@ STDAPI XblHttpCallRequestSetRetryCacheId(
 
     return call->SetRetryCacheId(retryAfterCacheId);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallRequestSetLongHttpCall(
     _In_ XblHttpCallHandle call,
     _In_ bool longHttpCall
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
 
     call->SetLongHttpCall(longHttpCall);
     return S_OK;
 }
+CATCH_RETURN()
 
 // HttpCallResponse Get APIs
 STDAPI XblHttpCallGetResponseString(
     _In_ XblHttpCallHandle call,
     _Out_ const char** responseString
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     return call->GetResponseString(responseString);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallGetResponseBodyBytesSize(
     _In_ XblHttpCallHandle call,
     _Out_ size_t* bufferSize
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     return call->GetResponseBodyBytesSize(bufferSize);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallGetResponseBodyBytes(
     _In_ XblHttpCallHandle call,
@@ -215,15 +243,18 @@ STDAPI XblHttpCallGetResponseBodyBytes(
     _Out_writes_bytes_to_(bufferSize, *bufferUsed) uint8_t* buffer,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     return call->GetResponseBodyBytes(bufferSize, buffer, bufferUsed);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallGetStatusCode(
     _In_ XblHttpCallHandle call,
     _Out_ uint32_t* statusCode
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(statusCode);
@@ -231,44 +262,53 @@ STDAPI XblHttpCallGetStatusCode(
     *statusCode = call->HttpStatus();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallGetNetworkErrorCode(
     _In_ XblHttpCallHandle call,
     _Out_ HRESULT* networkErrorCode,
     _Out_ uint32_t* platformNetworkErrorCode
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     return call->GetNetworkErrorCode(networkErrorCode, platformNetworkErrorCode);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallGetPlatformNetworkErrorMessage(
     _In_ XblHttpCallHandle call,
     _Out_ const char** platformNetworkErrorMessage
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     return call->GetPlatformNetworkErrorMessage(platformNetworkErrorMessage);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallGetHeader(
     _In_ XblHttpCallHandle call,
     _In_z_ const char* headerName,
     _Out_ const char** headerValue
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     return call->ResponseGetHeader(headerName, headerValue);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallGetNumHeaders(
     _In_ XblHttpCallHandle call,
     _Out_ uint32_t* numHeaders
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     return call->ResponseGetNumHeaders(numHeaders);
 }
+CATCH_RETURN()
 
 STDAPI XblHttpCallGetHeaderAtIndex(
     _In_ XblHttpCallHandle call,
@@ -276,7 +316,9 @@ STDAPI XblHttpCallGetHeaderAtIndex(
     _Out_ const char** headerName,
     _Out_ const char** headerValue
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(call);
     return call->ResponseGetHeaderAtIndex(headerIndex, headerName, headerValue);
 }
+CATCH_RETURN()

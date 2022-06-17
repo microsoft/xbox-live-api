@@ -413,6 +413,9 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\notification\gameinvitenotifications.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\notification\multiple_notification_subscriptions.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\presence\presence-cpp.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
