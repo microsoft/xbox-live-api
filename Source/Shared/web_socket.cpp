@@ -12,6 +12,15 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 
 using namespace xbox::services::system;
 
+// Context passed to LHC XAsync APIs. Ensures WebSocket is kept alive until those calls complete
+struct XAsyncContext
+{
+	XAsyncContext(std::shared_ptr<Websocket> _websocket) : websocket{ std::move(_websocket) }
+	{
+	}
+	std::shared_ptr<Websocket> websocket;
+};
+
 Websocket::Websocket(
     _In_ User&& user,
     _In_ TaskQueue queue
@@ -73,13 +82,14 @@ HRESULT Websocket::Connect(
             xsapi_internal_string userAgent = DEFAULT_USER_AGENT;
             HCWebSocketSetHeader(sharedThis->m_hcWebsocket, "User-Agent", userAgent.data());
 
+			auto asyncContext = MakeUnique<XAsyncContext>(sharedThis);
             auto asyncBlock = MakeUnique<XAsyncBlock>();
             asyncBlock->queue = sharedThis->m_queue.GetHandle();
-            asyncBlock->context = sharedThis.get();
+			asyncBlock->context = asyncContext.get();
             asyncBlock->callback = [](_In_ XAsyncBlock* asyncBlock)
             {
                 UniquePtr<XAsyncBlock> asyncUnique{ asyncBlock };
-                auto websocket = static_cast<Websocket*>(asyncBlock->context);
+				UniquePtr<XAsyncContext> asyncContext{ static_cast<XAsyncContext*>(asyncBlock->context) };
 
                 WebSocketCompletionResult hcResult{};
                 HRESULT hr = HCGetWebSocketConnectResult(asyncBlock, &hcResult);
@@ -90,16 +100,14 @@ HRESULT Websocket::Connect(
                     result.hr = hcResult.errorCode;
                     result.platformErrorCode = hcResult.platformErrorCode;
                 }
-                websocket->m_connectCompleteHandler(result);
-
-                websocket->DecRef();
+                asyncContext->websocket->m_connectCompleteHandler(result);
             };
 
             auto hr = HCWebSocketConnectAsync(uri.data(), subProtocol.data(), sharedThis->m_hcWebsocket, asyncBlock.get());
             if (SUCCEEDED(hr))
             {
                 asyncBlock.release();
-                sharedThis->AddRef();
+				asyncContext.release();
             }
             else
             {
@@ -114,13 +122,14 @@ HRESULT Websocket::Connect(
 
 HRESULT Websocket::Send(_In_ const char* message) noexcept
 {
+	auto asyncContext = MakeUnique<XAsyncContext>(shared_from_this());
     auto asyncBlock = MakeUnique<XAsyncBlock>();
     asyncBlock->queue = m_queue.GetHandle();
-    asyncBlock->context = this;
+    asyncBlock->context = asyncContext.get();
     asyncBlock->callback = [](_In_ XAsyncBlock* asyncBlock)
     {
         UniquePtr<XAsyncBlock> asyncUnique{ asyncBlock };
-        auto websocket = static_cast<Websocket*>(asyncBlock->context);
+		UniquePtr<XAsyncContext> asyncContext{ static_cast<XAsyncContext*>(asyncBlock->context) };
 
         WebSocketCompletionResult hcResult{};
         HRESULT hr = HCGetWebSocketSendMessageResult(asyncBlock, &hcResult);
@@ -131,16 +140,14 @@ HRESULT Websocket::Send(_In_ const char* message) noexcept
             result.hr = hcResult.errorCode;
             result.platformErrorCode = hcResult.platformErrorCode;
         }
-        websocket->m_sendCompleteHandler(result);
-
-        websocket->DecRef();
+        asyncContext->websocket->m_sendCompleteHandler(result);
     };
 
     HRESULT hr = HCWebSocketSendMessageAsync(m_hcWebsocket, message, asyncBlock.get());
     if (SUCCEEDED(hr))
     {
         asyncBlock.release();
-        this->AddRef();
+		asyncContext.release();
     }
     return hr;
 }
@@ -148,11 +155,6 @@ HRESULT Websocket::Send(_In_ const char* message) noexcept
 HRESULT Websocket::Disconnect() noexcept
 {
     return HCWebSocketDisconnect(m_hcWebsocket);
-}
-
-std::shared_ptr<RefCounter> Websocket::GetSharedThis()
-{
-    return shared_from_this();
 }
 
 void Websocket::ReceiveHandler(

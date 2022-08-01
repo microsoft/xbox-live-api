@@ -225,7 +225,7 @@ HRESULT Connection::AddSubscription(
         // If our connection is active, immediately register with RTA service
         if (m_state == XblRealTimeActivityConnectionState::Connected)
         {
-            return SendSubscribeMessage(sub);
+            return SendSubscribeMessage(sub, std::move(lock));
         }
         return S_OK;
     }
@@ -292,7 +292,7 @@ HRESULT Connection::RemoveSubscription(
     {
         // Unregister subscription from RTA service
         m_unsubscribeAsyncContexts[sub->m_state->clientId] = std::move(async);
-        return SendUnsubscribeMessage(sub);
+        return SendUnsubscribeMessage(sub, std::move(lock));
     }
     case Subscription::State::ServiceStatus::PendingSubscribe:
     {
@@ -333,9 +333,7 @@ size_t Connection::SubscriptionCount() const noexcept
     return m_subs.size();
 }
 
-HRESULT Connection::SendSubscribeMessage(
-    std::shared_ptr<Subscription> sub
-) const noexcept
+JsonDocument Connection::AssembleSubscribeMessage(std::shared_ptr<Subscription> sub) const noexcept
 {
     // Payload format [<API_ID>, <SEQUENCE_N>, “<RESOURCE_URI>”]
 
@@ -348,6 +346,23 @@ HRESULT Connection::SendSubscribeMessage(
     request.PushBack(sub->m_state->clientId, a);
     request.PushBack(JsonValue{ sub->m_resourceUri.data(), a }, a);
 
+    return request;
+}
+
+HRESULT Connection::SendSubscribeMessage(
+    std::shared_ptr<Subscription> sub,
+    std::unique_lock<std::mutex>&& lock
+) const noexcept
+{
+    JsonDocument request = AssembleSubscribeMessage(sub);
+
+    lock.unlock();
+    
+    return SendAssembledMessage(request);
+}
+
+HRESULT Connection::SendAssembledMessage(_In_ const JsonValue& request) const noexcept
+{
     String requestString{ JsonUtils::SerializeJson(request) };
     LOGS_DEBUG << __FUNCTION__ << "[" << this << "]: " << requestString;
 
@@ -355,7 +370,8 @@ HRESULT Connection::SendSubscribeMessage(
 }
 
 HRESULT Connection::SendUnsubscribeMessage(
-    std::shared_ptr<Subscription> sub
+    std::shared_ptr<Subscription> sub,
+    std::unique_lock<std::mutex>&& lock
 ) const noexcept
 {
     // Payload format [<API_ID>, <SEQUENCE_N>, <SUB_ID>]
@@ -368,6 +384,8 @@ HRESULT Connection::SendUnsubscribeMessage(
     request.PushBack(static_cast<uint32_t>(MessageType::Unsubscribe), a);
     request.PushBack(sub->m_state->clientId, a);
     request.PushBack(sub->m_state->serviceId, a);
+
+    lock.unlock();
 
     String requestString{ JsonUtils::SerializeJson(request) };
     LOGS_DEBUG << __FUNCTION__ << "[" << this << "]: " << requestString;
@@ -402,6 +420,9 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
 
         m_activeSubs[sub->m_state->serviceId] = sub;
 
+        AsyncContext<Result<void>> asyncContext{ std::move(m_subscribeAsyncContexts[sub->m_state->clientId]) };
+        m_subscribeAsyncContexts.erase(sub->m_state->clientId);
+
         switch (sub->m_state->serviceStatus)
         {
         case Subscription::State::ServiceStatus::Subscribing:
@@ -413,7 +434,7 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
         {
             // Client has removed the subscription while subscribe handshake was happening,
             // so immediately begin unsubscribing.
-            SendUnsubscribeMessage(sub);
+            SendUnsubscribeMessage(sub, std::move(lock));
             break;
         }
         default:
@@ -424,10 +445,10 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
         }
         }
 
-        AsyncContext<Result<void>> asyncContext{ std::move(m_subscribeAsyncContexts[sub->m_state->clientId]) };
-        m_subscribeAsyncContexts.erase(sub->m_state->clientId);
-
-        lock.unlock();
+        if (lock)
+        {
+            lock.unlock();
+        }
 
         asyncContext.Complete(ConvertRTAErrorCode(errorCode));
         sub->OnSubscribe(data);
@@ -519,6 +540,9 @@ void Connection::UnsubscribeResponseHandler(_In_ const JsonValue& message) noexc
 
     LOGS_DEBUG << __FUNCTION__ << ": [" << sub->m_state->clientId <<"] ServiceStatus=" << EnumName(sub->m_state->serviceStatus);
 
+    AsyncContext<Result<void>> asyncContext{ std::move(m_unsubscribeAsyncContexts[clientId]) };
+    m_unsubscribeAsyncContexts.erase(clientId);
+
     switch (sub->m_state->serviceStatus)
     {
     case Subscription::State::ServiceStatus::Unsubscribing:
@@ -532,7 +556,7 @@ void Connection::UnsubscribeResponseHandler(_In_ const JsonValue& message) noexc
     {
         // Client has re-added the subscription while unsubscibe handshake was happening,
         // so immediately begin subscribing.
-        SendSubscribeMessage(sub);
+        SendSubscribeMessage(sub, std::move(lock));
         break;
     }
     default:
@@ -542,10 +566,10 @@ void Connection::UnsubscribeResponseHandler(_In_ const JsonValue& message) noexc
     }
     }
 
-    AsyncContext<Result<void>> asyncContext{ std::move(m_unsubscribeAsyncContexts[clientId]) };
-    m_unsubscribeAsyncContexts.erase(clientId);
-
-    lock.unlock();
+    if (lock)
+    {
+        lock.unlock();
+    }
 
     asyncContext.Complete(ConvertRTAErrorCode(errorCode));
 }
@@ -601,10 +625,12 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
         m_connectTime = std::chrono::system_clock::now();
 
         assert(m_activeSubs.empty());
+
+        List<JsonDocument> subMessages{};
         for (auto& pair : m_subs)
         {
             assert(pair.second->m_state->serviceStatus == Subscription::State::ServiceStatus::Inactive);
-            SendSubscribeMessage(pair.second);
+            subMessages.push_back(AssembleSubscribeMessage(pair.second));
         }
 
         // RTA v2 has a lifetime of 2 hours. After 2 hours RTA service will disconnect the title. On some platforms
@@ -628,6 +654,13 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
             },
             CONNECTION_TIMEOUT_MS
         );
+
+        lock.unlock();
+
+        for (auto& request : subMessages)
+        {
+            SendAssembledMessage(request);
+        }
     }
     else
     {
@@ -662,7 +695,11 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
         );
     }
 
-    lock.unlock();
+    if (lock)
+    {
+        lock.unlock();
+    }
+
     m_stateChangedHandler(m_state);
 }
 
