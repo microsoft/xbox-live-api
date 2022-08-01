@@ -13,27 +13,33 @@ STDAPI XblEventsWriteInGameEvent(
     _In_opt_z_ const char* dimensions,
     _In_opt_z_ const char* measurements
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xboxLiveContext == nullptr || eventName == nullptr);
     VERIFY_XBL_INITIALIZED();
 
     return xboxLiveContext->EventsService()->WriteInGameEvent(eventName, dimensions, measurements);
 }
+CATCH_RETURN()
 
 #if XSAPI_INTERNAL_EVENTS_SERVICE
 
 STDAPI XblEventsSetStorageAllotment(
     uint64_t storageAllotmentInBytes
 ) XBL_NOEXCEPT
+try
 {
     return events::EventQueue::SetStorageAllotment(storageAllotmentInBytes);
 }
+CATCH_RETURN()
 
 STDAPI XblEventsSetMaxFileSize(
     uint64_t maxFileSizeInByes
 ) XBL_NOEXCEPT
+try
 {
     return events::EventQueue::SetMaxFileSize(maxFileSizeInByes);
 }
+CATCH_RETURN()
 
 #endif // !XSAPI_ETW_EVENTS_SERVICE

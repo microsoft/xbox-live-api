@@ -581,6 +581,7 @@ STDAPI XblMatchmakingCreateMatchTicketAsync(
     _In_ const char* ticketAttributesJson,
     _In_ XAsyncBlock* asyncBlock
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(matchmakingServiceConfigurationId);
@@ -598,6 +599,7 @@ STDAPI XblMatchmakingCreateMatchTicketAsync(
         JsonDocument().Parse(ticketAttributesJson),
         asyncBlock);
 }
+CATCH_RETURN()
 
 /// <summary>
 /// Get the result for an XblMatchmakingCreateMatchTicketAsync call.
@@ -611,10 +613,12 @@ STDAPI XblMatchmakingCreateMatchTicketResult(
     _In_ XAsyncBlock* asyncBlock,
     _Out_ XblCreateMatchTicketResponse* resultPtr
 ) XBL_NOEXCEPT 
+try
 {
     auto hr = XAsyncGetResult(asyncBlock, nullptr, sizeof(XblCreateMatchTicketResponse), resultPtr, nullptr);
     return hr;
 }
+CATCH_RETURN()
 
 /// <summary>
 /// Deletes a the match ticket on the server.
@@ -633,6 +637,7 @@ STDAPI XblMatchmakingDeleteMatchTicketAsync(
     _In_ const char* ticketId,
     _In_ XAsyncBlock* asyncBlock
 ) XBL_NOEXCEPT 
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(serviceConfiguration);
@@ -647,6 +652,7 @@ STDAPI XblMatchmakingDeleteMatchTicketAsync(
         ticketId,
         asyncBlock);
 }
+CATCH_RETURN()
 
 /// <summary>
 /// Retrieves the properties of a match ticket from the server.
@@ -667,6 +673,7 @@ STDAPI XblMatchmakingGetMatchTicketDetailsAsync(
     _In_ const char* ticketId,
     _In_ XAsyncBlock* asyncBlock
 ) XBL_NOEXCEPT 
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(serviceConfiguration);
@@ -682,6 +689,7 @@ STDAPI XblMatchmakingGetMatchTicketDetailsAsync(
         asyncBlock);
 
 }
+CATCH_RETURN()
 
 /// <summary>
 /// Get the result size for an XblMatchmakingGetMatchTicketDetailsAsync call.
@@ -692,9 +700,11 @@ STDAPI XblMatchmakingGetMatchTicketDetailsResultSize(
     _In_ XAsyncBlock* asyncBlock,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT 
+try
 {
     return XAsyncGetResultSize(asyncBlock, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 /// <summary>
 /// Get the result for an XblMatchmakingGetMatchTicketDetailsAsync call.
@@ -711,6 +721,7 @@ STDAPI XblMatchmakingGetMatchTicketDetailsResult(
     _Outptr_ XblMatchTicketDetailsResponse** ptrToBuffer,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT 
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(ptrToBuffer);
     auto hr = XAsyncGetResult(asyncBlock, nullptr, bufferSize, buffer, bufferUsed);
@@ -720,6 +731,7 @@ STDAPI XblMatchmakingGetMatchTicketDetailsResult(
     }
     return hr;
 }
+CATCH_RETURN()
 
 /// <summary>
 /// Gets statistics about a hopper such as how many players are in it.
@@ -737,6 +749,7 @@ STDAPI XblMatchmakingGetHopperStatisticsAsync(
     _In_ const char* hopperName,
     _In_ XAsyncBlock* asyncBlock
 ) XBL_NOEXCEPT 
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(serviceConfiguration);
@@ -750,6 +763,7 @@ STDAPI XblMatchmakingGetHopperStatisticsAsync(
         asyncBlock
     );
 }
+CATCH_RETURN()
 
 /// <summary>
 /// Get the result size for an XblMatchmakingGetHopperStatisticsAsync call.
@@ -760,9 +774,11 @@ STDAPI XblMatchmakingGetHopperStatisticsResultSize(
     _In_ XAsyncBlock* asyncBlock,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT 
+try
 {
     return XAsyncGetResultSize(asyncBlock, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 /// <summary>
 /// Get the result for an XblMatchmakingGetHopperStatisticsAsync call.
@@ -779,6 +795,7 @@ STDAPI XblMatchmakingGetHopperStatisticsResult(
     _Outptr_ XblHopperStatisticsResponse** ptrToBuffer,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(ptrToBuffer);
     auto hr = XAsyncGetResult(asyncBlock, nullptr, bufferSize, buffer, bufferUsed);
@@ -788,3 +805,4 @@ STDAPI XblMatchmakingGetHopperStatisticsResult(
     }
     return hr;
 }
+CATCH_RETURN()

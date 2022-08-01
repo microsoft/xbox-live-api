@@ -8,6 +8,7 @@ static fault_injection g_faultInjection; // not hanging this off of global state
 #endif
 
 STDAPI_(void) XblEnableFaultInjection(_In_ uint64_t featureId) XBL_NOEXCEPT
+try
 {
 #if _DEBUG // fault injection only enabled on debug bits so as not to impact retail titles
     g_faultInjection.m_enabledFeatureMask |= featureId;
@@ -15,8 +16,10 @@ STDAPI_(void) XblEnableFaultInjection(_In_ uint64_t featureId) XBL_NOEXCEPT
     UNREFERENCED_PARAMETER(featureId);
 #endif
 }
+CATCH_RETURN_WITH(;)
 
-STDAPI_(uint64_t) XblGetFaultCounter()
+STDAPI_(uint64_t) XblGetFaultCounter() XBL_NOEXCEPT
+try
 {
 #if _DEBUG // testing feature only enabled on debug bits so as not to impact retail titles
     return g_faultInjection.m_failTotalCounter;
@@ -24,8 +27,10 @@ STDAPI_(uint64_t) XblGetFaultCounter()
     return 0;
 #endif
 }
+CATCH_RETURN_WITH(0)
 
-STDAPI_(void) XblSetFaultInjectOptions(int64_t failFreq, uint64_t freqChangeSpeed, int64_t freqChangeAmount)
+STDAPI_(void) XblSetFaultInjectOptions(int64_t failFreq, uint64_t freqChangeSpeed, int64_t freqChangeAmount) XBL_NOEXCEPT
+try
 {
 #if _DEBUG // testing feature only enabled on debug bits so as not to impact retail titles
     g_faultInjection.m_failFreq = failFreq;
@@ -37,8 +42,10 @@ STDAPI_(void) XblSetFaultInjectOptions(int64_t failFreq, uint64_t freqChangeSpee
     UNREFERENCED_PARAMETER(freqChangeAmount);
 #endif
 }
+CATCH_RETURN_WITH(;)
 
-STDAPI_(bool) XblShouldFaultInject(_In_ uint64_t featureId)
+STDAPI_(bool) XblShouldFaultInject(_In_ uint64_t featureId) XBL_NOEXCEPT
+try
 {
 #if _DEBUG // testing feature only enabled on debug bits so as not to impact retail titles
     if ((g_faultInjection.m_enabledFeatureMask & featureId) == featureId)
@@ -63,4 +70,5 @@ STDAPI_(bool) XblShouldFaultInject(_In_ uint64_t featureId)
 
     return false;
 }
+CATCH_RETURN()
 

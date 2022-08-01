@@ -146,6 +146,7 @@ STDAPI XblProfileGetUserProfilesResultCount(
     _In_ XAsyncBlock* async,
     _Out_ size_t* profileCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(async == nullptr || profileCount == nullptr);
 
@@ -158,20 +159,24 @@ STDAPI XblProfileGetUserProfilesResultCount(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblProfileGetUserProfileResult(
     _In_ XAsyncBlock* async,
     _Out_ XblUserProfile* profile
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResult(async, nullptr, sizeof(XblUserProfile), profile, nullptr);
 }
+CATCH_RETURN()
 
 STDAPI XblProfileGetUserProfilesResult(
     _In_ XAsyncBlock* async,
     _In_ size_t profilesCount,
     _Out_writes_(profilesCount) XblUserProfile* profiles
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_IF(profilesCount == 0, S_OK);
     RETURN_HR_INVALIDARGUMENT_IF_NULL(async);
@@ -186,20 +191,25 @@ STDAPI XblProfileGetUserProfilesResult(
     hr = XAsyncGetResult(async, nullptr, profilesCount * sizeof(XblUserProfile), profiles, nullptr);
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblProfileGetUserProfilesForSocialGroupResultCount(
     _In_ XAsyncBlock* async,
     _Out_ size_t* profileCount
 ) XBL_NOEXCEPT
+try
 {
     return XblProfileGetUserProfilesResultCount(async, profileCount);
 }
+CATCH_RETURN()
 
 STDAPI XblProfileGetUserProfilesForSocialGroupResult(
     _In_ XAsyncBlock* async,
     _In_ size_t profilesCount,
     _Out_writes_(profilesCount) XblUserProfile* profiles
 ) XBL_NOEXCEPT
+try
 {
     return XblProfileGetUserProfilesResult(async, profilesCount, profiles);
 }
+CATCH_RETURN()

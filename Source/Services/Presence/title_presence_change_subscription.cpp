@@ -55,7 +55,10 @@ void TitlePresenceChangeSubscription::OnEvent(
     auto presenceService{ m_presenceService.lock() };
     if (presenceService && data.IsString())
     {
-        presenceService->HandleTitlePresenceChanged(m_xuid, m_titleId, EnumValue<XblPresenceTitleState>(data.GetString()));
+        //data is formatted as "state:titleId"
+        xsapi_internal_string state = data.GetString();
+        state = state.substr(0, state.find(':'));
+        presenceService->HandleTitlePresenceChanged(m_xuid, m_titleId, EnumValue<XblPresenceTitleState>(state.c_str()));
     }
 }
 

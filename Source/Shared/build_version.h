@@ -9,4 +9,4 @@
 //*********************************************************
 #pragma once
  
-#define XBOX_SERVICES_API_VERSION_STRING "2021.06.20220225.7"
+#define XBOX_SERVICES_API_VERSION_STRING "2021.06.20220517.10"

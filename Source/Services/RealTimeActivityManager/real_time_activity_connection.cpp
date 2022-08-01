@@ -664,7 +664,10 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
     }
     else
     {
-        m_state = XblRealTimeActivityConnectionState::Disconnected;
+        if (m_connectAttempt > 3)
+        {
+            m_state = XblRealTimeActivityConnectionState::Disconnected;
+        }
 
         //libHttpClient websocket does not support connecting
         // the same websocket handle multiple times, so create a new one.
