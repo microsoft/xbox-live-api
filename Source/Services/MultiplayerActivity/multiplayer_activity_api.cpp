@@ -19,15 +19,18 @@ STDAPI XblMultiplayerActivityUpdateRecentPlayers(
     _In_reads_(updatesCount) const XblMultiplayerActivityRecentPlayerUpdate* updates,
     _In_ size_t updatesCount
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr);
     return xblContextHandle->MultiplayerActivityService()->UpdateRecentPlayers(updates, updatesCount);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerActivityFlushRecentPlayersAsync(
     _In_ XblContextHandle xblContextHandle,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr);
 
@@ -51,6 +54,7 @@ STDAPI XblMultiplayerActivityFlushRecentPlayersAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerActivitySetActivityAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -58,6 +62,7 @@ STDAPI XblMultiplayerActivitySetActivityAsync(
     _In_ bool allowCrossPlatformJoin,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || activityInfo == nullptr || activityInfo->connectionString ==  nullptr);
 
@@ -83,6 +88,7 @@ STDAPI XblMultiplayerActivitySetActivityAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerActivityGetActivityAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -90,6 +96,7 @@ STDAPI XblMultiplayerActivityGetActivityAsync(
     _In_ size_t xuidsCount,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || xuidsPtr == nullptr || xuidsCount == 0);
 
@@ -190,14 +197,17 @@ STDAPI XblMultiplayerActivityGetActivityAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerActivityGetActivityResultSize(
     _In_ XAsyncBlock* async,
     _Out_ size_t* resultSizeInBytes
 ) XBL_NOEXCEPT
+try
 {
     return XAsyncGetResultSize(async, resultSizeInBytes);
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerActivityGetActivityResult(
     _In_ XAsyncBlock* async,
@@ -207,6 +217,7 @@ STDAPI XblMultiplayerActivityGetActivityResult(
     _Out_ size_t* resultCount,
     _Out_opt_ size_t* bufferUsed
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(results == nullptr || resultCount == nullptr);
 
@@ -219,11 +230,13 @@ STDAPI XblMultiplayerActivityGetActivityResult(
     }
     return hr;
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerActivityDeleteActivityAsync(
     _In_ XblContextHandle xblContextHandle,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xblContextHandle);
 
@@ -247,6 +260,7 @@ STDAPI XblMultiplayerActivityDeleteActivityAsync(
         }
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerActivitySendInvitesAsync(
     _In_ XblContextHandle xblContextHandle,
@@ -256,6 +270,7 @@ STDAPI XblMultiplayerActivitySendInvitesAsync(
     _In_opt_z_ const char* _connectionString,
     _In_ XAsyncBlock* async
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(xblContextHandle == nullptr || xuidsPtr == nullptr || xuidsCount == 0);
 
@@ -282,6 +297,7 @@ STDAPI XblMultiplayerActivitySendInvitesAsync(
         }
     });
 }
+CATCH_RETURN()
 
 #if (HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL) && !XSAPI_UNIT_TESTS
 STDAPI_(XblFunctionContext) XblMultiplayerActivityAddInviteHandler(
@@ -289,6 +305,7 @@ STDAPI_(XblFunctionContext) XblMultiplayerActivityAddInviteHandler(
     _In_ XblMultiplayerActivityInviteHandler* handler,
     _In_opt_ void* context
 ) XBL_NOEXCEPT
+try
 {
     if (xblContext == nullptr || handler == nullptr)
     {
@@ -313,15 +330,18 @@ STDAPI_(XblFunctionContext) XblMultiplayerActivityAddInviteHandler(
     } 
     });
 }
+CATCH_RETURN()
 
 STDAPI XblMultiplayerActivityRemoveInviteHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblFunctionContext token
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xblContext);
     auto rtaNotificationService = std::dynamic_pointer_cast<RTANotificationService>(xblContext->NotificationService());
     rtaNotificationService->RemoveNotificationHandler(token);
     return S_OK;
 }
+CATCH_RETURN()
 #endif

@@ -85,21 +85,25 @@ STDAPI XblContextSettingsGetLongHttpTimeout(
     _In_ XblContextHandle context,
     _Out_ uint32_t* timeoutInSeconds
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(context == nullptr || timeoutInSeconds == nullptr);
     *timeoutInSeconds = context->Settings()->LongHttpTimeout();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblContextSettingsSetLongHttpTimeout(
     _In_ XblContextHandle context,
     _In_ uint32_t timeoutInSeconds
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(context == nullptr);
     context->Settings()->SetLongHttpTimeout(timeoutInSeconds);
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblContextSettingsGetHttpRetryDelay(
     _In_ XblContextHandle context,
@@ -178,39 +182,47 @@ STDAPI XblContextSettingsGetUseCoreDispatcherForEventRouting(
     _In_ XblContextHandle context,
     _Out_ bool* useDispatcher
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(context == nullptr || useDispatcher == nullptr);
     *useDispatcher = context->Settings()->UseCoreDispatcherForEventRouting();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblContextSettingsSetUseCoreDispatcherForEventRouting(
     _In_ XblContextHandle context,
     _In_ bool useDispatcher
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(context == nullptr);
     context->Settings()->SetUseCoreDispatcherForEventRouting(useDispatcher);
     return S_OK;
 }
+CATCH_RETURN()
 #endif
 
 STDAPI XblContextSettingsGetUseCrossPlatformQosServers(
     _In_ XblContextHandle context,
     _Out_ bool* value
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF(context == nullptr || value == nullptr);
     *value = context->Settings()->UseCrossplatformQosServers();
     return S_OK;
 }
+CATCH_RETURN()
 
 STDAPI XblContextSettingsSetUseCrossPlatformQosServers(
     _In_ XblContextHandle context,
     _In_ bool value
 ) XBL_NOEXCEPT
+try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(context);
     context->Settings()->SetUseCrossplatformQosServers(value);
     return S_OK;
 }
+CATCH_RETURN()

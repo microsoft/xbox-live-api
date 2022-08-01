@@ -54,9 +54,11 @@ XblFunctionContext PresenceService::AddTitlePresenceChangedHandler(
     {
         for (auto& xuidPair : m_trackedXuids)
         {
-            for (auto& titlePair : xuidPair.second.titlePresenceChangedSubscriptions)
+            for (auto& titlePair : m_trackedTitles)
             {
-                m_rtaManager->AddSubscription(m_user, titlePair.second);
+                auto sub{ MakeShared<TitlePresenceChangeSubscription>(xuidPair.first, titlePair.first, shared_from_this()) };
+                xuidPair.second.titlePresenceChangedSubscriptions[titlePair.first] = sub;
+                m_rtaManager->AddSubscription(m_user, sub);
             }
         }
     }

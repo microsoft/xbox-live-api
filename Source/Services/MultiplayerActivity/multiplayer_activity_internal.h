@@ -79,6 +79,7 @@ private:
     UnorderedMap<uint64_t, RecentPlayerUpdateMetadata> m_pendingRecentPlayerUpdates{};
     bool m_recentPlayersUpdateScheduled{ false };
 
+    static uint64_t GetSequenceNumber();
     void ScheduleRecentPlayersUpdate() noexcept;
     static XblMultiplayerActivityPlatform GetLocalPlatform() noexcept;
 
