@@ -49,7 +49,7 @@ protected:
     Callback<WebsocketResult> m_sendCompleteHandler;
 };
 
-class Websocket : public IWebsocket, public RefCounter, public std::enable_shared_from_this<Websocket>
+class Websocket : public IWebsocket, public std::enable_shared_from_this<Websocket>
 {
 public:
     Websocket(
@@ -69,10 +69,6 @@ public:
     HRESULT Disconnect() noexcept override;
 
 private:
-
-    // RefCounter
-    std::shared_ptr<RefCounter> GetSharedThis() override;
-
     static void CALLBACK ReceiveHandler(
         _In_ HCWebsocketHandle websocket,
         _In_z_ const char* incomingBodyString,
