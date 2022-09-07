@@ -24,7 +24,7 @@ string_t permission_deny_reason::reason() const
         { static_cast<uint32_t>(XblPermissionDenyReason::PrivilegeRestrictsTarget), _T("PrivilegeRestrictsTarget") },
         { static_cast<uint32_t>(XblPermissionDenyReason::BlockListRestrictsTarget), _T("BlockListRestrictsTarget") },
         { static_cast<uint32_t>(XblPermissionDenyReason::MuteListRestrictsTarget), _T("MuteListRestrictsTarget") },
-        { static_cast<uint32_t>(XblPermissionDenyReason::PrivacySettingsRestrictsTarget), _T("PrivacySettingsRestrictsTarget") }
+        { static_cast<uint32_t>(XblPermissionDenyReason::PrivacySettingRestrictsTarget), _T("PrivacySettingRestrictsTarget") }
     };
     return reasonsMap.at(static_cast<uint32_t>(m_reasonDetails.reason));
 }
