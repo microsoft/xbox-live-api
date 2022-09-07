@@ -691,7 +691,10 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
     }
     else
     {
-        m_state = XblRealTimeActivityConnectionState::Disconnected;
+        if (m_connectAttempt > 3)
+        {
+            m_state = XblRealTimeActivityConnectionState::Disconnected;
+        }
         ScheduleConnect();
     }
 
@@ -804,7 +807,6 @@ void Connection::DisconnectHandler(WebSocketCloseStatus status) noexcept
         serviceSub->status = ServiceSubscription::Status::Inactive;
     }
 
-    m_state = XblRealTimeActivityConnectionState::Disconnected;
     ScheduleConnect();
     lock.unlock();
 

@@ -363,7 +363,7 @@ enum class XblPermissionDenyReason : uint32_t
     /// A privacy value for the requestor has a restriction that doesn't allow interaction with the target.  
     /// For instance, a parental control only allows interaction with friends and the target isn't a friend.
     /// </summary>
-    PrivacySettingsRestrictsTarget = 9,
+    PrivacySettingRestrictsTarget = 9,
 
     /// <summary>
     /// The target is a cross-network user, but cross-network privacy settings indicated only friends are allowed.  
@@ -418,7 +418,7 @@ typedef struct XblPermissionDenyReasonDetails
     XblPrivilege restrictedPrivilege;
 
     /// <summary>
-    /// Active when the deny reason is XblPermissionDenyReason::PrivacySettingsRestrictsTarget.  
+    /// Active when the deny reason is XblPermissionDenyReason::PrivacySettingRestrictsTarget.  
     /// Unknown otherwise.
     /// </summary>
     XblPrivacySetting restrictedPrivacySetting;

@@ -78,7 +78,7 @@ Result<PermissionCheckResult> PermissionCheckResult::Deserialize(
                     result.restrictedPrivilege = XblPrivilegeValue(restrictedSetting.data());
                     break;
                 }
-                case XblPermissionDenyReason::PrivacySettingsRestrictsTarget:
+                case XblPermissionDenyReason::PrivacySettingRestrictsTarget:
                 {
                     result.restrictedPrivacySetting = EnumValue<XblPrivacySetting>(restrictedSetting.data());
                     break;
