@@ -1213,6 +1213,13 @@ HRESULT MultiplayerService::SubscribeToRta() noexcept
                 {
                     handler.second();
                 }
+
+                // If there were sessions awaiting a connectionId, complete those AsyncContexts
+                for (auto& pair : sharedThis->m_sessionsAwaitingConnectionId)
+                {
+                    pair.second.Complete(S_OK);
+                }
+                sharedThis->m_sessionsAwaitingConnectionId.clear();
             }
         });
 
