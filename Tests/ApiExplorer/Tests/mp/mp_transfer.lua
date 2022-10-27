@@ -22,6 +22,8 @@ function OnXblMultiplayerWriteSessionAsync()
 end
 
 function OnXblMultiplayerSetTransferHandleAsync()
+    XblMultiplayerSessionCloseHandle(session1)
+    XblMultiplayerSessionCloseHandle(session2)
     test.stopTest();
 end
 

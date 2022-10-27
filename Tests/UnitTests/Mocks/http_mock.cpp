@@ -55,6 +55,7 @@ HttpMock & HttpMock::operator=(HttpMock&& other)
 HttpMock::~HttpMock()
 {
     HCMockRemoveMock(m_handle);
+    HCMockCallCloseHandle(m_handle);
 }
 
 void HttpMock::SetResponseHttpStatus(uint32_t httpStatus) const noexcept

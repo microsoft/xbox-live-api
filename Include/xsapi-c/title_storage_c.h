@@ -17,7 +17,7 @@ extern "C"
 
 #define XBL_TITLE_STORAGE_BLOB_PATH_MAX_LENGTH (257 * 3)
 #define XBL_TITLE_STORAGE_BLOB_DISPLAY_NAME_MAX_LENGTH (129 * 3)
-#define XBL_TITLE_STORAGE_BLOB_ETAG_MAX_LENGTH (18 * 3) // TODO confirm with Azure Blob Services team
+#define XBL_TITLE_STORAGE_BLOB_ETAG_MAX_LENGTH (18 * 3) 
 
 /// <summary>
 /// Defines values used to indicate title storage type.

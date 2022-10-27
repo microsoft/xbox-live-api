@@ -260,7 +260,7 @@ STDAPI XblAchievementsManagerGetAchievementsByState(
 /// </summary>
 /// <param name="xboxUserId">The Xbox User ID of the player.</param>
 /// <param name="achievementId">The UTF-8 encoded achievement ID as defined by Dev Center.</param>
-/// <param name="currentProgess">The completion percentage of the achievement to indicate progress.  
+/// <param name="currentProgress">The completion percentage of the achievement to indicate progress.  
 /// Valid values are from 1 to 100. Set to 100 to unlock the achievement.  
 /// Progress will be set by the server to the highest value sent</param>
 /// <returns>HRESULT return code for this API operation.</returns>
@@ -287,7 +287,7 @@ STDAPI XblAchievementsManagerGetAchievementsByState(
 STDAPI XblAchievementsManagerUpdateAchievement(
     _In_ uint64_t xboxUserId, 
     _In_ const char* achievementId, 
-    _In_ uint8_t currentProgess
+    _In_ uint8_t currentProgress
 ) XBL_NOEXCEPT;
 
 } //end extern "C"

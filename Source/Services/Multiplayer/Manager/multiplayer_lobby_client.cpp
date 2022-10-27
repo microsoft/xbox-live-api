@@ -1201,11 +1201,22 @@ HRESULT MultiplayerLobbyClient::CreateGameFromLobby() noexcept
                 }
                 else if(m_setTransferHandleAttempt++ < MAX_CONNECTION_ATTEMPTS)
                 {
-                    m_sessionToCommit = writeSessionResult.ExtractPayload();
-                    // Retry setting transfer handle after a small delay
-                    HRESULT hr = m_lobbyClient->m_queue.RunWork([op] {
-                        op->SetTransferHandleToPending();
-                    }, RETRY_DELAY_MS);
+
+                    std::shared_ptr<XblMultiplayerSession> sessionToCommitTemp = writeSessionResult.ExtractPayload();
+
+                    HRESULT hr = S_OK;
+                    if (sessionToCommitTemp != nullptr) // handle rare case where an empty body is returned
+                    {
+                        m_sessionToCommit = sessionToCommitTemp;
+                        // Retry setting transfer handle after a small delay
+                        hr = m_lobbyClient->m_queue.RunWork([op] {
+                            op->SetTransferHandleToPending();
+                        }, RETRY_DELAY_MS);
+                    }
+                    else
+                    {
+                        hr = writeSessionResult.Hresult();
+                    }
 
                     if (FAILED(hr))
                     {

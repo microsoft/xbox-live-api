@@ -19,6 +19,7 @@ function OnXblMultiplayerSendInvitesAsync()
 end
 
 function OnXblMultiplayerGetSessionByHandleAsync()
+    XblMultiplayerSessionCloseHandle()
     test.stopTest();
 end
 

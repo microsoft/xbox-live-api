@@ -323,7 +323,7 @@ enum class XblMultiplayerInitializationStage : uint32_t
     Evaluating,
 
     /// <summary>
-    /// Failed stage. If the first initilization episode didn't succeed, the session can't be initialized.
+    /// Failed stage. If the first initialization episode didn't succeed, the session can't be initialized.
     /// </summary>
     Failed
 };
@@ -1138,7 +1138,7 @@ typedef struct XblMultiplayerSessionConstants
     XblMultiplayerSessionCapabilities SessionCapabilities;
 } XblMultiplayerSessionConstants;
 
-#define XBL_MULTIPLAYER_DEVICE_TOKEN_MAX_LENGTH             40 // TODO confirm max size, not a GUID
+#define XBL_MULTIPLAYER_DEVICE_TOKEN_MAX_LENGTH             40 
 #define XBL_MULTIPLAYER_SESSION_TEMPLATE_NAME_MAX_LENGTH    100
 #define XBL_MULTIPLAYER_SESSION_NAME_MAX_LENGTH             XBL_MULTIPLAYER_SESSION_TEMPLATE_NAME_MAX_LENGTH
 
@@ -2580,7 +2580,7 @@ STDAPI XblMultiplayerSessionSetMutableRoleSettings(
 /// Gets the collection of members that are in the session or entering the session together.
 /// </summary>
 /// <param name="handle">Handle to the multiplayer session.</param>
-/// <param name="members">Passes back a pointer to array of session member ojects.
+/// <param name="members">Passes back a pointer to array of session member objects.
 /// The memory for the returned pointer will remain valid for the life of the XblMultiplayerSessionHandle object until it is closed.</param>
 /// <param name="membersCount">Passes back the size of the returned array.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
@@ -3243,7 +3243,7 @@ STDAPI XblMultiplayerSearchHandleGetJoinRestriction(
 ) XBL_NOEXCEPT;
 
 /// <summary>
-/// Get whether or not the session associated with the search handle is temporaraly closed for joining.
+/// Get whether or not the session associated with the search handle is temporarily closed for joining.
 /// </summary>
 /// <param name="handle">Handle to the search handle details.</param>
 /// <param name="closed">Passes back whether the session is closed or not.</param>
@@ -3270,7 +3270,7 @@ STDAPI XblMultiplayerSearchHandleGetMemberCounts(
 /// Get the creation time of the search handle.
 /// </summary>
 /// <param name="handle">Handle to the search handle details.</param>
-/// <param name="creationTime">Passes back the time the serach handle was created in MPSD (not the local object).</param>
+/// <param name="creationTime">Passes back the time the search handle was created in MPSD (not the local object).</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 STDAPI XblMultiplayerSearchHandleGetCreationTime(
     _In_ XblMultiplayerSearchHandle handle,
@@ -3936,7 +3936,7 @@ STDAPI XblMultiplayerGetActivitiesWithPropertiesForUsersResult(
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
 /// This method immediately enables the RTA connection, but the in order to receive session changed callbacks, the session
-/// must be written again after enabling sunscriptions.
+/// must be written again after enabling subscriptions.
 /// </remarks>
 STDAPI XblMultiplayerSetSubscriptionsEnabled(
     _In_ XblContextHandle xblContext,
