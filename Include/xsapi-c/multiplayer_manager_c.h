@@ -1098,7 +1098,7 @@ STDAPI XblMultiplayerManagerLobbySessionSetProperties(
 /// <remarks>
 /// This function sets the value, represented as a JSON string, of a custom property for the lobby session. Custom properties 
 /// can be changed at any time. If custom properties are shared between devices, or may be updated by several devices 
-/// at the same time, use this function to ensure atomicity and resolve any conflicts between devices while changing the values of those cusotm properties. 
+/// at the same time, use this function to ensure atomicity and resolve any conflicts between devices while changing the values of those custom properties. 
 /// If a custom property isn't shared across devices, use the <see cref="XblMultiplayerManagerLobbySessionSetProperties"/> function instead 
 /// to change the value of that custom property.
 /// <para>The service may reject the request to change the custom property if a race condition occurs due to a conflict.
@@ -1363,7 +1363,7 @@ STDAPI XblMultiplayerManagerGameSessionSetProperties(
 /// <remarks>
 /// This function sets the value, represented as a JSON string, of a custom property for the game session. Custom properties 
 /// can be changed at any time. If custom properties are shared between devices, or may be updated by several devices 
-/// at the same time, use this function to ensure atomicity and resolve any conflicts between devices while changing the values of those cusotm properties. 
+/// at the same time, use this function to ensure atomicity and resolve any conflicts between devices while changing the values of those custom properties. 
 /// If a custom property isn't shared across devices, use the <see cref="XblMultiplayerManagerGameSessionSetProperties"/> function instead 
 /// to change the value of that custom property.
 /// <para>The service may reject the request to change the custom property if a race condition occurs due to a conflict.

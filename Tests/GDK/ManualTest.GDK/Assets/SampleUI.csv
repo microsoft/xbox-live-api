@@ -1,0 +1,10 @@
+#ITEM,ID,X,Y,DX,DY,PARAMETERS
+OVERLAY,2000,0,0,1920,1080
+LEGEND,2001,82,850,525,300,[DPad] or Arrows - Select a scenario|[A] or Enter - Start a scenario|[Menu] or Tab - Sign in|[View] or Esc - Exit
+BUTTON,2101,82,300,525,50,AddUser
+BUTTON,2102,82,375,525,50,Get Achievement Status ID = 1
+BUTTON,2103,82,450,525,50,Complete Achievement ID = 1
+BUTTON,2104,82,525,525,50,Get Achievement Status ID = 2
+BUTTON,2105,82,600,525,50,Set Achievement ID = 2 -> 25%
+BUTTON,2106,82,675,525,50,Set Achievement ID = 2 -> 50%
+BUTTON,2107,82,750,525,50,Set Achievement ID = 2 -> 100%

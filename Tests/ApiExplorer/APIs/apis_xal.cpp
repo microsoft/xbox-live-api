@@ -9,6 +9,8 @@ int XalCleanupAsync_Lua(lua_State *L)
     if (Data()->nsalMockCall != nullptr)
     {
         HCMockRemoveMock(Data()->nsalMockCall);
+        //Close the handle we're holding onto for API runner state
+        HCMockCallCloseHandle(Data()->nsalMockCall);
         Data()->nsalMockCall = nullptr;
 
         if (Data()->libHttpClientInit) // Set on GDK where XAL is just a wrapper around XUser

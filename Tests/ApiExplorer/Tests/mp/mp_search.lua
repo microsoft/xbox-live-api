@@ -35,6 +35,7 @@ end
 
 function OnXblMultiplayerDeleteSearchHandleAsync()
     XblMultiplayerSearchHandleCloseHandle()
+    XblMultiplayerSessionCloseHandle()
     test.stopTest();
 end
 

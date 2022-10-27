@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Game configVersion="1">
+  <!-- Version "1" is supported by March 2022 GDK or later -->
+
+    <Identity Name="41336MicrosoftATG.NetRumble2" Publisher="CN=A4954634-DF4B-47C7-AB70-D3215D246AF1" Version="1.0.1.0"/>
+
+    <ExecutableList>
+    <Executable Name="ManualTest.exe"
+                Id="Game"/>
+  </ExecutableList>
+
+  <TitleId>76b1590E</TitleId>
+  <MSAAppId>0000000044264AE3</MSAAppId>
+
+  <ShellVisuals DefaultDisplayName="ATG ManualTest Sample"
+                PublisherDisplayName="Xbox ATG"
+                StoreLogo="Assets\StoreLogo.png"
+                Square480x480Logo="Assets\LargeLogo.png"
+                Square150x150Logo="Assets\Logo.png"
+                Square44x44Logo="Assets\SmallLogo.png"
+                Description="ManualTest"
+                ForegroundText="dark"
+                BackgroundColor="#000000"
+                SplashScreenImage="Assets\SplashScreen.png"/>
+</Game>

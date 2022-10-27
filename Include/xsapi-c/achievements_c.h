@@ -165,7 +165,7 @@ enum class XblAchievementRewardType : uint32_t
 enum class XblAchievementRarityCategory : uint32_t
 {
     /// <summary>
-    /// The rarity is incalculable (e.g. no one has played the title yet, demoninator is 0).
+    /// The rarity is incalculable (e.g. no one has played the title yet, denominator is 0).
     /// </summary>
     Unset = 0,
 

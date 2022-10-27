@@ -254,7 +254,14 @@ LeaderboardResult::SerializeQuery(XblLeaderboardQuery* query, char* buffer)
         query->xboxUserId = m_globalQuery->xuid.empty() ? 0 : utils::internal_string_to_uint64(m_globalQuery->xuid);
 
         utils::strcpy(buffer, m_globalQuery->name.size() + 1, m_globalQuery->name.c_str());
-        query->leaderboardName = static_cast<char*>(buffer);
+        if (m_globalQuery->isTitleManaged)
+        {
+            query->statName = static_cast<char*>(buffer);
+        }
+        else
+        {
+            query->leaderboardName = static_cast<char*>(buffer);
+        }
         buffer += m_globalQuery->name.size() + 1;
 
         m_additionalColumnleaderboardNamesC.resize(m_globalQuery->columns.size());

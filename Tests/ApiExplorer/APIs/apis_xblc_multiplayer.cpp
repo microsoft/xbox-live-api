@@ -83,6 +83,11 @@ int XblMultiplayerSessionCreateHandle_Lua(lua_State *L)
     // CODE SNIPPET END
 
     auto state{ MPState() };
+    auto& session{ state->sessionHandles[static_cast<size_t>(sessionIndex)] };
+    if (session)
+    {
+        XblMultiplayerSessionCloseHandle(session);
+    }
     state->sessionHandles[static_cast<unsigned int>(sessionIndex)] = sessionHandle;
 
     lua_pushinteger(L, static_cast<lua_Integer>(sessionIndex));
@@ -1441,6 +1446,13 @@ int XblMultiplayerGetSessionAsync_Lua(lua_State *L)
         std::unique_ptr<size_t> sessionIndexPtr{ static_cast<size_t*>(asyncBlock->context) };
         auto sessionIndex{ *sessionIndexPtr };
 
+        auto& session{ MPState()->sessionHandles[sessionIndex] }; //CODE SNIP SKIP
+        if (session) //CODE SNIP SKIP
+        {
+            XblMultiplayerSessionCloseHandle(session); //CODE SNIP SKIP
+            MPState()->sessionHandles[sessionIndex] = nullptr; //CODE SNIP SKIP
+        }
+
         XblMultiplayerSessionHandle sessionHandle = nullptr;
         auto hr = XblMultiplayerGetSessionResult(asyncBlock, &sessionHandle);
         LogToFile("XblMultiplayerGetSessionResult: hr=%s", ConvertHR(hr).c_str()); // CODE SNIP SKIP
@@ -1489,6 +1501,13 @@ int XblMultiplayerGetSessionByHandleAsync_Lua(lua_State *L)
         std::unique_ptr<XAsyncBlock> asyncBlockPtr{ asyncBlock }; // Take over ownership of the XAsyncBlock*
         std::unique_ptr<size_t> sessionIndexPtr{ static_cast<size_t*>(asyncBlock->context) };
         auto sessionIndex{ *sessionIndexPtr };
+
+        auto& session{ MPState()->sessionHandles[sessionIndex] }; //CODE SNIP SKIP
+        if (session) //CODE SNIP SKIP
+        {
+            XblMultiplayerSessionCloseHandle(session); //CODE SNIP SKIP
+            MPState()->sessionHandles[sessionIndex] = nullptr; //CODE SNIP SKIP
+        }
 
         XblMultiplayerSessionHandle sessionHandle = nullptr;
         auto hr = XblMultiplayerGetSessionByHandleResult(asyncBlock, &sessionHandle);
