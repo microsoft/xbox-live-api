@@ -501,7 +501,7 @@ private:
         _In_ AsyncContext<Result<void>> async
     ) noexcept;
 
-    HRESULT SubscribeToRta() noexcept;
+    HRESULT SubscribeToRta(std::unique_lock<std::mutex> lock) noexcept;
     HRESULT UnsubscribeFromRta() noexcept;
 
     HRESULT WriteSessionUsingSubpath(

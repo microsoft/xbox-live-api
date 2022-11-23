@@ -216,7 +216,7 @@ XblFunctionContext UserStatisticsService::AddStatisticChangedHandler(
     StatisticChangeHandler handler
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     if (!m_resyncHandlerToken)
     {
@@ -251,7 +251,7 @@ void UserStatisticsService::RemoveStatisticChangedHandler(
     XblFunctionContext token
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     auto removed{ m_statisticChangeHandlers.erase(token) };
 
@@ -275,7 +275,7 @@ HRESULT UserStatisticsService::TrackStatistics(
     _In_ const Vector<String>& statNames
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     for (auto& xuid : xuids)
     {
@@ -310,7 +310,7 @@ HRESULT UserStatisticsService::StopTrackingStatistics(
     _In_ const Vector<String>& statNames
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     for (auto& xuid : xuids)
     {
@@ -336,7 +336,7 @@ HRESULT UserStatisticsService::StopTrackingUsers(
     _In_ const Vector<uint64_t>& xuids
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     for (auto& xuid : xuids)
     {
@@ -361,7 +361,7 @@ void UserStatisticsService::HandleStatisticChanged(
     const StatisticChangeEventArgs& args
 ) const noexcept
 {
-    std::unique_lock<std::mutex> lock{ m_mutex };
+    std::unique_lock<std::recursive_mutex> lock{ m_mutex };
     auto handlers{ m_statisticChangeHandlers };
     lock.unlock();
 
@@ -373,7 +373,7 @@ void UserStatisticsService::HandleStatisticChanged(
 
 void UserStatisticsService::HandleRTAResync()
 {
-    std::unique_lock<std::mutex> lock{ m_mutex };
+    std::unique_lock<std::recursive_mutex> lock{ m_mutex };
 
     // Get all stats tracked stats for all tracked users so that we can resync in a single request.
     // In the request callback, we will only invoke the stat changed handlers for the tracked users/stats
@@ -398,7 +398,7 @@ void UserStatisticsService::HandleRTAResync()
             return;
         }
 
-        std::unique_lock<std::mutex> lock{ m_mutex };
+        std::unique_lock<std::recursive_mutex> lock{ m_mutex };
 
         if (Succeeded(result))
         {

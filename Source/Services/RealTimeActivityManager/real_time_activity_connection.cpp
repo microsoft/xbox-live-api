@@ -48,6 +48,9 @@ struct ServiceSubscription
     Set<std::shared_ptr<Subscription>> clientSubscriptions;
     List<AsyncContext<Result<void>>> subscribeAsyncContexts;
     List<AsyncContext<Result<void>>> unsubscribeAsyncContexts;
+
+    // OnSubscribe data payload
+    JsonDocument onSubscribeData{ rapidjson::kNullType };
 };
 
 // RTA message types and error codes define by service here http://xboxwiki/wiki/Real_Time_Activity
@@ -229,6 +232,8 @@ HRESULT Connection::AddSubscription(
     {
         // Subscription is already active, trivially complete
         lock.unlock();
+        // Pass along original OnSubscribe payload for this subscription
+        sub->OnSubscribe(serviceSub->onSubscribeData);
         async.Complete(S_OK);
         return S_OK;
     }
@@ -431,7 +436,7 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
     case ErrorCode::Success:
     {
         serviceSub->serviceId = message[3].GetInt();
-        const auto& data = message[4];
+        serviceSub->onSubscribeData.CopyFrom(message[4], serviceSub->onSubscribeData.GetAllocator());
 
         m_subsByServiceId[serviceSub->serviceId] = serviceSub;
         List<AsyncContext<Result<void>>> subscribeAsyncContexts{ std::move(serviceSub->subscribeAsyncContexts) };
@@ -470,7 +475,7 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
         }
         for (auto& clientSub : clientSubs)
         {
-            clientSub->OnSubscribe(data);
+            clientSub->OnSubscribe(serviceSub->onSubscribeData);
         }
 
         return;
