@@ -455,6 +455,15 @@
     <CopyFileToFolders>
       <DestinationFolders>$(OutDir)Assets</DestinationFolders>
     </CopyFileToFolders>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Xbox.XboxOne.x64'">xcopy /Y /I /E "$(ProjectDir)Assets\*.*" "$(TargetDir)Assets" &amp; xcopy /Y /I /E "$(ProjectDir)Media\*.*" "$(TargetDir)Media" &amp; xcopy /Y /I /E "$(ProjectDir)Media\Fonts\*.*" "$(TargetDir)" &amp; xcopy /Y /I /E "$(ProjectDir)Media\Textures\*.*" "$(TargetDir)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Profile|Gaming.Xbox.XboxOne.x64'">xcopy /Y /I /E "$(ProjectDir)Assets\*.*" "$(TargetDir)Assets" &amp; xcopy /Y /I /E "$(ProjectDir)Media\*.*" "$(TargetDir)Media" &amp; xcopy /Y /I /E "$(ProjectDir)Media\Fonts\*.*" "$(TargetDir)" &amp; xcopy /Y /I /E "$(ProjectDir)Media\Textures\*.*" "$(TargetDir)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Xbox.XboxOne.x64'">xcopy /Y /I /E "$(ProjectDir)Assets\*.*" "$(TargetDir)Assets" &amp; xcopy /Y /I /E "$(ProjectDir)Media\*.*" "$(TargetDir)Media" &amp; xcopy /Y /I /E "$(ProjectDir)Media\Fonts\*.*" "$(TargetDir)" &amp; xcopy /Y /I /E "$(ProjectDir)Media\Textures\*.*" "$(TargetDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\APIRunner.GDK\Kits\ATGTK\ControllerFont.h" />

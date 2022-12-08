@@ -144,12 +144,15 @@ try
         auto group{ socialManager.GetUserGroup(groupHandle) };
         if (!group)
         {
+            *users = nullptr;
             *usersCount = 0;
             return E_UNEXPECTED;
         }
 
-        *users = group->Users().data();
-        *usersCount = group->Users().size();
+        auto& groupUsers = group->Users();
+        *users = groupUsers.data();
+        *usersCount = groupUsers.size();
+
         return S_OK;
     });
 }
@@ -170,12 +173,15 @@ try
         auto group{ socialManager.GetUserGroup(groupHandle) };
         if (!group)
         {
+            *trackedUsers = nullptr;
             *trackedUsersCount = 0;
             return E_UNEXPECTED;
         }
 
-        *trackedUsers = group->TrackedUsers().data();
-        *trackedUsersCount = group->TrackedUsers().size();
+        const auto& groupTrackedUsers = group->TrackedUsers();
+        *trackedUsers = groupTrackedUsers.data();
+        *trackedUsersCount = groupTrackedUsers.size();
+
         return S_OK;
     });
 }

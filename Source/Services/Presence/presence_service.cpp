@@ -54,7 +54,10 @@ XblFunctionContext PresenceService::AddTitlePresenceChangedHandler(
     TitlePresenceChangedHandler handler
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::unique_lock<std::recursive_mutex> lock{ m_mutex };
+
+    m_titlePresenceChangedHandlers[m_nextHandlerToken] = std::move(handler);
+    auto token = m_nextHandlerToken++;
 
     // Add subs to RTA manager if needed
     if (m_titlePresenceChangedHandlers.empty())
@@ -70,15 +73,14 @@ XblFunctionContext PresenceService::AddTitlePresenceChangedHandler(
         }
     }
 
-    m_titlePresenceChangedHandlers[m_nextHandlerToken] = std::move(handler);
-    return m_nextHandlerToken++;
+    return token;
 }
 
 void PresenceService::RemoveTitlePresenceChangedHandler(
     _In_ XblFunctionContext context
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     auto removed{ m_titlePresenceChangedHandlers.erase(context) };
     if (removed && m_titlePresenceChangedHandlers.empty())
@@ -98,7 +100,7 @@ XblFunctionContext PresenceService::AddDevicePresenceChangedHandler(
     DevicePresenceChangedHandler handler
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     // Add subs to RTA manager if needed
     if (m_devicePresenceChangedHandlers.empty())
@@ -118,7 +120,7 @@ void PresenceService::RemoveDevicePresenceChangedHandler(
     _In_ XblFunctionContext context
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     auto removed{ m_devicePresenceChangedHandlers.erase(context) };
     if (removed && m_devicePresenceChangedHandlers.empty())
@@ -135,7 +137,7 @@ HRESULT PresenceService::TrackUsers(
     const Vector<uint64_t>& xuids
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     if (!m_resyncHandlerToken)
     {
@@ -188,7 +190,7 @@ HRESULT PresenceService::StopTrackingUsers(
     const Vector<uint64_t>& xuids
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     for (auto& xuid : xuids)
     {
@@ -217,7 +219,7 @@ HRESULT PresenceService::TrackAdditionalTitles(
     const Vector<uint32_t>& titleIds
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     for (auto& titleId : titleIds)
     {
@@ -251,7 +253,7 @@ HRESULT PresenceService::StopTrackingAdditionalTitles(
     const Vector<uint32_t>& titleIds
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutex };
+    std::lock_guard<std::recursive_mutex> lock{ m_mutex };
 
     List<uint32_t> removedTitles{};
     for (auto& titleId : titleIds)
@@ -415,7 +417,7 @@ void PresenceService::HandleDevicePresenceChanged(
     _In_ bool isUserLoggedOnDevice
 ) const noexcept
 {
-    std::unique_lock<std::mutex> lock{ m_mutex };
+    std::unique_lock<std::recursive_mutex> lock{ m_mutex };
     auto handlers{ m_devicePresenceChangedHandlers };
     lock.unlock();
 
@@ -431,7 +433,7 @@ void PresenceService::HandleTitlePresenceChanged(
     _In_ XblPresenceTitleState state
 ) const noexcept
 {
-    std::unique_lock<std::mutex> lock{ m_mutex };
+    std::unique_lock<std::recursive_mutex> lock{ m_mutex };
     auto handlers{ m_titlePresenceChangedHandlers };
     lock.unlock();
 
@@ -443,7 +445,7 @@ void PresenceService::HandleTitlePresenceChanged(
 
 void PresenceService::HandleRTAResync()
 {
-    std::unique_lock<std::mutex> lock{ m_mutex };
+    std::unique_lock<std::recursive_mutex> lock{ m_mutex };
 
     LOGS_DEBUG << "Resyncing " << m_trackedXuids.size() << " Presence Subscriptions";
 
@@ -456,7 +458,7 @@ void PresenceService::HandleRTAResync()
             return;
         }
 
-        std::unique_lock<std::mutex> lock{ m_mutex };
+        std::unique_lock<std::recursive_mutex> lock{ m_mutex };
 
         if(Succeeded(result))
         {

@@ -353,6 +353,9 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\mp\MP_JoinLobbyViaActivity.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_multiple_contexts.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_partial_invite_flow.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>

@@ -136,11 +136,13 @@ int XblMultiplayerWriteSessionAsync_Lua(lua_State *L)
 {
     // Params:
     // 1) Session handle id returned when the session was created
-    // 2) write mode (as string)
+    // 2) XblContextHandle to use. Defaults to Data()->xboxLiveContextse
 
     CreateQueueIfNeeded();
     auto sessionIndex{ GetUint64FromLua(L, 1, 0) };
     assert(MPState()->sessionHandles.size() > sessionIndex);
+
+    XblContextHandle xboxLiveContext = (XblContextHandle)GetUint64FromLua(L, 2, (uint64_t)Data()->xboxLiveContext);
 
     ENSURE_IS_TRUE(MPState()->sessionHandles[static_cast<uint32_t>(sessionIndex)] != nullptr, "No valid multiplayer session.");
 
@@ -180,7 +182,7 @@ int XblMultiplayerWriteSessionAsync_Lua(lua_State *L)
         CallLuaFunctionWithHr(hr, "OnXblMultiplayerWriteSessionAsync"); // CODE SNIP SKIP
     };
 
-    auto hr = XblMultiplayerWriteSessionAsync(Data()->xboxLiveContext, MPState()->sessionHandles[static_cast<uint32_t>(sessionIndex)], writeMode, asyncBlock.get());
+    auto hr = XblMultiplayerWriteSessionAsync(xboxLiveContext, MPState()->sessionHandles[static_cast<uint32_t>(sessionIndex)], writeMode, asyncBlock.get());
     if (SUCCEEDED(hr))
     {
         // The call succeeded, so release the std::unique_ptr ownership of XAsyncBlock* since the callback will take over ownership.
@@ -1940,9 +1942,12 @@ int XblMultiplayerGetActivitiesWithPropertiesForUsersAsync_Lua(lua_State *L)
 
 int XblMultiplayerSetSubscriptionsEnabled_Lua(lua_State *L)
 {
+
     bool enabled = GetBoolFromLua(L, 1, true);
+    XblContextHandle xboxLiveContext = (XblContextHandle)GetUint64FromLua(L, 2, (uint64_t)Data()->xboxLiveContext);
+
     // CODE SNIPPET START: XblMultiplayerSetSubscriptionsEnabled
-    HRESULT hr = XblMultiplayerSetSubscriptionsEnabled(Data()->xboxLiveContext, enabled);
+    HRESULT hr = XblMultiplayerSetSubscriptionsEnabled(xboxLiveContext, enabled);
     // CODE SNIPPET END
 
     LogToFile("XblMultiplayerSetSubscriptionsEnabled: hr=%s", ConvertHR(hr).c_str());

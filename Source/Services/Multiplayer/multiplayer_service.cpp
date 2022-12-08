@@ -1157,7 +1157,7 @@ HRESULT MultiplayerService::SetRtaConnectionId(
     return S_OK;
 }
 
-HRESULT MultiplayerService::SubscribeToRta() noexcept
+HRESULT MultiplayerService::SubscribeToRta(std::unique_lock<std::mutex> lock) noexcept
 {
     if (m_subscription == nullptr)
     {
@@ -1223,6 +1223,8 @@ HRESULT MultiplayerService::SubscribeToRta() noexcept
             }
         });
 
+        // Unlock before adding subscription as it can synchronously call back into our ConnectionIdChanged handler
+        lock.unlock();
         return m_rtaManager->AddSubscription(m_user, m_subscription);
     }
     return S_OK;
@@ -1248,9 +1250,9 @@ HRESULT MultiplayerService::UnsubscribeFromRta() noexcept
 
 HRESULT MultiplayerService::EnableMultiplayerSubscriptions() noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+    std::unique_lock<std::mutex> lock{ m_mutexMultiplayerService };
     m_forceEnableRtaSubscription = true;
-    return SubscribeToRta();
+    return SubscribeToRta(std::move(lock));
 }
 
 HRESULT MultiplayerService::DisableMultiplayerSubscriptions() noexcept
@@ -1281,11 +1283,21 @@ XblFunctionContext MultiplayerService::AddMultiplayerSessionChangedHandler(
     _In_ MultiplayerSubscription::SessionChangedHandler handler
 ) noexcept
 {
-    std::lock_guard<std::mutex> lock{ m_mutexMultiplayerService };
+    {
+        std::unique_lock<std::mutex> lock{ m_mutexMultiplayerService };
+        SubscribeToRta(std::move(lock));
+    }
 
-    SubscribeToRta();
-    assert(m_subscription);
-    return m_subscription->AddSessionChangedHandler(std::move(handler));
+    XblFunctionContext token{};
+    {
+        std::unique_lock<std::mutex> lock{ m_mutexMultiplayerService };
+        if (m_subscription)
+        {
+            token = m_subscription->AddSessionChangedHandler(std::move(handler));
+        }
+    }
+
+    return token;
 }
 
 void MultiplayerService::RemoveMultiplayerSessionChangedHandler(

@@ -14,9 +14,9 @@ function TestMP_Handler()
     XblMultiplayerSessionDuplicateHandle()
     XblMultiplayerSessionCloseHandle()
 
-    XblRealTimeActivityActivate()
+    --XblRealTimeActivityActivate()
     XblMultiplayerSubscriptionsEnabled()
-    XblMultiplayerSetSubscriptionsEnabled()
+    --XblMultiplayerSetSubscriptionsEnabled()
     XblMultiplayerSubscriptionsEnabled()
 
     XblMultiplayerSessionCreateHandle()

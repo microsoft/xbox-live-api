@@ -257,7 +257,7 @@ private:
     // Tracked stats by scid. Needed to perform RTA resync
     Map<String, Vector<String>> m_trackedStatsByScid;
 
-    mutable std::mutex m_mutex;
+    mutable std::recursive_mutex m_mutex;
 
     friend class StatisticChangeSubscription;
 };

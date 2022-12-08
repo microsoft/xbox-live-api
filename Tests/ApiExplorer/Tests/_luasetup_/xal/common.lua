@@ -20,9 +20,12 @@ end
 
 function common.OnXalTryAddFirstUserSilentlyAsync()
     local hr = GetLastError()
+    local handle = 0
     if hr == 0 then
         print("SignInSilently Succeeded. Creating XblContext")
-        hr = XblContextCreateHandle()
+        handle, hr = XblContextCreateHandle()
+        print("hr " .. hr)
+        print("handle " .. handle)
         if hr == 0 then
             XalUserGetGamertag()
             XalUserGetId()
