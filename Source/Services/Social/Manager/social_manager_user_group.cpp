@@ -203,10 +203,13 @@ const Vector<const XblSocialManagerUser*>& XblSocialManagerUserGroup::Users() no
     PERF_START();
     std::unique_lock<std::mutex> lock{ m_mutex };
     m_usersView.clear();
-    std::transform(m_users.begin(), m_users.end(), std::back_inserter(m_usersView), [](const auto& pair)
+    if (m_loaded)
     {
-        return pair.second;
-    });
+        std::transform(m_users.begin(), m_users.end(), std::back_inserter(m_usersView), [](const auto& pair)
+        {
+            return pair.second;
+        });
+    }
     PERF_STOP();
     return m_usersView;
 }
@@ -215,22 +218,29 @@ const Vector<uint64_t>& XblSocialManagerUserGroup::TrackedUsers() noexcept
 {
     PERF_START();
     std::unique_lock<std::mutex> lock{ m_mutex };
-    switch (type)
+    if (m_loaded)
     {
-    case XblSocialUserGroupType::FilterType:
+        switch (type)
+        {
+        case XblSocialUserGroupType::FilterType:
+        {
+            m_trackedUsersView.clear();
+            std::transform(m_users.begin(), m_users.end(), std::back_inserter(m_trackedUsersView), [](const auto& pair)
+                {
+                    return pair.first;
+                });
+            break;
+        }
+        case XblSocialUserGroupType::UserListType:
+        {
+            // Tracked users view is static
+            break;
+        }
+        }
+    }
+    else
     {
         m_trackedUsersView.clear();
-        std::transform(m_users.begin(), m_users.end(), std::back_inserter(m_trackedUsersView), [](const auto& pair)
-        {
-            return pair.first;
-        });
-        break;
-    }
-    case XblSocialUserGroupType::UserListType:
-    {
-        // Tracked users view is static
-        break;
-    }
     }
     PERF_STOP();
     return m_trackedUsersView;

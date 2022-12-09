@@ -235,7 +235,7 @@ private:
     Map<uint32_t, size_t> m_trackedTitles;
     uint32_t const m_titleId;
 
-    mutable std::mutex m_mutex;
+    mutable std::recursive_mutex m_mutex;
 
     friend class DevicePresenceChangeSubscription;
     friend class TitlePresenceChangeSubscription;

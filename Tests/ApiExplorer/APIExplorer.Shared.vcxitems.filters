@@ -822,5 +822,8 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\notification\multiple_notification_subscriptions.lua">
       <Filter>Tests\notification</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_multiple_contexts.lua">
+      <Filter>Tests\mp</Filter>
+    </None>
   </ItemGroup>
 </Project>

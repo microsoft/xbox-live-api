@@ -154,10 +154,24 @@ int XblGetErrorCondition_Lua(lua_State *L)
 int XblContextCreateHandle_Lua(lua_State *L)
 {
     // CODE SNIPPET START: XblContextCreateHandle
-    HRESULT hr = XblContextCreateHandle(Data()->xalUser, &Data()->xboxLiveContext);
+    XblContextHandle contextHandle{ nullptr };
+    HRESULT hr = XblContextCreateHandle(Data()->xalUser, &contextHandle);
     // CODE SNIPPET END
+
+    // Cache the created handle for use in other APIs if we don't have one already
+    if (Data()->xboxLiveContext == nullptr)
+    {
+        Data()->xboxLiveContext = contextHandle;
+    }
+    else
+    {
+        LogToFile("XblContextCreateHandle called but an existing handle was cached");
+    }
+
+    lua_pushinteger(L, (int64_t)contextHandle);
+
     LogToFile("XblContextCreateHandle: %s", ConvertHR(hr).c_str());
-    return LuaReturnHR(L, hr);
+    return LuaReturnHR(L, hr, 1);
 }
 
 int XblContextDuplicateHandle_Lua(lua_State *L)
@@ -185,13 +199,20 @@ int XblContextCloseHandle_Lua(lua_State *L)
     StopSocialManagerDoWorkHelperCpp();
 #endif
 
-    // CODE SNIPPET START: XblContextCreateHandle
-    if (Data()->xboxLiveContext)
+    // Get the XblContextHandle
+    XblContextHandle handleToClose = (XblContextHandle)GetUint64FromLua(L, 1, (uint64_t)Data()->xboxLiveContext);
+
+    // CODE SNIPPET START: XblContextCloseHandle
+    if (handleToClose != nullptr)
     {
-        XblContextCloseHandle(Data()->xboxLiveContext);
-        Data()->xboxLiveContext = nullptr;
+        XblContextCloseHandle(handleToClose);
     }
     // CODE SNIPPET END
+
+    if (handleToClose == Data()->xboxLiveContext)
+    {
+        Data()->xboxLiveContext = nullptr;
+    }
 
     LogToFile("OnXblContextCloseHandle called.");
     return LuaReturnHR(L, S_OK);

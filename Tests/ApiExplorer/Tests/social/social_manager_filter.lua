@@ -14,6 +14,7 @@ function OnXblSocialManagerDoWork_LocalUserAddedEvent()
     XblSocialManagerGetLocalUsers()
     XblSocialManagerSetRichPresencePollingStatus()
     group, hr = XblSocialManagerCreateSocialUserGroupFromFilters()
+    XblSocialManagerUserGroupGetUsers()
     print("group " .. group)
 end
 

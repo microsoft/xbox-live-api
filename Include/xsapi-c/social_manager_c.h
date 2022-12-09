@@ -463,7 +463,7 @@ STDAPI_(bool) XblSocialManagerPresenceRecordIsUserPlayingTitle(
 /// <remarks>
 /// Call this API after calling either <see cref="XblSocialManagerCreateSocialUserGroupFromFilters"/>
 /// or <see cref="XblSocialManagerCreateSocialUserGroupFromList"/> to create an XblSocialManagerUserGroup.  
-/// Have the XblSocialManagerUserGroupHandle returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded
+/// The XblSocialManagerUserGroupHandle is returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded
 /// event in <see cref="XblSocialManagerDoWork"/>.
 /// </remarks>
 STDAPI XblSocialManagerUserGroupGetType(
@@ -482,7 +482,7 @@ STDAPI XblSocialManagerUserGroupGetType(
 /// <remarks>
 /// Call this API after calling either <see cref="XblSocialManagerCreateSocialUserGroupFromFilters"/>
 /// or <see cref="XblSocialManagerCreateSocialUserGroupFromList"/> to create an XblSocialManagerUserGroup.  
-/// Have the XblSocialManagerUserGroupHandle returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded event 
+/// The XblSocialManagerUserGroupHandle is returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded event 
 /// in <see cref="XblSocialManagerDoWork"/>.
 /// </remarks>
 STDAPI XblSocialManagerUserGroupGetLocalUser(
@@ -501,7 +501,7 @@ STDAPI XblSocialManagerUserGroupGetLocalUser(
 /// If the group is not a filter group, E_UNEXPECTED will be returned.  
 /// Call this API after either <see cref="XblSocialManagerCreateSocialUserGroupFromFilters"/>
 /// or <see cref="XblSocialManagerCreateSocialUserGroupFromList"/> to create an XblSocialManagerUserGroup.  
-/// Have the XblSocialManagerUserGroupHandle returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded 
+/// The XblSocialManagerUserGroupHandle is returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded 
 /// event in <see cref="XblSocialManagerDoWork"/>.<br/>
 /// </remarks>
 STDAPI XblSocialManagerUserGroupGetFilters(
@@ -533,8 +533,7 @@ typedef const XblSocialManagerUser* const* XblSocialManagerUserPtrArray;
 /// they are statically sized and trivially copyable.  
 /// Call this API after calling either <see cref="XblSocialManagerCreateSocialUserGroupFromFilters"/>
 /// or <see cref="XblSocialManagerCreateSocialUserGroupFromList"/> to create an XblSocialManagerUserGroup.  
-/// Have the XblSocialManagerUserGroupHandle returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded 
-/// event in <see cref="XblSocialManagerDoWork"/>.
+/// Wait for <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded event in <see cref="XblSocialManagerDoWork"/>.  Prior to this the group will be empty.
 /// </remarks>
 STDAPI XblSocialManagerUserGroupGetUsers(
     _In_ XblSocialManagerUserGroupHandle group,
@@ -555,8 +554,7 @@ STDAPI XblSocialManagerUserGroupGetUsers(
 /// but for filter-based groups, the set tracked users changes as the local user's relationships change.  
 /// Call this API after calling either <see cref="XblSocialManagerCreateSocialUserGroupFromFilters"/>
 /// or <see cref="XblSocialManagerCreateSocialUserGroupFromList"/> to create an XblSocialManagerUserGroup.  
-/// Have the XblSocialManagerUserGroupHandle returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded event 
-/// in <see cref="XblSocialManagerDoWork"/>.  
+/// Wait for <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded event in <see cref="XblSocialManagerDoWork"/>.  Prior to this the group will be empty.
 /// </remarks>
 STDAPI XblSocialManagerUserGroupGetUsersTrackedByGroup(
     _In_ XblSocialManagerUserGroupHandle group,
@@ -630,8 +628,7 @@ STDAPI XblSocialManagerDoWork(
 /// (invalidating the returned handle) if the associated user is removed from Social Manager.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// The result of a user group being loaded will be triggered through 
-/// the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded event in <see cref="XblSocialManagerDoWork"/>.
+/// Wait for <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded event in <see cref="XblSocialManagerDoWork"/>.  Prior to this the group will be empty.
 /// </remarks>
 STDAPI XblSocialManagerCreateSocialUserGroupFromFilters(
     _In_ XblUserHandle user,
@@ -652,8 +649,7 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromFilters(
 /// (invalidating the returned handle) if the associated user is removed from Social Manager.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
-/// The result of a user group being loaded will be triggered through
-/// the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded event in <see cref="XblSocialManagerDoWork"/>.
+/// Wait for <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded event in <see cref="XblSocialManagerDoWork"/>.  Prior to this the group will be empty.
 /// </remarks>
 STDAPI XblSocialManagerCreateSocialUserGroupFromList(
     _In_ XblUserHandle user,
@@ -671,7 +667,7 @@ STDAPI XblSocialManagerCreateSocialUserGroupFromList(
 /// This will stop updaing the Xbox Social User Group and remove tracking for any users the XblSocialManagerUserGroup holds.  
 /// Call this API after calling either <see cref="XblSocialManagerCreateSocialUserGroupFromFilters"/>
 /// or <see cref="XblSocialManagerCreateSocialUserGroupFromList"/> to create an XblSocialManagerUserGroup.  
-/// Have the XblSocialManagerUserGroupHandle returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded event 
+/// The XblSocialManagerUserGroupHandle is returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded event 
 /// in <see cref="XblSocialManagerDoWork"/>.
 /// </remarks>
 STDAPI XblSocialManagerDestroySocialUserGroup(
@@ -722,7 +718,7 @@ STDAPI XblSocialManagerGetLocalUsers(
 /// <see cref="XblSocialManagerEventType"/>::SocialUserGroupUpdated event in <see cref="XblSocialManagerDoWork"/>.  
 /// Call this API after calling either <see cref="XblSocialManagerCreateSocialUserGroupFromFilters"/>
 /// or <see cref="XblSocialManagerCreateSocialUserGroupFromList"/> to create an XblSocialManagerUserGroup.  
-/// Have the XblSocialManagerUserGroupHandle returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded
+/// The XblSocialManagerUserGroupHandle is returned by the <see cref="XblSocialManagerEventType"/>::SocialUserGroupLoaded
 /// event in <see cref="XblSocialManagerDoWork"/>.
 /// </remarks>
 STDAPI XblSocialManagerUpdateSocialUserGroup(
