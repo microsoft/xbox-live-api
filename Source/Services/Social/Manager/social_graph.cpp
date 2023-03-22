@@ -749,6 +749,7 @@ XblSocialManagerPresenceRecord SocialGraph::ConvertPresenceRecord(
 
             smTitleRecord.titleId = newTitleRecord.titleId;
             smTitleRecord.isTitleActive = newTitleRecord.titleActive;
+            utils::strcpy(smTitleRecord.titleName, sizeof(smTitleRecord.titleName), newTitleRecord.titleName);
             utils::strcpy(smTitleRecord.presenceText, sizeof(smTitleRecord.presenceText), newTitleRecord.richPresenceString);
             smTitleRecord.isBroadcasting = newTitleRecord.broadcastRecord != nullptr;
             smTitleRecord.deviceType = deviceRecord.deviceType;

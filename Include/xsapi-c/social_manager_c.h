@@ -264,6 +264,11 @@ typedef struct XblSocialManagerPresenceTitleRecord
     uint32_t titleId;
 
     /// <summary>
+    /// The title name.
+    /// </summary>
+    char titleName[XBL_TITLE_NAME_CHAR_SIZE];
+
+    /// <summary>
     /// The active state for the title.
     /// </summary>
     bool isTitleActive;
