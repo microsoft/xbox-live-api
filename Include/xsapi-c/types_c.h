@@ -38,6 +38,7 @@ extern "C"
 #define XBL_UNIQUE_MODERN_GAMERTAG_CHAR_SIZE    (XBL_MODERN_GAMERTAG_CHAR_SIZE + 1 + 3 ) // modern gamertag + '#' + max suffix size for cases when MGT display length is 12. Null terminator already accoutned for in MGT
 #define XBL_REAL_NAME_CHAR_SIZE                 (255 * 3)
 #define XBL_RICH_PRESENCE_CHAR_SIZE             (100 * 3)
+#define XBL_TITLE_NAME_CHAR_SIZE                (100 * 3)
 #define XBL_XBOX_USER_ID_CHAR_SIZE              (21 * 3)
 #define XBL_LAST_TIME_PLAYED_CHAR_SIZE          25
 

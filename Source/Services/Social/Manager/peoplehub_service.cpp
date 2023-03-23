@@ -277,6 +277,18 @@ Result<XblSocialManagerPresenceTitleRecord> PeoplehubService::DeserializePresenc
     record.titleId = utils::internal_string_to_uint32(titleId);
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "IsPrimary", record.isPrimary));
 
+    //get titleName from Presence string: format should be "Title - Rich Presence Text"
+    for (int i = 0; i < XBL_TITLE_NAME_CHAR_SIZE; i++)
+    {
+        char c = record.presenceText[i];
+        if (c == '-' || c == '\0')
+        {
+            record.titleName[i] = '\0';
+            break;
+        }
+        record.titleName[i] = c;
+    }
+
     return Result<XblSocialManagerPresenceTitleRecord>{ record };
 }
 

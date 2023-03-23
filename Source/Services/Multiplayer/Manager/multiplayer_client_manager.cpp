@@ -390,7 +390,7 @@ MultiplayerClientManager::JoinGame(
         gameSession->Join(nullptr, false);
         for (const auto& memberXuid : xboxUserIds)
         {
-            if (memberXuid == primaryContext->Xuid())
+            if (memberXuid != primaryContext->Xuid())
             {
                 gameSession->AddMemberReservation(memberXuid);
             }
