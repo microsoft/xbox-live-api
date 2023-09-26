@@ -16,7 +16,7 @@ extern "C"
 /// </summary>
 /// <memof><see cref="XblMultiplayerActivityInfo"/></memof>
 /// <argof><see cref="XblMultiplayerActivitySetActivityAsync"/></argof>
-    enum class XblMultiplayerActivityPlatform : uint32_t
+enum class XblMultiplayerActivityPlatform : uint32_t
 {
     /// <summary>
     /// Unknown device.
@@ -235,6 +235,7 @@ STDAPI XblMultiplayerActivityUpdateRecentPlayers(
 /// <see href="live-mpa-client-how-to.md#recent-players">Recent players</see> section 
 /// of <see href="live-mpa-client-how-to.md">Example code for Multiplayer Activity</see>.
 /// </remarks>
+/// <rest>Calls POST /titles/{titleId}/recentplayers</rest>
 STDAPI XblMultiplayerActivityFlushRecentPlayersAsync(
     _In_ XblContextHandle xblContext,
     _In_ XAsyncBlock* async
@@ -263,6 +264,7 @@ STDAPI XblMultiplayerActivityFlushRecentPlayersAsync(
 /// the <see href="live-mpa-client-how-to.md#activities">Activities</see> section 
 /// of <see href="live-mpa-client-how-to.md">Example code for Multiplayer Activity</see>.
 /// </remarks>
+/// <rest>Calls PUT /titles/{titleId}/users/{xuid}/activites</rest>
 STDAPI XblMultiplayerActivitySetActivityAsync(
     _In_ XblContextHandle xblContext,
     _In_ const XblMultiplayerActivityInfo* activityInfo,
@@ -288,6 +290,7 @@ STDAPI XblMultiplayerActivitySetActivityAsync(
 /// For more information about multiplayer activities, see
 /// <see href="live-mpa-activities.md">Activities</see>.
 /// </remarks>
+/// <rest>Calls POST /titles/{titleId}/activities/query</rest>
 STDAPI XblMultiplayerActivityGetActivityAsync(
     _In_ XblContextHandle xblContext,
     _In_reads_(xuidsCount) const uint64_t* xuids,
@@ -363,6 +366,7 @@ STDAPI XblMultiplayerActivityGetActivityResult(
 /// For more information about multiplayer activities, see
 /// <see href="live-mpa-activities.md">Activities</see>.
 /// </remarks>
+/// <rest>Calls DELETE /titles/{titleId}/users/{xuid}/activites</rest>
 STDAPI XblMultiplayerActivityDeleteActivityAsync(
     _In_ XblContextHandle xblContext,
     _In_ XAsyncBlock* async
@@ -390,6 +394,7 @@ STDAPI XblMultiplayerActivityDeleteActivityAsync(
 /// For more information about multiplayer activities, see
 /// <see href="live-mpa-activities.md">Activities</see>.
 /// </remarks>
+/// <rest>Calls POST /titles/{titleId}/invites</rest>
 STDAPI XblMultiplayerActivitySendInvitesAsync(
     _In_ XblContextHandle xblContext,
     _In_ const uint64_t* xuids,

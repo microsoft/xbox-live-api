@@ -510,7 +510,7 @@ typedef struct XblAchievementUnlockEvent
     _Field_z_ const char* achievementIcon;
 
     /// <summary>
-    /// The base 10 ID of the title the achievement is defined for.
+    /// The UTF-8 encoded achievement ID.
     /// </summary>
     _Field_z_ const char* achievementId;
 

@@ -95,6 +95,7 @@ Archive/**/*.winmd
 Build/**/Debug/
 Build/**/Release/
 External/**/lib/
+!External/xal/External/OneDS/lib/
 External/**/bin/
 External/**/Debug/
 External/**/Release/

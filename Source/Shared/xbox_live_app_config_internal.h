@@ -27,12 +27,6 @@ public:
     uint32_t TitleId();
     const xsapi_internal_string& Scid() const;
     const xsapi_internal_string& Sandbox() const;
-#if HC_PLATFORM == HC_PLATFORM_UWP
-    // Remove after switch to Xal auth on UWP
-    void SetSandbox(const xsapi_internal_string& sandbox);
-
-    std::shared_ptr<local_config> LocalConfig() const { return m_localConfig; }
-#endif
 
     const xsapi_internal_string& EndpointId() const;
     void SetEndpointId(const xsapi_internal_string& endpointId);
@@ -115,10 +109,6 @@ private:
     xsapi_internal_string m_telemetryOsVersion;
     xsapi_internal_string m_telemetryDeviceClass;
     xsapi_internal_string m_telemetryDeviceId;
-#endif
-
-#if HC_PLATFORM == HC_PLATFORM_UWP
-    std::shared_ptr<local_config> m_localConfig;
 #endif
 };
 

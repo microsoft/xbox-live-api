@@ -84,151 +84,7 @@ enum class gaming_privilege
 class title_callable_ui
 {
 public:
-#if HC_PLATFORM == HC_PLATFORM_UWP
-#if !defined(XBOX_LIVE_CREATORS_SDK)
-    /// <summary>
-    /// Shows a picker UI that allows a person playing the game to select players
-    /// from a presented list of other people.
-    /// After the operation is complete, the list of selected Xbox User IDs is returned to the calling app.
-    /// </summary>
-    /// <param name="promptDisplayText">The prompt display text.</param>
-    /// <param name="xboxUserIds">A list of Xbox User IDs which the user can select from.</param>
-    /// <param name="preselectedXboxUserIds">A list of Xbox User IDs which will be pre-selected.</param>
-    /// <param name="minSelectionCount">The minimum number of people the user must select.</param>
-    /// <param name="maxSelectionCount">The maximum number of people the user can select.</param>
-    /// <param name="user">System user that identifies which user is sending the invite</param>
-    /// <returns>
-    /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// The task completes when the UI is closed.
-    /// result.payload() contains the list of users that were selected by the player.
-    /// result.err() contains the error based on what happened in the case of an error.
-    /// </returns>
-    static pplx::task<xbox::services::xbox_live_result<std::vector<string_t>>>
-    show_player_picker_ui(
-        _In_ const string_t& promptDisplayText,
-        _In_ const std::vector<string_t>& xboxUserIds,
-        _In_ const std::vector<string_t>& preselectedXboxUserIds,
-        _In_ uint32_t minSelectionCount,
-        _In_ uint32_t maxSelectionCount,
-        _In_opt_ Windows::System::User^ user = nullptr
-        );
-
-    /// <summary>
-    /// Shows a picker UI populated from the selected user's friend list and suggested friend list.
-    /// After selection, the user can send an invitation to play a game and/or party chat for a
-    /// specified game session to the selected people.
-    /// </summary>
-    /// <param name="sessionReference">A reference to the multiplayer session to invite people to.</param>
-    /// <param name="invitationDisplayText">The ID of the custom invite string that is displayed with 
-    /// the invite notification.The ID must match the ID that is assigned to the custom invite string 
-    /// in the title's multiplayer service configuration. The format of the parameter is "///{id}", 
-    /// where {id} is replaced with the ID of the custom string. For example, if the ID of the custom string 
-    /// "Play Capture the Flag" is 1, then you would set this parameter to "///1" in order to display the 
-    /// "Play Capture the Flag" custom string in the game invite. 
-    /// Pass an empty string if you don't want a custom string added to the invite.</param>
-    /// <param name="contextStringId">The custom activation context that is available to the invitee in the 
-    /// activation URI for an invite. The custom activation context string must be URL-safe and binary content 
-    /// should be encoded with URL-safe base64 encoding. The maximum length is 160 characters.</param>
-    /// <param name="user">System user that identifies which user is sending the invite</param>
-    /// <returns>
-    /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// The task completes when the UI is closed.
-    /// result.err() contains the error based on what happened in the case of an error.
-    /// </returns>
-    static pplx::task<xbox::services::xbox_live_result<void>>
-    show_game_invite_ui(
-        _In_ const xbox::services::multiplayer::multiplayer_session_reference& sessionReference,
-        _In_ const string_t& invitationDisplayText,
-        _In_ const string_t& contextStringId = string_t(),
-        _In_opt_ Windows::System::User^ user = nullptr
-        );
-
-    /// <summary>
-    /// Shows UI for adding or removing a specified person to or from the requesting user's friend list.
-    /// </summary>
-    /// <param name="targetXboxUserId">The Xbox User ID to show information about.</param>
-    /// <param name="user">System user that identifies the user to show the UI on behalf of</param>
-    /// <returns>
-    /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// The task completes when the UI is closed.
-    /// result.err() contains the error based on what happened in the case of an error.
-    /// </returns>
-    static pplx::task<xbox::services::xbox_live_result<void>>
-    show_change_friend_relationship_ui(
-        _In_ const string_t& targetXboxUserId,
-        _In_opt_ Windows::System::User^ user = nullptr
-        );
-
-    /// <summary>
-    /// Shows UI presenting the requesting user's achievements for the specified title.
-    /// </summary>
-    /// <param name="titleId">The Xbox titleId to show information about.</param>
-    /// <param name="user">System user that identifies the user to show the UI on behalf of</param>
-    /// <returns>
-    /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// The task completes when the UI is closed.
-    /// result.err() contains the error based on what happened in the case of an error.
-    /// </returns>
-    static pplx::task<xbox::services::xbox_live_result<void>>
-    show_title_achievements_ui(
-        _In_ uint32_t titleId,
-        _In_opt_ Windows::System::User^ user = nullptr
-        );
-#endif // !defined(XBOX_LIVE_CREATORS_SDK)
-
-    /// <summary>
-    /// Shows UI displaying the profile card for a specified user.
-    /// </summary>
-    /// <param name="targetXboxUserId">The Xbox User ID to show information about.</param>
-    /// <param name="user">System user that identifies the user to show the UI on behalf of</param>
-    /// <returns>
-    /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// The task completes when the UI is closed.
-    /// result.err() contains the error based on what happened in the case of an error.
-    /// </returns>
-    static pplx::task<xbox::services::xbox_live_result<void>>
-    show_profile_card_ui(
-        _In_ const string_t& targetXboxUserId,
-        _In_opt_ Windows::System::User^ user = nullptr
-        );
-
-    /// <summary>
-    /// Checks if the current user has a specific privilege
-    /// </summary>
-    /// <param name="privilege">The privilege to check.</param>
-    /// <param name="user">System user that identifies the user to show the UI on behalf of</param>
-    /// <returns>
-    /// result.payload() contains a boolean which is true if the current user has the privilege.
-    /// result.err() contains the error based on what happened in the case of an error.
-    /// </returns>
-    static xbox::services::xbox_live_result<bool>
-    check_gaming_privilege_silently(
-        _In_ gaming_privilege privilege,
-        _In_opt_ Windows::System::User^ user = nullptr
-        );
-
-    /// <summary>
-    /// Checks if the current user has a specific privilege and if it doesn't, it shows UI
-    /// </summary>
-    /// <param name="privilege">The privilege to check.</param>
-    /// <param name="friendlyMessage">Text to display in addition to the stock text about the privilege.
-    /// Pass an empty string if you don't want a message added.</param>
-    /// <param name="user">System user that identifies the user to show the UI on behalf of</param>
-    /// <returns>
-    /// Returns a pplx::task&lt;T&gt; object that represents the state of the asynchronous operation.
-    /// The task completes when the UI is closed.
-    /// result.payload() contains a boolean which is true if the current user has the privilege.
-    /// result.err() contains the error based on what happened in the case of an error.
-    /// </returns>
-    static pplx::task<xbox::services::xbox_live_result<bool>>
-    check_gaming_privilege_with_ui(
-        _In_ gaming_privilege privilege,
-        _In_ string_t friendlyMessage,
-        _In_opt_ Windows::System::User^ user = nullptr
-        );
-
-#else
-
+#if HC_PLATFORM != HC_PLATFORM_UWP
     /// <summary>
     /// Shows a picker UI that allows a person playing the game to select players
     /// from a presented list of other people.
@@ -339,9 +195,6 @@ public:
     /// </returns>
     static pplx::task<xbox::services::xbox_live_result<void>>
     show_friend_finder_ui(
-#if HC_PLATFORM == HC_PLATFORM_UWP
-        _In_opt_ Windows::System::User^ user = nullptr
-#endif
     );
 
     /// <summary>
@@ -375,9 +228,6 @@ public:
     /// </returns>
     static pplx::task<xbox::services::xbox_live_result<void>>
     show_user_settings_ui(
-#if HC_PLATFORM == HC_PLATFORM_UWP
-        _In_opt_ Windows::System::User^ user = nullptr
-#endif
     );
 
     /// <summary>
@@ -388,9 +238,6 @@ public:
     /// </returns>
     static pplx::task<xbox::services::xbox_live_result<void>>
         show_customize_user_profile_ui(
-#if HC_PLATFORM == HC_PLATFORM_UWP
-            _In_opt_ Windows::System::User^ user = nullptr
-#endif
         );
 #elif !HC_PLATFORM_IS_MICROSOFT
 
@@ -435,12 +282,6 @@ public:
 #endif
 
 private:
-#if HC_PLATFORM == HC_PLATFORM_UWP
-    static void _Get_gaming_privilege_scope_policy(
-        _Out_ Platform::String^& scope,
-        _Out_ Platform::String^& policy
-        );
-#endif
 };
 #endif // !XSAPI_NO_PPL
 

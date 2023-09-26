@@ -230,7 +230,7 @@ enum class XblPermission : uint32_t
     Unknown = 0,
 
     /// <summary>
-    /// Check whether or not the user can send a message with text content to the target user.
+    /// Check whether or not the user can send a message with text content or an invitation to the target user.
     /// This value does not change if the player has muted the target user.  Use CommunicateUsingVoice instead.
     /// This value will be false if for example you have set your comms to friends only and the target is not a friend.
     /// This value will be false if for example if the target user has blocked you.

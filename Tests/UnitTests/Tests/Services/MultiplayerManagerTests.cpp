@@ -93,7 +93,7 @@ const char* defaultLobbySessionResponse = R"({
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -191,7 +191,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -251,7 +251,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           },
 
           "1":{  
@@ -279,7 +279,7 @@ public:
              },
 
              "gamertag":"TestGamertag_2",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -339,7 +339,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           },
 
           "1":{  
@@ -367,7 +367,7 @@ public:
              },
 
              "gamertag":"TestGamertag_3",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -426,7 +426,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -485,7 +485,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -544,7 +544,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           },
 
           "1":{  
@@ -572,7 +572,7 @@ public:
              },
 
              "gamertag":"TestGamertag_2",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -632,7 +632,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -692,7 +692,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -746,7 +746,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -807,7 +807,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           },
 
           "1":{  
@@ -901,7 +901,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           },
 
           "1":{  
@@ -929,7 +929,7 @@ public:
              },
 
              "gamertag":"TestGamertag_2",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -983,7 +983,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -1043,7 +1043,7 @@ public:
 
              "next":1,
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -1103,7 +1103,7 @@ public:
 
              "next":1,
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -1225,7 +1225,7 @@ public:
 
              "next":1,
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -1286,7 +1286,7 @@ public:
 
              "next":1,
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -1347,7 +1347,7 @@ public:
 
              "next":1,
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -1447,7 +1447,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -1526,7 +1526,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -1611,7 +1611,7 @@ public:
 
              "next":1,
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -1695,7 +1695,7 @@ public:
 
              "next":1,
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -1774,7 +1774,7 @@ public:
 
              "initializationEpisode":1,
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           },
 
           "1":{  
@@ -1877,7 +1877,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           },
 
           "1":{  
@@ -1914,7 +1914,7 @@ public:
              },
 
              "gamertag":"TestGamertag_2",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -1992,7 +1992,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -2070,7 +2070,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           },
 
           "1":{  
@@ -2107,7 +2107,7 @@ public:
              },
 
              "gamertag":"TestGamertag_2",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -2196,7 +2196,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           },
 
           "1":{  
@@ -2233,7 +2233,7 @@ public:
              },
 
              "gamertag":"TestGamertag_2",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -2316,7 +2316,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           },
 
           "1":{  
@@ -2364,7 +2364,7 @@ public:
              },
 
              "gamertag":"TestGamertag_2",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -2453,7 +2453,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           },
 
           "1":{  
@@ -2490,7 +2490,7 @@ public:
              },
 
              "gamertag":"TestGamertag_2",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 
@@ -2570,7 +2570,7 @@ public:
              },
 
              "gamertag":"2 Dev 246876529",
-             "deviceToken":"e7c221cbe5228043c39865281047b178"
+             "deviceToken":""
           }
        },
 

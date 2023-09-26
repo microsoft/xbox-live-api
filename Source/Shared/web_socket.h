@@ -69,6 +69,8 @@ public:
     HRESULT Disconnect() noexcept override;
 
 private:
+    void OnMessageReceived(String&& message) const noexcept;
+
     static void CALLBACK ReceiveHandler(
         _In_ HCWebsocketHandle websocket,
         _In_z_ const char* incomingBodyString,

@@ -195,12 +195,16 @@ xsapi_internal_string utils::convert_timepoint_to_string(
         time.tm_year + 1900, time.tm_mon + 1, time.tm_mday,
         time.tm_hour, time.tm_min, time.tm_sec, static_cast<int>(ms.count() % 1000));
 #else
+#if defined(__ORBIS__) || defined(__PROSPERO__)
+    std::tm* error = localtime_s(&t, &time);
+#else
     std::tm* error = localtime_r(&t, &time);
+#endif // __ORBIS__ || __PROSPERO__
     if (error == nullptr)
     {
         return result;
     }
-    sprintf(buff, _T("%04d-%02d-%02dT%02d:%02d:%02d.%03dZ"),
+    snprintf(buff, sizeof(buff), _T("%04d-%02d-%02dT%02d:%02d:%02d.%03dZ"),
               time.tm_year + 1900, time.tm_mon + 1, time.tm_mday,
               time.tm_hour, time.tm_min, time.tm_sec, static_cast<int>(ms.count() % 1000));
 

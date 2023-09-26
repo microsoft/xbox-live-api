@@ -4,9 +4,6 @@
 #include "pch.h"
 #include "shared_macros.h"
 #include "xbox_live_app_config_internal.h"
-#if HC_PLATFORM == HC_PLATFORM_UWP
-#include "local_config.h"
-#endif
 
 using namespace xbox::services;
 
@@ -22,37 +19,7 @@ std::shared_ptr<AppConfig> AppConfig::Instance()
     return nullptr;
 }
 
-#if HC_PLATFORM == HC_PLATFORM_UWP 
-HRESULT AppConfig::Initialize()
-{
-    m_localConfig = MakeShared<local_config>();
-    auto readResult = m_localConfig->read();
-    if (readResult.err())
-    {
-        LOGS_ERROR << "Loading local config file error : " << readResult.err() << ", msg : " << readResult.err_message();
-        return utils::convert_xbox_live_error_code_to_hresult(readResult.err());
-    }
-
-    m_titleId = m_localConfig->title_id();
-    m_scid = m_localConfig->scid();
-    m_overrideScid = m_localConfig->override_scid();
-    m_overrideTitleId = m_localConfig->override_title_id();
-
-    if (m_titleId == 0)
-    {
-        LOGS_ERROR << "ERROR: Could not read \"titleId\" in xboxservices.config.  Must be a JSON number";
-        return E_FAIL;
-    }
-
-    if (m_scid.empty())
-    {
-        LOGS_ERROR << "ERROR: Could not read \"PrimaryServiceConfigId\" in xboxservices.config.  Must be a JSON string";
-        return E_FAIL;
-    }
-    return S_OK;
-}
-
-#elif HC_PLATFORM == HC_PLATFORM_XDK
+#if HC_PLATFORM == HC_PLATFORM_XDK
 HRESULT AppConfig::Initialize()
 {
     m_sandbox = utils::internal_string_from_utf16(Windows::Xbox::Services::XboxLiveConfiguration::SandboxId->Data());

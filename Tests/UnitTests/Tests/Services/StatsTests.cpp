@@ -172,7 +172,7 @@ public:
         }
     }
 
-    XblRequestedStatistics CreateRequestedStat(char* scid, const char** statNames, uint32_t statCount)
+    XblRequestedStatistics CreateRequestedStat(char const* scid, const char** statNames, uint32_t statCount)
     {
         XblRequestedStatistics requestedStat{};
         requestedStat.statistics = statNames;

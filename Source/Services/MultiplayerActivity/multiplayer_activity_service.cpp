@@ -82,7 +82,7 @@ HRESULT MultiplayerActivityService::FlushRecentPlayers(
         {
         }
 
-        HRESULT Init(
+        HRESULT InitServiceCall(
             _In_ std::shared_ptr<XboxLiveContextSettings> contextSettings,
             _In_ uint32_t titleId
         ) noexcept
@@ -182,7 +182,7 @@ HRESULT MultiplayerActivityService::FlushRecentPlayers(
     RETURN_HR_IF_FAILED(userResult.Hresult());
 
     auto serviceCall = MakeShared<ServiceCall>(userResult.ExtractPayload());
-    RETURN_HR_IF_FAILED(serviceCall->Init(m_xboxLiveContextSettings, m_titleId));
+    RETURN_HR_IF_FAILED(serviceCall->InitServiceCall(m_xboxLiveContextSettings, m_titleId));
 
     JsonDocument requestBody{ rapidjson::kObjectType };
     auto& a{ requestBody.GetAllocator() };
@@ -496,7 +496,7 @@ XblMultiplayerActivityPlatform MultiplayerActivityService::GetLocalPlatform() no
         XblMultiplayerActivityPlatform::MacOS
     #elif HC_PLATFORM == HC_PLATFORM_NINTENDO_SWITCH
         XblMultiplayerActivityPlatform::Nintendo
-    #elif HC_PLATFORM == HC_PLATFORM_SONY_PLAYSTATION_4
+    #elif HC_PLATFORM_IS_PLAYSTATION
         XblMultiplayerActivityPlatform::PlayStation
     #else
         XblMultiplayerActivityPlatform::Unknown

@@ -33,18 +33,6 @@ pplx::task<xbox_live_result<void>> notification_service::subscribe_to_notificati
 
     return asyncWrapper->Task(hr);
 }
-#elif HC_PLATFORM == HC_PLATFORM_UWP
-pplx::task<xbox_live_result<void>> notification_service::subscribe_to_notifications(
-)
-{
-    auto xblContext = m_xblContext;
-    auto asyncWrapper = new AsyncWrapper<void>();
-    auto hr = XblNotificationSubscribeToNotificationsAsync(
-        xblContext,
-        &asyncWrapper->async);
-
-    return asyncWrapper->Task(hr);
-}
 #elif HC_PLATFORM == HC_PLATFORM_WIN32 && !XSAPI_UNIT_TESTS
 
 inline invite_notification_event_args::invite_notification_event_args(_In_ const XblGameInviteNotificationEventArgs& gameInviteargs)

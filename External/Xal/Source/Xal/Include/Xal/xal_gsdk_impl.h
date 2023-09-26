@@ -214,6 +214,15 @@ void XalUserCloseHandle(
 }
 
 inline
+int32_t XalCompareUsers(
+    _In_ XalUserHandle user1,
+    _In_ XalUserHandle user2
+) noexcept
+{
+    return XUserCompare(user1, user2);
+}
+
+inline
 HRESULT XalUserGetId(
     _In_ XalUserHandle user,
     _Out_ uint64_t* id

@@ -33,6 +33,9 @@ GlobalState::GlobalState(
     m_appConfig{ MakeShared<xbox::services::AppConfig>() },
     m_logger{ MakeShared<logger>() }
 {
+#if HC_PLATFORM_IS_MICROSOFT
+    HCTraceSetEtwEnabled(true);
+#endif
     m_logger->add_log_output(MakeShared<log_hc_output>());
 
 #if _DEBUG && XSAPI_UNIT_TESTS && XSAPI_PROFILE
@@ -152,6 +155,13 @@ HRESULT GlobalState::Create(
     return S_OK;
 }
 
+struct HCCleanupContext
+{
+    XAsyncBlock* xblCleanupAsyncBlock;
+    TaskQueue hcCleanupQueue;
+    XAsyncBlock hcCleanupAsyncBlock;
+};
+
 HRESULT GlobalState::CleanupAsync(
     _In_ XAsyncBlock* async
 ) noexcept
@@ -270,9 +280,21 @@ HRESULT GlobalState::CleanupAsync(
 
                 // Don't call HCCleanup until after GlobalState is destroyed since some of our state
                 // depends on HC state.
-                HCCleanup();
+                auto hcCleanupContext = MakeUnique<HCCleanupContext>();
+                hcCleanupContext->xblCleanupAsyncBlock = data->async;
+                hcCleanupContext->hcCleanupQueue = TaskQueue::DeriveWorkerQueue(data->async->queue);
+                hcCleanupContext->hcCleanupAsyncBlock.queue = hcCleanupContext->hcCleanupQueue.GetHandle();
+                hcCleanupContext->hcCleanupAsyncBlock.context = hcCleanupContext.get();
+                hcCleanupContext->hcCleanupAsyncBlock.callback = GlobalState::HCCleanupComplete;
 
-                XAsyncComplete(data->async, S_OK, 0);
+                HRESULT hr = HCCleanupAsync(&hcCleanupContext->hcCleanupAsyncBlock);
+                if (FAILED(hr))
+                {
+                    HC_TRACE_ERROR_HR(XSAPI, hr, "HCCleanupAsync Failed");
+                    XAsyncComplete(data->async, hr, 0);
+                }
+
+                hcCleanupContext.release();
             });
 
             RETURN_HR_IF_FAILED(hr);
@@ -284,6 +306,22 @@ HRESULT GlobalState::CleanupAsync(
         }
         }
     });
+}
+
+void GlobalState::HCCleanupComplete(XAsyncBlock* async) noexcept
+{
+    UniquePtr<HCCleanupContext> context{ static_cast<HCCleanupContext*>(async->context) };
+    
+    XAsyncBlock* xblCleanupAsyncBlock = context->xblCleanupAsyncBlock;
+    HRESULT hr = XAsyncGetStatus(async, true);
+    if (hr == E_HC_INTERNAL_STILLINUSE)
+    {
+        // If something else is still referencing libHttpClient, consider that a success
+        hr = S_OK;
+    }
+    context.reset(); // Cleanup context before returning to caller
+
+    XAsyncComplete(xblCleanupAsyncBlock, hr, 0);
 }
 
 std::shared_ptr<GlobalState> GlobalState::Get() noexcept

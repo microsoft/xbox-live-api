@@ -20,18 +20,6 @@ STDAPI XblNotificationSubscribeToNotificationsAsync(
     _In_ XAsyncBlock* asyncBlock,
     _In_ const char* deviceToken
 ) XBL_NOEXCEPT;
-
-#elif HC_PLATFORM == HC_PLATFORM_UWP
-/// <summary>
-/// Subscribes the title to push notifications.
-/// </summary>
-/// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
-/// <param name="asyncBlock">Caller allocated AsyncBlock.</param>
-/// <returns>HRESULT return code for this API operation.</returns>
-STDAPI XblNotificationSubscribeToNotificationsAsync(
-    _In_ XblContextHandle xboxLiveContext,
-    _In_ XAsyncBlock* asyncBlock
-) XBL_NOEXCEPT;
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_UWP

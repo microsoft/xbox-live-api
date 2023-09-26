@@ -46,7 +46,6 @@ typedef std::chrono::steady_clock chrono_clock_t;
 namespace xbox {
     namespace services {
         class xbox_live_context_settings;
-        class local_config;
         class JsonAllocator;
         namespace system {
             class xbox_live_user;

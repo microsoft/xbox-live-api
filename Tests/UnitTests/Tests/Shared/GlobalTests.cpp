@@ -193,8 +193,10 @@ public:
             {
                 UNREFERENCED_PARAMETER(memType);
                 g_memFreeHookCalls++;
+#if _DEBUG
                 size_t removed{ g_allocationMap.erase(pAddress) };
                 assert(removed);
+#endif
                 delete[] pAddress;
             }
         } memoryManager;

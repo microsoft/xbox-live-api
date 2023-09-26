@@ -233,7 +233,7 @@ namespace details
         _ASYNCRTIMP scoped_c_thread_locale();
         _ASYNCRTIMP ~scoped_c_thread_locale();
 
-#if !defined(ANDROID) && !defined(__ANDROID__) // CodePlex 269
+#if !defined(ANDROID) && !defined(__ANDROID__) && !defined(__ORBIS__) && !defined(__PROSPERO__) // CodePlex 269
 #ifdef _WIN32
         typedef _locale_t xplat_locale;
 #else
@@ -246,7 +246,7 @@ namespace details
 #ifdef _WIN32
         std::string m_prevLocale;
         int m_prevThreadSetting;
-#elif !(defined(ANDROID) || defined(__ANDROID__))
+#elif !(defined(ANDROID) || defined(__ANDROID__) || defined(__ORBIS__) || defined(__PROSPERO__))
         locale_t m_prevLocale;
 #endif
         scoped_c_thread_locale(const scoped_c_thread_locale &);

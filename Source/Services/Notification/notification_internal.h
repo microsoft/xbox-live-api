@@ -137,24 +137,5 @@ private:
     std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> m_rtaManager;
     std::shared_ptr<NotificationSubscription> m_rtaSubscription;
 };
-#elif HC_PLATFORM == HC_PLATFORM_UWP
-class UWPNotificationService : public NotificationService
-{
-public:
-    UWPNotificationService(
-        _In_ User&& user,
-        _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
-    ) noexcept;
-
-    HRESULT RegisterWithNotificationService(
-        _In_ AsyncContext<HRESULT> async
-    ) noexcept override;
-
-private:
-    void OnPushNotificationReceived(
-        _In_ Windows::Networking::PushNotifications::PushNotificationChannel ^sender,
-        _In_ Windows::Networking::PushNotifications::PushNotificationReceivedEventArgs ^args
-    );
-};
 #endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_END

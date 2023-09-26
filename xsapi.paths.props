@@ -3,9 +3,9 @@
   <PropertyGroup>
     <XsapiSourceRoot>$(MSBuildThisFileDirectory)</XsapiSourceRoot>
     <PackagesRoot Condition="'$(PackagesRoot)'==''">$(XsapiSourceRoot)External\Packages\</PackagesRoot>
-    <OutDir>$(XsapiSourceRoot)Bins\Binaries\$(Configuration)\$(Platform)\$(MSBuildProjectName)\</OutDir>
-    <IntDir>$(XsapiSourceRoot)Bins\Obj\$(Configuration)\$(Platform)\$(MSBuildProjectName)\</IntDir>
-    <OutputPath>$(OutDir)</OutputPath>
-    <IntermediateOutputPath>$(IntDir)</IntermediateOutputPath>
+    <XsapiOutDir>$(XsapiSourceRoot)Bins\Binaries\$(Configuration)\$(Platform)\$(MSBuildProjectName)\</XsapiOutDir>
+    <XsapiIntDir>$(XsapiSourceRoot)Bins\Obj\$(Configuration)\$(Platform)\$(MSBuildProjectName)\</XsapiIntDir>
+    <!--Used by CSharp projects-->
+    <OutputPath>$(XsapiOutDir)</OutputPath>
   </PropertyGroup>
 </Project>

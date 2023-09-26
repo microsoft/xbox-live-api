@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- This file is a replacement for Microsoft.Cpp.Default.Props and Microsoft.Cpp.props for Cpp projects targeting GDK -->
+  <Import Project="..\xsapi.paths.props" />
+  <!--Bring in LHC build config-->
+  <!--Order is important here. We have to define default platform toolset before importing libHttpClient.GDK.props as it will set to v100 as default-->
+  <PropertyGroup>
+    <PlatformToolset Condition="'$(PlatformToolset)' == '' and $(VisualStudioVersion)==15">v141</PlatformToolset>
+    <!--Spectre mitigation breaks the GDK BWOI builds so conditionally disable that-->
+    <SpectreMitigation Condition="'$(GDKUseBWOI)'=='true'">false</SpectreMitigation>
+  </PropertyGroup>
+  <Import Project="$(XsapiSourceRoot)\External\Xal\External\libHttpClient\Build\libHttpClient.GDK.props" />
+  <!--Overrides to LHC build config-->
+  <PropertyGroup>
+    <OutDir>$(XsapiOutDir)</OutDir>
+    <IntDir>$(XsapiIntDir)</IntDir>
+  </PropertyGroup>
+</Project>

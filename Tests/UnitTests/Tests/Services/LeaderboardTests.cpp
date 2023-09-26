@@ -166,7 +166,7 @@ public:
         }
     }
 
-    void VerifyLeaderboardRow(XblLeaderboardRow* row, JsonValue rowToVerify, const std::vector<char*>& columns)
+    void VerifyLeaderboardRow(XblLeaderboardRow* row, JsonValue rowToVerify, const std::vector<char const*>& columns)
     {
         VERIFY_IS_NOT_NULL(row);
         VERIFY_ARE_EQUAL_STR(row->gamertag, rowToVerify["gamertag"].GetString());
@@ -204,7 +204,7 @@ public:
         }
     }
 
-    void VerifyLeadershipResult(XblLeaderboardResult* result, JsonValue& resultToVerify, const std::vector<char*>& columns = std::vector<char*>())
+    void VerifyLeadershipResult(XblLeaderboardResult* result, JsonValue& resultToVerify, const std::vector<char const*>& columns = {})
     {
         VERIFY_IS_NOT_NULL(result);
 
@@ -221,7 +221,7 @@ public:
         }
     }
 
-    XblLeaderboardResult* TestAndGetLeaderboardResult(XblContextHandle xblContextHandle, XblLeaderboardQuery query, const char* responseStr, uint32_t bufferSizeMultiplier, const std::vector<char*>& columns = std::vector<char*>())
+    XblLeaderboardResult* TestAndGetLeaderboardResult(XblContextHandle xblContextHandle, XblLeaderboardQuery query, const char* responseStr, uint32_t bufferSizeMultiplier, const std::vector<char const*>& columns = {})
     {
         XAsyncBlock async{};
         size_t resultSize{};
@@ -317,7 +317,7 @@ public:
         HttpMock mock2("GET", url.str(), 200);
         mock2.SetResponseBody(defaultLeaderboardData);
 
-        std::vector<char*> vecColumns{ "HasSkull", "Level" };
+        std::vector<char const*> vecColumns{ "HasSkull", "Level" };
         const char* columns2[2] = { vecColumns[0], vecColumns[1] };
         query.additionalColumnleaderboardNamesCount = 2;
         query.additionalColumnleaderboardNames = columns2;
@@ -399,7 +399,7 @@ public:
         HttpMock mock2("GET", url.str(), 200);
         mock2.SetResponseBody(defaultLeaderboardData);
 
-        std::vector<char*> vecColumns{ "HasSkull", "Level" };
+        std::vector<char const*> vecColumns{ "HasSkull", "Level" };
         const char* columns2[2] = { vecColumns[0], vecColumns[1] };
         query.additionalColumnleaderboardNamesCount = 2;
         query.additionalColumnleaderboardNames = columns2;
@@ -445,7 +445,7 @@ public:
         HttpMock mock1("GET", url.str(), 200);
         mock1.SetResponseBody(defaultLeaderboardData);
         
-        std::vector<char*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
+        std::vector<char const*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
         const char* columns[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
         query.additionalColumnleaderboardNamesCount = 4;
         query.additionalColumnleaderboardNames = columns;
@@ -478,7 +478,7 @@ public:
         HttpMock mock1("GET", url.str(), 200);
         mock1.SetResponseBody(defaultLeaderboardData);
 
-        std::vector<char*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
+        std::vector<char const*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
         const char* columns4[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
         query.additionalColumnleaderboardNamesCount = 4;
         query.additionalColumnleaderboardNames = columns4;
@@ -527,7 +527,7 @@ public:
         HttpMock mock2("GET", url.str(), 200);
         mock2.SetResponseBody(defaultLeaderboardData);
 
-        std::vector<char*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
+        std::vector<char const*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
         const char* columns[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
         query.additionalColumnleaderboardNamesCount = 4;
         query.additionalColumnleaderboardNames = columns;
@@ -597,7 +597,7 @@ public:
         HttpMock mock2("GET", url.str(), 200);
         mock2.SetResponseBody(defaultLeaderboardData);
         
-        std::vector<char*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
+        std::vector<char const*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
         const char* columns4[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
         query.additionalColumnleaderboardNamesCount = 4;
         query.additionalColumnleaderboardNames = columns4;
@@ -649,7 +649,7 @@ public:
         HttpMock mock2("GET", url.str(), 200);
         mock2.SetResponseBody(defaultLeaderboardData);
 
-        std::vector<char*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
+        std::vector<char const*> vecColumns{ "HasSkull", "Kills", "Level", "Empty" };
         const char* columns4[4] = { vecColumns[0], vecColumns[1], vecColumns[2], vecColumns[3] };
         query.additionalColumnleaderboardNamesCount = 4;
         query.additionalColumnleaderboardNames = columns4;

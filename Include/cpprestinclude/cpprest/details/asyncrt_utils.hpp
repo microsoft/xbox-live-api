@@ -64,7 +64,7 @@ namespace utility
 namespace details
 {
 
-#if !defined(ANDROID) && !defined(__ANDROID__)
+#if !defined(ANDROID) && !defined(__ANDROID__) && !defined(__ORBIS__) && !defined(__PROSPERO__)
 std::once_flag g_c_localeFlag;
 std::unique_ptr<scoped_c_thread_locale::xplat_locale, void(*)(scoped_c_thread_locale::xplat_locale *)> g_c_locale(nullptr, [](scoped_c_thread_locale::xplat_locale *){});
 scoped_c_thread_locale::xplat_locale scoped_c_thread_locale::c_locale()
@@ -139,7 +139,7 @@ scoped_c_thread_locale::~scoped_c_thread_locale()
         _configthreadlocale(m_prevThreadSetting);
     }
 }
-#elif (defined(ANDROID) || defined(__ANDROID__))
+#elif (defined(ANDROID) || defined(__ANDROID__) || defined(__ORBIS__) || defined(__PROSPERO__))
 scoped_c_thread_locale::scoped_c_thread_locale() {}
 scoped_c_thread_locale::~scoped_c_thread_locale() {}
 #else
@@ -639,7 +639,11 @@ utility::string_t datetime::to_string(date_format format) const
     time_t time = (time_t)input - (time_t)11644473600LL;// diff between windows and unix epochs (seconds)
 
     struct tm datetime;
+#if defined(__ORBIS__) || defined(__PROSPERO__)
+    gmtime_s(&time, &datetime);
+#else
     gmtime_r(&time, &datetime);
+#endif // __ORBIS__ || __PROSPERO__
 
     const int max_dt_length = 64;
     char output[max_dt_length+1] = {0};

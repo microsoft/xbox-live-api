@@ -119,6 +119,16 @@ Result<void> AchievementsManagerUser::Initialize(
                 // convert to manager event
                 for (uint32_t entryIndex = 0; entryIndex < args.entryCount; ++entryIndex)
                 {
+                    // In rare cases, we may get a notification for an achievement that we don't have
+                    //  cached. We'll log but otherwise ignore the RTA notification in those cases
+                    auto achievementId = args.updatedAchievementEntries[entryIndex].achievementId;
+
+                    if (sharedThis->m_userAchievements.find(achievementId) == sharedThis->m_userAchievements.end())
+                    {
+                        LOGS_WARN << "Ignoring unexpected Achievement Progress RTA event for achievement not in the AchievementManager local cache.";
+                        continue;
+                    }
+
                     XblAchievementsManagerEvent achievementEvent;
                     achievementEvent.xboxUserId = sharedThis->m_xuid;
                     achievementEvent.eventType = XblAchievementsManagerEventType::AchievementProgressUpdated;
@@ -836,6 +846,15 @@ HRESULT AchievementsManagerUser::HandleAchievementsResults(
                 //  existing achievement, and generate the proper event from it.
                 if (m_isInitialized)
                 {
+                    // In rare cases we'll get back a notification that isn't in our local cache. If that happens
+                    //  we'll simply ignore the new achievement until the title restarts or the user is removed
+                    //  and re-added to achievements manager
+                    if (m_userAchievements.find(achievement.id) == m_userAchievements.end())
+                    {
+                        LOGS_WARN << "Fetch achievements returned new achievement that wasn't present in local achievement cache.";
+                        continue;
+                    }
+
                     // We only want to have this function generate unlock events if we're expecting 
                     //  RTA notifications. Otherwise it will be produced from the progress change
                     //  event.
