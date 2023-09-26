@@ -319,20 +319,6 @@ HRESULT PresenceService::SetPresence(
     (HttpResult result)
     {
         HRESULT hr{ Failed(result) ? result.Hresult() : result.Payload()->Result() };
-        if (SUCCEEDED(hr))
-        {
-            uint32_t heartbeatDelayInMins{ 0 };
-
-            auto heartbeatAfterHeader = result.Payload()->GetResponseHeader("X-Heartbeat-After");
-            if (!heartbeatAfterHeader.empty())
-            {
-                heartbeatDelayInMins = utils::internal_string_to_uint32(heartbeatAfterHeader) / 60;
-            }
-            else
-            {
-                heartbeatDelayInMins = 5;
-            }
-        }
         async.Complete(hr);
     } });
 }

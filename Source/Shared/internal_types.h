@@ -56,7 +56,6 @@ typedef std::chrono::system_clock chrono_clock_t;
 namespace xbox {
     namespace services {
         class xbox_live_context_settings;
-        class local_config;
         namespace system {
             class xbox_live_user;
         }

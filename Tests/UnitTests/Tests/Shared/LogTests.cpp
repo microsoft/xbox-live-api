@@ -102,18 +102,16 @@ public:
                 m_message{ std::move(message) },
                 m_loopCount{ loopCount }
             {
-                auto hr = XAsyncRun(&m_async, [](XAsyncBlock* async)
+                XAsyncRun(&m_async, [](XAsyncBlock* async)
+                {
+                    auto pThis{ static_cast<LogTask*>(async->context) };
+                    for (size_t i = 0; i < pThis->m_loopCount; ++i)
                     {
-                        auto pThis{ static_cast<LogTask*>(async->context) };
-                        for (size_t i = 0; i < pThis->m_loopCount; ++i)
-                        {
-                            pThis->m_logger->add_log(log_entry(HCTraceLevel::Error, "test", pThis->m_message) << i);
-                        }
-                        pThis->Completed.Set();
-                        return S_OK;
-                    });
-
-                assert(SUCCEEDED(hr));
+                        pThis->m_logger->add_log(log_entry(HCTraceLevel::Error, "test", pThis->m_message) << i);
+                    }
+                    pThis->Completed.Set();
+                    return S_OK;
+                });
             }
 
             Event Completed;

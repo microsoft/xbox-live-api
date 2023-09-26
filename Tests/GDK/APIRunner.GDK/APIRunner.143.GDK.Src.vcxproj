@@ -386,6 +386,7 @@
       <PreprocessorDefinitions>ATG_ENABLE_TELEMETRY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ShowIncludes>true</ShowIncludes>
     </ClCompile>
     <FXCompile>
       <ShaderModel>5.1</ShaderModel>

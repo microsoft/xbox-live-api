@@ -8,7 +8,13 @@
 
 #include <httpClient/pal.h>
 
-#if HC_PLATFORM == HC_PLATFORM_WIN32
+#if HC_PLATFORM_HEADER_OVERRIDE
+#ifdef XAL_PLATFORM_TYPES_PATH
+#include XAL_PLATFORM_TYPES_PATH
+#else
+#error Platform header override is enabled but XAL_PLATFORM_TYPES_PATH is undefined
+#endif
+#elif HC_PLATFORM == HC_PLATFORM_WIN32
 #include <Xal/xal_win32.h>
 #elif HC_PLATFORM == HC_PLATFORM_UWP
 #include <Xal/xal_uwp.h>
@@ -78,6 +84,9 @@ extern "C"
 #define E_XAL_MALFORMEDCLIENTID             MAKE_E_HC(0x5116L) // 0x89235116
 #define E_XAL_MISSINGCLIENTID               MAKE_E_HC(0x5117L) // 0x89235117
 #define E_XAL_MISSINGTITLEID                MAKE_E_HC(0x5118L) // 0x89235118
+#define E_XAL_CONTENT_ISOLATION             MAKE_E_HC(0x5119L) // 0x89235119
+#define E_XAL_SANDBOX_NOT_ALLOWED           MAKE_E_HC(0x511AL) // 0x8923511A
+#define E_XAL_GAMEWINDOWNOTFOREGROUND       MAKE_E_HC(0x511BL) // 0x8923511B
 
 // E_XAL_INTERNAL_* values should never be returned to callers of XAL.
 #define E_XAL_INTERNAL_SWITCHUSER           MAKE_E_HC(0x5171L) // 0x89235171
@@ -103,6 +112,9 @@ extern "C"
 #undef E_XAL_MALFORMEDCLIENTID
 #undef E_XAL_MISSINGCLIENTID
 #undef E_XAL_MISSINGTITLEID
+#undef E_XAL_CONTENT_ISOLATION
+#undef E_XAL_SANDBOX_NOT_ALLOWED
+#undef E_XAL_GAMEWINDOWNOTFOREGROUND
 
 #define E_XAL_USERSETFULL                   E_GAMEUSER_MAX_USERS_ADDED                      // 0x89245100
 #define E_XAL_USERSIGNEDOUT                 E_GAMEUSER_SIGNED_OUT                           // 0x89245101
@@ -117,6 +129,9 @@ extern "C"
 #define E_XAL_MALFORMEDCLIENTID             E_GAMEUSER_MALFORMED_MSAAPPID                   // 0x89245113
 #define E_XAL_MISMATCHEDTITLEANDCLIENTIDS   E_GAMEUSER_INCONSISTENT_MSAAPPID_AND_TITLEID    // 0x89245114
 #define E_XAL_MISSINGCLIENTID               E_GAMEUSER_NO_MSAAPPID                          // 0x89245115
+#define E_XAL_CONTENT_ISOLATION             XO_E_CONTENT_ISOLATION                          // 0x8015DC12
+#define E_XAL_SANDBOX_NOT_ALLOWED           XO_E_SANDBOX_NOT_ALLOWED                        // 0x8015DC19
+#define E_XAL_GAMEWINDOWNOTFOREGROUND       E_GAMERUNTIME_WINDOW_NOT_FOREGROUND             // 0x89240103
 #endif
 
 //------------------------------------------------------------------------------

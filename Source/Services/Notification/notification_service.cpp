@@ -157,7 +157,7 @@ HRESULT NotificationService::RegisterForNotificationsHelper(
     default:
     {
         auto workQueue = async.Queue().DeriveWorkerQueue();
-        m_registrationAsync = AsyncContext<HRESULT>::Collapse({ std::move(m_registrationAsync), std::move(async) });
+        m_registrationAsync = std::move(async);
         m_registrationStatus = RegistrationStatus::Registering;
 
         xsapi_internal_stringstream str;

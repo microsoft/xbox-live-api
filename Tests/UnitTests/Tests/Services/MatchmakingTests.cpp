@@ -38,7 +38,7 @@ public:
         VERIFY_ARE_EQUAL_STR(result->SessionName, resultToVerify["name"].GetString());
     }
 
-    char* ConvertMatchStatusToString(
+    char const* ConvertMatchStatusToString(
         XblTicketStatus ticketStatus
         )
     {
@@ -59,7 +59,7 @@ public:
         }
     }
 
-    char* ConvertPerserveSessionModeToString(
+    char const* ConvertPerserveSessionModeToString(
         XblPreserveSessionMode preserveSessionMode
         )
     {

@@ -10,8 +10,6 @@ Result<XblMultiplayerActivityDetails> Serializers::DeserializeMultiplayerActivit
     _In_ const JsonValue& json
 )
 {
-    HRESULT errc = S_OK;
-
     XblMultiplayerActivityDetails returnResult{};
     XSAPI_ASSERT(!json.IsNull());
 
@@ -19,7 +17,6 @@ Result<XblMultiplayerActivityDetails> Serializers::DeserializeMultiplayerActivit
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "type", type));
     if (type.compare("activity") != 0)
     {
-        errc = WEB_E_INVALID_JSON_STRING;
         return returnResult;
     }
 

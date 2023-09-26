@@ -51,7 +51,10 @@
 #undef RAPIDJSON_NAMESPACE_BEGIN
 #undef RAPIDJSON_NAMESPACE_END
 #endif
+#pragma warning( push )
+#pragma warning( disable : 4365 )
 #include "../../../External/rapidjson/include/rapidjson/document.h"
+#pragma warning( pop )
 
 #include "../Include/multidevice.h"
 #include "../Include/api_explorer.h"

@@ -68,12 +68,14 @@ private:
         UNREFERENCED_PARAMETER(context);
         UNREFERENCED_PARAMETER(queue);
 
+#if _DEBUG
         auto pThis{ static_cast<SingleThreadDispatcher*>(context) };
         assert(pThis);
         assert(queue == pThis->m_queue.GetHandle());
 
         // Nothing should be submitted to the queue after XblCleanup has completed
         assert(!pThis->m_shutdown);
+#endif
     }
 
     TaskQueue m_queue;

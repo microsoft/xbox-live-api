@@ -28,7 +28,7 @@ HRESULT MockWebsocket::Connect(
 
     return m_queue.RunWork([sharedThis{ shared_from_this() }]
     {
-        std::unique_lock<std::recursive_mutex>{ sharedThis->m_mutex };
+        std::unique_lock<std::recursive_mutex> lock{ sharedThis->m_mutex };
         if (s_connectHandler == nullptr)
         {
             sharedThis->m_connectCompleteHandler(WebsocketResult{ S_OK });

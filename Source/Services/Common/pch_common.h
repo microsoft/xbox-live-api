@@ -119,9 +119,6 @@
 #include "xsapi-c/xbox_live_context_c.h"
 
 #include "shared_macros.h"
-#if HC_PLATFORM == HC_PLATFORM_UWP
-#include <collection.h>
-#endif
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(x) sizeof(x) / sizeof(x[0])
@@ -130,5 +127,9 @@
 #if HC_PLATFORM_IS_MICROSOFT
     #define SPRINTF(buffer, size, format, ...) sprintf_s(buffer, size, format, __VA_ARGS__)
 #else
-    #define SPRINTF(buffer, size, format, ...) sprintf(buffer, format, __VA_ARGS__)
+    #define SPRINTF(buffer, size, format, ...) snprintf(buffer, size, format, __VA_ARGS__)
+#endif
+
+#if HC_PLATFORM_IS_PLAYSTATION
+#include "xsapi_ps.h"
 #endif

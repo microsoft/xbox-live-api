@@ -173,9 +173,6 @@ HRESULT XblContext::Initialize(
         RETURN_HR_IF_FAILED(m_notificationService->Initialize());
 #elif HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_IOS
         m_notificationService = MakeShared<xbox::services::notification::MobileNotificationService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
-#elif HC_PLATFORM == HC_PLATFORM_UWP
-        m_notificationService = MakeShared<xbox::services::notification::UWPNotificationService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
-        m_notificationService->RegisterWithNotificationService(AsyncContext<HRESULT>{ globalQueue });
 #endif
 #endif
     }

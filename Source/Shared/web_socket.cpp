@@ -157,6 +157,17 @@ HRESULT Websocket::Disconnect() noexcept
     return HCWebSocketDisconnect(m_hcWebsocket);
 }
 
+void Websocket::OnMessageReceived(String&& m) const noexcept
+{
+    // LHC doesn't guarantee that it will invoke message handlers on a specific thread. Because we want to ensure our
+    // callbacks are made on the proper thread, submit the message handler to the provided TaskQueue.
+
+    m_queue.RunWork([clientHandler = m_receiveHandler, message = std::move(m) ]() mutable
+    {
+        clientHandler(std::move(message));
+    });
+}
+
 void Websocket::ReceiveHandler(
     _In_ HCWebsocketHandle /*websocket*/,
     _In_z_ const char* incomingBodyString,
@@ -164,7 +175,7 @@ void Websocket::ReceiveHandler(
 )
 {
     auto thisPtr{ static_cast<Websocket*>(functionContext) };
-    thisPtr->m_receiveHandler(incomingBodyString);
+    thisPtr->OnMessageReceived(incomingBodyString);
 }
 
 void Websocket::BinaryReceiveHandler(
@@ -175,7 +186,7 @@ void Websocket::BinaryReceiveHandler(
 )
 {
     auto thisPtr{ static_cast<Websocket*>(functionContext) };
-    thisPtr->m_receiveHandler(xsapi_internal_string{ reinterpret_cast<const char*>(payloadBytes), payloadSize });
+    thisPtr->OnMessageReceived(xsapi_internal_string{ reinterpret_cast<const char*>(payloadBytes), payloadSize });
 }
 
 void Websocket::CloseHandler(

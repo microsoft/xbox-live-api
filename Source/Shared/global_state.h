@@ -110,6 +110,8 @@ private:
     GlobalState(const GlobalState&) = delete;
     GlobalState& operator=(const GlobalState&) = delete;
 
+    static void CALLBACK HCCleanupComplete(XAsyncBlock* async) noexcept;
+
     mutable std::mutex m_mutex;
     TaskQueue m_taskQueue{ nullptr };
     std::shared_ptr<achievements::manager::AchievementsManager> m_achievementsManager;

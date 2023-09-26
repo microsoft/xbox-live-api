@@ -395,12 +395,12 @@ HRESULT XalPlatformRemoteConnectSetEventHandlers(
     trampolines.show = [](void* ctx, uint32_t /*cuid*/, XalPlatformOperation op, char const* url, char const* code)
     {
         auto handlers = static_cast<XalPlatformRemoteConnectEventHandlers*>(ctx);
-        handlers->show(ctx, nullptr, op, url, code);
+        handlers->show(handlers->context, nullptr, op, url, code);
     };
     trampolines.close = [](void* ctx, uint32_t /*cuid*/, XalPlatformOperation op)
     {
         auto handlers = static_cast<XalPlatformRemoteConnectEventHandlers*>(ctx);
-        handlers->close(ctx, nullptr, op);
+        handlers->close(handlers->context, nullptr, op);
     };
     trampolines.context = &s_handlers;
 

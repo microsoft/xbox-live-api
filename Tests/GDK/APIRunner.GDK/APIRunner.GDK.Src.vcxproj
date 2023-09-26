@@ -1,218 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Gaming.Xbox.Scarlett.x64">
-      <Configuration>Debug</Configuration>
-      <Platform>Gaming.Xbox.Scarlett.x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Profile|Gaming.Xbox.Scarlett.x64">
-      <Configuration>Profile</Configuration>
-      <Platform>Gaming.Xbox.Scarlett.x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Gaming.Xbox.Scarlett.x64">
-      <Configuration>Release</Configuration>
-      <Platform>Gaming.Xbox.Scarlett.x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Gaming.Xbox.XboxOne.x64">
-      <Configuration>Release</Configuration>
-      <Platform>Gaming.Xbox.XboxOne.x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Profile|Gaming.Xbox.XboxOne.x64">
-      <Configuration>Profile</Configuration>
-      <Platform>Gaming.Xbox.XboxOne.x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|Gaming.Xbox.XboxOne.x64">
-      <Configuration>Debug</Configuration>
-      <Platform>Gaming.Xbox.XboxOne.x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Gaming.Desktop.x64">
-      <Configuration>Release</Configuration>
-      <Platform>Gaming.Desktop.x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Profile|Gaming.Desktop.x64">
-      <Configuration>Profile</Configuration>
-      <Platform>Gaming.Desktop.x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|Gaming.Desktop.x64">
-      <Configuration>Debug</Configuration>
-      <Platform>Gaming.Desktop.x64</Platform>
-    </ProjectConfiguration>
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <RootNamespace>APIRunner_GDK</RootNamespace>
     <ProjectGuid>{46F31A54-4C74-41A8-B294-26B5689E51EF}</ProjectGuid>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <Keyword>Win32Proj</Keyword>
-    <!-- - - - -->
-    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
-    <TargetRuntime>Native</TargetRuntime>
-    <GDKExtLibNames>Xbox.Services.API.C</GDKExtLibNames>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(xsapi.paths.props))" />
+  <Import Project="$(XsapiSourceRoot)\Build\xsapi.gdk.props" />
+  <Import Project="$(XsapiSourceRoot)\xsapi.staticlib.props" />
   <Import Condition="Exists($(ATGBuildProps))" Project="$(ATGBuildProps)" />
-  <Import Project="$(MSBuildThisFileDirectory)..\..\..\Build\xsapi.gdk.bwoi.props" />
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Xbox.XboxOne.x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-    <EmbedManifest>false</EmbedManifest>
-    <GenerateManifest>false</GenerateManifest>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Xbox.Scarlett.x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-    <EmbedManifest>false</EmbedManifest>
-    <GenerateManifest>false</GenerateManifest>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Gaming.Xbox.XboxOne.x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-    <EmbedManifest>false</EmbedManifest>
-    <GenerateManifest>false</GenerateManifest>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Gaming.Xbox.Scarlett.x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-    <EmbedManifest>false</EmbedManifest>
-    <GenerateManifest>false</GenerateManifest>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Xbox.XboxOne.x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
-    <EmbedManifest>false</EmbedManifest>
-    <GenerateManifest>false</GenerateManifest>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Xbox.Scarlett.x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
-    <EmbedManifest>false</EmbedManifest>
-    <GenerateManifest>false</GenerateManifest>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Desktop.x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Gaming.Desktop.x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Desktop.x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v141</PlatformToolset>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-    <Import Project="..\..\APIExplorer\APIExplorer.Shared.vcxitems" Label="Shared" />
-  </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Xbox.XboxOne.x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Xbox.Scarlett.x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Gaming.Xbox.XboxOne.x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Gaming.Xbox.Scarlett.x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Xbox.XboxOne.x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Xbox.Scarlett.x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Desktop.x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Gaming.Desktop.x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Desktop.x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Xbox.XboxOne.x64'">
-    <ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
-    <LibraryPath>$(Console_SdkLibPath)</LibraryPath>
-    <LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
-    <IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
-    <ExecutablePath>$(Console_SdkRoot)bin;$(Console_SdkToolPath);$(ExecutablePath)</ExecutablePath>
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Xbox.Scarlett.x64'">
-    <ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
-    <LibraryPath>$(Console_SdkLibPath)</LibraryPath>
-    <LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
-    <IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
-    <ExecutablePath>$(Console_SdkRoot)bin;$(Console_SdkToolPath);$(ExecutablePath)</ExecutablePath>
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Gaming.Xbox.XboxOne.x64'">
-    <ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
-    <LibraryPath>$(Console_SdkLibPath)</LibraryPath>
-    <LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
-    <IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
-    <ExecutablePath>$(Console_SdkRoot)bin;$(Console_SdkToolPath);$(ExecutablePath)</ExecutablePath>
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Gaming.Xbox.Scarlett.x64'">
-    <ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
-    <LibraryPath>$(Console_SdkLibPath)</LibraryPath>
-    <LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
-    <IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
-    <ExecutablePath>$(Console_SdkRoot)bin;$(Console_SdkToolPath);$(ExecutablePath)</ExecutablePath>
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Xbox.XboxOne.x64'">
-    <ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
-    <LibraryPath>$(Console_SdkLibPath)</LibraryPath>
-    <LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
-    <IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
-    <ExecutablePath>$(Console_SdkRoot)bin;$(Console_SdkToolPath);$(ExecutablePath)</ExecutablePath>
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Xbox.Scarlett.x64'">
-    <ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
-    <LibraryPath>$(Console_SdkLibPath)</LibraryPath>
-    <LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
-    <IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
-    <ExecutablePath>$(Console_SdkRoot)bin;$(Console_SdkToolPath);$(ExecutablePath)</ExecutablePath>
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
+  <Import Project="..\..\APIExplorer\APIExplorer.Shared.vcxitems" Label="Shared" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Desktop.x64'">
-    <LibraryPath>$(Console_SdkLibPath);$(LibraryPath)</LibraryPath>
-    <IncludePath>$(Console_SdkIncludeRoot);$(IncludePath)</IncludePath>
-    <ExecutablePath>$(Console_SdkRoot)bin;$(Console_SdkToolPath);$(ExecutablePath)</ExecutablePath>
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Gaming.Desktop.x64'">
     <LibraryPath>$(Console_SdkLibPath);$(LibraryPath)</LibraryPath>
     <IncludePath>$(Console_SdkIncludeRoot);$(IncludePath)</IncludePath>
     <ExecutablePath>$(Console_SdkRoot)bin;$(Console_SdkToolPath);$(ExecutablePath)</ExecutablePath>
@@ -238,10 +36,6 @@
   </ItemDefinitionGroup>
   <PropertyGroup>
     <XblTraceBuildInfo>true</XblTraceBuildInfo>
-  </PropertyGroup>
-  <PropertyGroup>
-    <XsapiPropsFile>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), xsapi.staticlib.props))\xsapi.staticlib.props</XsapiPropsFile>
-    <XsapiEnableCpp>1</XsapiEnableCpp>
   </PropertyGroup>
   <Import Project="$(XsapiPropsFile)" Condition="Exists($(XsapiPropsFile))" />
   <PropertyGroup>
