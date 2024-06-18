@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "xsapi_json_utils.h"
+#include "uri_impl.h"
 
 using namespace xbox::services::legacy;
 
@@ -191,8 +192,14 @@ HRESULT JsonUtils::ExtractJsonStringToCharArray(
 {
     xsapi_internal_string jsonStr;
     RETURN_HR_IF_FAILED(ExtractJsonString(jsonValue, stringName, jsonStr));
-    utils::strcpy(charArray, size, jsonStr.data());
-
+    if (jsonStr.size() < size)
+    {
+        utils::strcpy(charArray, size, jsonStr.data());
+    }
+    else
+    {
+        return E_INVALIDARG;
+    }
     return S_OK;
 }
 

@@ -22,8 +22,6 @@
 #include <Xal/xal_xdk.h>
 #elif HC_PLATFORM == HC_PLATFORM_GDK
 #include <Xal/xal_gsdk.h>
-#elif HC_PLATFORM == HC_PLATFORM_GRTS
-#include <Xal/xal_grts.h>
 #elif HC_PLATFORM == HC_PLATFORM_ANDROID
 #include <Xal/xal_android.h>
 #elif HC_PLATFORM_IS_APPLE
@@ -42,14 +40,12 @@
 #define XAL_ENABLE_BACK_COMPAT_SHIMS 1
 #endif
 
-#if HC_PLATFORM == HC_PLATFORM_GRTS
-#ifndef FEATURE_ASSERTS_ENABLED
-#if defined(DBG)
-#define FEATURE_ASSERTS_ENABLED 1
-#else
-#define FEATURE_ASSERTS_ENABLED 0
+#ifndef XAL_OS_ERRORS
+#define XAL_OS_ERRORS 0
 #endif
-#endif
+
+#ifndef XAL_CUSTOM_ALLOCATOR
+#define XAL_CUSTOM_ALLOCATOR 1
 #endif
 
 extern "C"
@@ -87,6 +83,8 @@ extern "C"
 #define E_XAL_CONTENT_ISOLATION             MAKE_E_HC(0x5119L) // 0x89235119
 #define E_XAL_SANDBOX_NOT_ALLOWED           MAKE_E_HC(0x511AL) // 0x8923511A
 #define E_XAL_GAMEWINDOWNOTFOREGROUND       MAKE_E_HC(0x511BL) // 0x8923511B
+#define E_XAL_UNLISTEDCONSENT               MAKE_E_HC(0x511CL) // 0x8923511C
+#define E_XAL_CONSENTNOTAPPLICABLE          MAKE_E_HC(0x511DL) // 0x8923511D
 
 // E_XAL_INTERNAL_* values should never be returned to callers of XAL.
 #define E_XAL_INTERNAL_SWITCHUSER           MAKE_E_HC(0x5171L) // 0x89235171
@@ -98,7 +96,7 @@ extern "C"
 #define E_XAL_INTERNAL_NODISPLAYCLAIMSFOUND MAKE_E_HC(0x5177L) // 0x89235177
 
 // GDK has system definitions for some error values
-#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_GRTS
+#if XAL_OS_ERRORS
 #undef E_XAL_USERSETFULL
 #undef E_XAL_USERSIGNEDOUT
 #undef E_XAL_UIREQUIRED
@@ -268,6 +266,28 @@ typedef enum XalGamerPictureSize
 } XalGamerPictureSize;
 
 /// <summary>
+/// Enum defining the possible consent states.
+/// </summary>
+/// <remarks>
+/// The different states provide additional information for the client to adapt
+/// the UX, but only Opted In can be used as a positive signal, the rest should
+/// all be treated as Opted Out.
+/// </remarks>
+typedef enum XalConsentState
+{
+    /// <summary>Unkown consent state due to query failure</summary>
+    /// <remarks>Should treat as Opted Out</remarks>
+    XalConsentState_QueryFailure = 0,
+    /// <summary>Model does not exist or does not apply for user</summary>
+    /// <remarks>Should treat as Opted Out</remarks>
+    XalConsentState_NotApplicable = 1,
+    /// <summary>User has been opted out</summary>
+    XalConsentState_OptedOut = 2,
+    /// <summary>User has been opted in</summary>
+    XalConsentState_OptedIn = 3,
+} XalConsentState;
+
+/// <summary>
 /// Enum defining the various gamertag components.
 /// </summary>
 typedef enum XalGamertagComponent
@@ -384,6 +404,11 @@ typedef struct XalUserGetTokenAndSignatureArgs
     /// Get a token for all users.
     /// </summary>
     bool allUsers;
+
+    /// <summary>
+    /// Get a token with or without TitleIdentity.
+    /// </summary>
+    bool ignoreTitleIdentity;
 } XalUserGetTokenAndSignatureArgs;
 
 /// <summary>

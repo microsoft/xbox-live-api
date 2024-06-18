@@ -415,11 +415,11 @@ namespace detail
         time_t time = (time_t)input - (time_t)11644473600LL;// diff between windows and unix epochs (seconds)
 
         struct tm datetime;
-#if defined(__ORBIS__) || defined(__PROSPERO__)
+#if defined(PAVO)
         gmtime_s(&time, &datetime);
 #else
         gmtime_r(&time, &datetime);
-#endif // __ORBIS__ || __PROSPERO__
+#endif // PAVO
 
         const int max_dt_length = 64;
         char output[max_dt_length + 1] = { 0 };

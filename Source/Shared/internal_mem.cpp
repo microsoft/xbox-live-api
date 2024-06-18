@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "pch.h"
+#include <rapidjson/allocators.hpp>
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
 

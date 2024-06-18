@@ -23,13 +23,12 @@ typedef struct XblUserProfile
     uint64_t xboxUserId;
 
     /// <summary>
-    /// The UTF-8 encoded user's display name to be used in application UI.  
-    /// This value is privacy gated and could be a user's real name or their Gamertag.
+    /// Name for displaying in apps. This will always be the user's gamertag and identical to the gameDisplayName field.
     /// </summary>
     char appDisplayName[XBL_DISPLAY_NAME_CHAR_SIZE];
 
     /// <summary>
-    /// UTF-8 encoded Uri for the user's display picture to be used in application UI.  
+    /// UTF-8 encoded Uri for the user's gamer pic.  This will always be identical to the gameDisplayPictureResizeUri field.
     /// The Uri is a resizable Uri. It can be used to specify one of the following sizes and formats by appending &apos;&amp;format={format}&amp;w={width}&amp;h={height}:<br/>
     /// Format: png<br/>
     /// Width   Height<br/>
@@ -40,13 +39,12 @@ typedef struct XblUserProfile
     char appDisplayPictureResizeUri[XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE];
 
     /// <summary>
-    /// The UTF-8 encoded user's display name to be used in game UI.  
-    /// This value is privacy gated and could be a user's real name or their Gamertag.
+    /// Name for displaying in games. This will always be the user's gamertag and identical to the appDisplayName field.
     /// </summary>
     char gameDisplayName[XBL_DISPLAY_NAME_CHAR_SIZE];
 
     /// <summary>
-    /// UTF-8 encoded Uri for the user's display picture to be used in games.  
+    /// UTF-8 encoded Uri for the user's gamer pic.  This will always be identical to the appDisplayPictureResizeUri field.
     /// The Uri is a resizable Uri. It can be used to specify one of the following sizes and formats by appending &apos;&amp;format={format}&amp;w={width}&amp;h={height}:<br/>
     /// Format: png<br/>
     /// Width   Height<br/>
@@ -62,24 +60,26 @@ typedef struct XblUserProfile
     char gamerscore[XBL_GAMERSCORE_CHAR_SIZE];
 
     /// <summary>
-    /// The UTF-8 encoded user's Gamertag.
+    /// The UTF-8 encoded user's classic gamertag.
+    /// This field only uses ASCII characters and does not include a suffix.
     /// </summary>
     char gamertag[XBL_GAMERTAG_CHAR_SIZE];
 
     /// <summary>
     /// The UTF-8 encoded modern gamertag for the user.  
+    /// This field uses specific ranges of UTF-8 characters and does not include a suffix.
     /// Not guaranteed to be unique.
     /// </summary>
     char modernGamertag[XBL_MODERN_GAMERTAG_CHAR_SIZE];
 
     /// <summary>
-    /// The UTF-8 encoded suffix appended to modern gamertag to ensure uniqueness.  
+    /// The UTF-8 encoded numeric suffix appended to modern gamertag to ensure uniqueness.  
     /// May be empty in some cases.
     /// </summary>
     char modernGamertagSuffix[XBL_MODERN_GAMERTAG_SUFFIX_CHAR_SIZE];
 
     /// <summary>
-    /// The UTF-8 encoded unique modern gamertag and suffix.  
+    /// The UTF-8 encoded unique modern gamertag and numeric suffix.  
     /// Format will be "modernGamertag#suffix".  
     /// Guaranteed to be no more than 16 rendered characters.
     /// </summary>

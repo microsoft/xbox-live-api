@@ -40,7 +40,7 @@ extern "C"
 #define XBL_RICH_PRESENCE_CHAR_SIZE             (100 * 3)
 #define XBL_TITLE_NAME_CHAR_SIZE                (100 * 3)
 #define XBL_XBOX_USER_ID_CHAR_SIZE              (21 * 3)
-#define XBL_LAST_TIME_PLAYED_CHAR_SIZE          25
+#define XBL_LAST_TIME_PLAYED_CHAR_SIZE          (25 * 3)
 
 #define XBL_GUID_LENGTH                         40
 #define XBL_SCID_LENGTH                         XBL_GUID_LENGTH

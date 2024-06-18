@@ -89,9 +89,6 @@ extern "C"
     #define ANYSIZE_ARRAY 1
     #endif
 
-    typedef long LONG;
-    typedef long LONG_PTR;
-
     #ifndef FIELD_OFFSET
     #define FIELD_OFFSET(type, field)    ((long)(long)&(((type *)0)->field))
     #endif

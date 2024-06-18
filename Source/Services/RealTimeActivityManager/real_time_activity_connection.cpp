@@ -425,7 +425,6 @@ void Connection::SubscribeResponseHandler(_In_ const JsonValue& message) noexcep
     if (subIter == m_subsByClientId.end())
     {
         // Ignore unexpected message
-        assert(false);
         LOGS_DEBUG << "__FUNCTION__" << ": [" << clientId << "] Ignoring unexpected message";
         return;
     }

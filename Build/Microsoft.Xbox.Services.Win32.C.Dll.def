@@ -60,10 +60,13 @@ EXPORTS
     HCHttpCallSetContext
     HCHttpCallSetTracing
     HCInitialize
+    HCIsInitialized
     HCMemGetFunctions
     HCMemSetFunctions
     HCMockAddMock
+    HCMockCallCloseHandle
     HCMockCallCreate
+    HCMockCallDuplicateHandle
     HCMockClearMocks
     HCMockRemoveMock
     HCMockResponseSetHeader
@@ -79,8 +82,10 @@ EXPORTS
     HCSettingsSetTraceLevel
     HCSetWebSocketFunctions
     HCTraceImplMessage
+    HCTraceImplMessage_v
     HCTraceImplScopeId
     HCTraceSetClientCallback
+    HCTraceSetEtwEnabled
     HCTraceSetPlatformCallbacks
     HCTraceSetTraceToDebugger
     HCWebSocketCloseHandle
@@ -88,6 +93,7 @@ EXPORTS
     HCWebSocketCreate
     HCWebSocketDisconnect
     HCWebSocketDuplicateHandle
+    HCWebSocketGetBinaryMessageFragmentEventFunction
     HCWebSocketGetEventFunctions
     HCWebSocketGetHeader
     HCWebSocketGetHeaderAtIndex
@@ -95,11 +101,14 @@ EXPORTS
     HCWebSocketGetProxyUri
     HCWebSocketSendBinaryMessageAsync
     HCWebSocketSendMessageAsync
+    HCWebSocketSetBinaryMessageFragmentEventFunction
     HCWebSocketSetHeader
+    HCWebSocketSetMaxReceiveBufferSize
     HCWebSocketSetProxyDecryptsHttps
     HCWebSocketSetProxyUri
     XalAddUserWithUiAsync
     XalAddUserWithUiResult
+    XalCheckUcsConsentForAllUsers
     XalCleanupAsync
     XalCleanupResult
     XalCompareUsers
@@ -116,11 +125,14 @@ EXPORTS
     XalPlatformCryptoSetCallbacks
     XalPlatformDateTimeSetCallbacks
     XalPlatformRemoteConnectCancelPrompt
+    XalPlatformRemoteConnectClearEventHandlers
     XalPlatformRemoteConnectSetEventHandlers
     XalPlatformStorageClearComplete
+    XalPlatformStorageClearEventHandlers
     XalPlatformStorageReadComplete
     XalPlatformStorageSetEventHandlers
     XalPlatformStorageWriteComplete
+    XalPlatformWebClearEventHandler
     XalPlatformWebSetEventHandler
     XalPlatformWebShowUrlComplete
     XalSignOutUserAsync
@@ -131,6 +143,7 @@ EXPORTS
     XalTryAddUserByIdAsync
     XalTryAddUserByIdResult
     XalUserCheckPrivilege
+    XalUserCheckUcsConsent
     XalUserCloseHandle
     XalUserCloseSignoutDeferral
     XalUserDuplicateHandle
@@ -149,6 +162,8 @@ EXPORTS
     XalUserGetTokenAndSignatureSilentlyResultSize
     XalUserIsDevice
     XalUserIsGuest
+    XalUserManageUcsConsentWithUiAsync
+    XalUserManageUcsConsentWithUiResult
     XalUserRegisterChangeEventHandler
     XalUserResolveIssueWithUiAsync
     XalUserResolveIssueWithUiResult

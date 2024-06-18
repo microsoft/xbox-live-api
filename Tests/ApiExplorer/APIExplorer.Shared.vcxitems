@@ -305,6 +305,7 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\httpPerform.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\libHCTrace.lua" />
     <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\manualDispatchTest.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>

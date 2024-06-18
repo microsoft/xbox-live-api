@@ -267,6 +267,10 @@ STDAPI XblAchievementsManagerGetAchievementsByState(
 /// <remarks>
 /// This API will work even when offline on PC and Xbox consoles. Offline updates will be 
 /// posted by the system when connection is re-established even if the title isn't running.  
+/// Note that in order for this API to work offline, the title must have previously 
+/// called <see cref="XblAchievementsManagerAddLocalUser"/> for the user while online otherwise this API 
+/// will return an error.  If this is not desired, consider calling 
+/// <see cref="XblAchievementsUpdateAchievementAsync"/> if this API fails to handle 'offline during init' scenarios.
 /// 
 /// The result of the operation will not be represented locally immediately. The
 /// earliest the update will be reflected will be after the next frame's call to

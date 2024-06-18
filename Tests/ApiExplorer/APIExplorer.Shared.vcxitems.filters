@@ -825,5 +825,8 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\mp\mp_multiple_contexts.lua">
       <Filter>Tests\mp</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\libHttp\libHCTrace.lua">
+      <Filter>Tests\libHttp</Filter>
+    </None>
   </ItemGroup>
 </Project>

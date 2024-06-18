@@ -22,6 +22,10 @@
 #include "Logger/log_hc_output.h"
 #include "global_state.h"
 
+#if !_LINK_WITH_CPPRESTSDK && HC_PLATFORM != HC_PLATFORM_GDK
+#include "cpprestsdk_impl.h"
+#endif
+
 #ifndef _XTIME_TICKS_PER_TIME_T
 #define _XTIME_TICKS_PER_TIME_T 10000000LL
 #endif
@@ -195,11 +199,11 @@ xsapi_internal_string utils::convert_timepoint_to_string(
         time.tm_year + 1900, time.tm_mon + 1, time.tm_mday,
         time.tm_hour, time.tm_min, time.tm_sec, static_cast<int>(ms.count() % 1000));
 #else
-#if defined(__ORBIS__) || defined(__PROSPERO__)
+#if defined(PAVO)
     std::tm* error = localtime_s(&t, &time);
 #else
     std::tm* error = localtime_r(&t, &time);
-#endif // __ORBIS__ || __PROSPERO__
+#endif // PAVO
     if (error == nullptr)
     {
         return result;
