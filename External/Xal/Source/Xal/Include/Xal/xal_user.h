@@ -319,6 +319,47 @@ STDAPI XalUserResolveIssueWithUiResult(
 ) noexcept;
 
 //-----------------------------------------------------------------------------
+// UCS consent
+
+/// <summary>
+/// Checks the state of the given UCS consent for the user.
+/// </summary>
+/// <param name="user">The user object.</param>
+/// <param name="consentModelName">The UCS consent model name.</param>
+/// <param name="consentState">The state of the consent.</param>
+/// <returns>Result code for this API operation.</returns>
+STDAPI XalUserCheckUcsConsent(
+    _In_ XalUserHandle user,
+    _In_z_ char const* consentModelName,
+    _Out_ XalConsentState* consentState
+) noexcept;
+
+/// <summary>
+/// Shows ui explaining why the user is missing the given privilege and
+/// allows acquiring it.
+/// </summary>
+/// <param name="user">The user object.</param>
+/// <param name="consentModelName">The UCS consent model name.</param>
+/// <param name="async">The AsyncBlock for this operation.</param>
+/// <returns>Result code for this API operation.</returns>
+STDAPI XalUserManageUcsConsentWithUiAsync(
+    _In_ XalUserHandle user,
+    _In_z_ char const* consentModelName,
+    _In_ XAsyncBlock* async
+) noexcept;
+
+/// <summary>
+/// Get the result of a given XalUserManageUcsConsentWithUiAsync operation.
+/// </summary>
+/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="consentState">The state of the consent.</param>
+/// <returns>Result code for this API operation.</returns>
+STDAPI XalUserManageUcsConsentWithUiResult(
+    _In_ XAsyncBlock* async,
+    _Out_ XalConsentState* consentState
+) noexcept;
+
+//-----------------------------------------------------------------------------
 // Events
 
 /// <summary>

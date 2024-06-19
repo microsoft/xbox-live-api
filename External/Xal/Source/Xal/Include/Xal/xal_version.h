@@ -20,6 +20,6 @@ extern "C"
 /// YYYYMMDD Date string describing the date the build was created
 /// rrr QFE number (000 indicates base release)
 /// </summary>
-#define XAL_VERSION "2023.05.20230616.001"
+#define XAL_VERSION "2024.02.20240220.000"
 
 }

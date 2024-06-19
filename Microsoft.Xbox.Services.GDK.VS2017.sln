@@ -18,7 +18,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "APIRunner.GDK.Src", "Tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThunksGenerator", "Build\Microsoft.Xbox.Services.141.GDK.C.Thunks\generator\ThunksGenerator\ThunksGenerator.csproj", "{21C651D1-61D7-46C5-BD23-128E40329AA5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libHttpClient.141.GDK.C", "External\xal\External\libHttpClient\Build\libHttpClient.141.GDK.C\libHttpClient.141.GDK.C.vcxproj", "{78C0122C-6B2D-4054-8C49-448277DD7A7D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libHttpClient.GDK", "External\xal\External\libHttpClient\Build\libHttpClient.GDK\libHttpClient.GDK.vcxproj", "{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{901F04C7-6EC2-4641-90E7-54D2F72DF570}"
 	ProjectSection(SolutionItems) = preProject
@@ -39,6 +39,16 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{81806275-2461-4CB7-935A-7EFEC3488A86}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Build\Microsoft.Xbox.Services.GDK\Microsoft.Xbox.Services.GDK.vcxitems*{1e320494-894e-4feb-90ca-df4fe20499f4}*SharedItemsImports = 9
+		Tests\APIExplorer\APIExplorer.Shared.vcxitems*{46f31a54-4c74-41a8-b294-26b5689e51ef}*SharedItemsImports = 4
+		Build\Microsoft.Xbox.Services.Common\Microsoft.Xbox.Services.Common.vcxitems*{60139f62-bf37-4f11-bd93-5fbf4e92100c}*SharedItemsImports = 4
+		Build\Microsoft.Xbox.Services.GDK\Microsoft.Xbox.Services.GDK.vcxitems*{60139f62-bf37-4f11-bd93-5fbf4e92100c}*SharedItemsImports = 4
+		External\xal\External\libHttpClient\Build\libHttpClient.Common\libHttpClient.Common.vcxitems*{a5a6e02a-21ba-4d55-9fb9-7b24dedd3743}*SharedItemsImports = 4
+		External\xal\External\libHttpClient\Build\libHttpClient.GDK.Shared\libHttpClient.GDK.Shared.vcxitems*{a5a6e02a-21ba-4d55-9fb9-7b24dedd3743}*SharedItemsImports = 4
+		Tests\APIExplorer\APIExplorer.Shared.vcxitems*{cbc0bec4-131d-4868-9345-71813557fb39}*SharedItemsImports = 9
+		Build\Microsoft.Xbox.Services.Common\Microsoft.Xbox.Services.Common.vcxitems*{cf3350e5-00a2-4647-a996-baf7542b0327}*SharedItemsImports = 9
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|ARM = Debug|ARM
@@ -182,25 +192,24 @@ Global
 		{21C651D1-61D7-46C5-BD23-128E40329AA5}.Release|x64.Build.0 = Release|Any CPU
 		{21C651D1-61D7-46C5-BD23-128E40329AA5}.Release|x86.ActiveCfg = Release|Any CPU
 		{21C651D1-61D7-46C5-BD23-128E40329AA5}.Release|x86.Build.0 = Release|Any CPU
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Debug|Any CPU.ActiveCfg = Debug|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Debug|ARM.ActiveCfg = Debug|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Debug|ARM64.ActiveCfg = Debug|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Debug|Gaming.Desktop.x64.ActiveCfg = Debug|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Debug|Gaming.Desktop.x64.Build.0 = Debug|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Debug|Gaming.Xbox.Scarlett.x64.ActiveCfg = Debug|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Debug|Gaming.Xbox.XboxOne.x64.ActiveCfg = Debug|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Debug|Gaming.Xbox.XboxOne.x64.Build.0 = Debug|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Debug|x64.ActiveCfg = Debug|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Debug|x86.ActiveCfg = Debug|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Release|Any CPU.ActiveCfg = Release|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Release|ARM.ActiveCfg = Release|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Release|ARM64.ActiveCfg = Release|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Release|Gaming.Desktop.x64.ActiveCfg = Release|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Release|Gaming.Desktop.x64.Build.0 = Release|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Release|Gaming.Xbox.Scarlett.x64.ActiveCfg = Release|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Release|Gaming.Xbox.XboxOne.x64.ActiveCfg = Release|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Release|x64.ActiveCfg = Release|Gaming.Desktop.x64
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D}.Release|x86.ActiveCfg = Release|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Debug|Any CPU.ActiveCfg = Debug|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Debug|ARM.ActiveCfg = Debug|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Debug|ARM64.ActiveCfg = Debug|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Debug|Gaming.Desktop.x64.ActiveCfg = Debug|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Debug|Gaming.Desktop.x64.Build.0 = Debug|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Debug|Gaming.Xbox.Scarlett.x64.ActiveCfg = Debug|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Debug|Gaming.Xbox.XboxOne.x64.ActiveCfg = Debug|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Debug|x64.ActiveCfg = Debug|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Debug|x86.ActiveCfg = Debug|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Release|Any CPU.ActiveCfg = Release|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Release|ARM.ActiveCfg = Release|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Release|ARM64.ActiveCfg = Release|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Release|Gaming.Desktop.x64.ActiveCfg = Release|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Release|Gaming.Desktop.x64.Build.0 = Release|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Release|Gaming.Xbox.Scarlett.x64.ActiveCfg = Release|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Release|Gaming.Xbox.XboxOne.x64.ActiveCfg = Release|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Release|x64.ActiveCfg = Release|Gaming.Desktop.x64
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743}.Release|x86.ActiveCfg = Release|Gaming.Desktop.x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -209,25 +218,15 @@ Global
 		{CBC0BEC4-131D-4868-9345-71813557FB39} = {81806275-2461-4CB7-935A-7EFEC3488A86}
 		{DC381015-B171-4DA5-B7FA-7CDE8196C6D3} = {C9C47451-FCA6-4B7F-9BD0-20AD3B119737}
 		{60139F62-BF37-4F11-BD93-5FBF4E92100C} = {C9C47451-FCA6-4B7F-9BD0-20AD3B119737}
+		{A5A6E02A-21BA-4D55-9FB9-7B24DEDD3743} = {C9C47451-FCA6-4B7F-9BD0-20AD3B119737}
 		{E538394B-68CB-4597-87AD-7B6841CC1278} = {C9C47451-FCA6-4B7F-9BD0-20AD3B119737}
 		{052C4858-C76F-4CEA-8A1A-E8E5559E67C2} = {DC381015-B171-4DA5-B7FA-7CDE8196C6D3}
 		{46F31A54-4C74-41A8-B294-26B5689E51EF} = {DC381015-B171-4DA5-B7FA-7CDE8196C6D3}
 		{21C651D1-61D7-46C5-BD23-128E40329AA5} = {C9C47451-FCA6-4B7F-9BD0-20AD3B119737}
-		{78C0122C-6B2D-4054-8C49-448277DD7A7D} = {C9C47451-FCA6-4B7F-9BD0-20AD3B119737}
 		{CF3350E5-00A2-4647-A996-BAF7542B0327} = {81806275-2461-4CB7-935A-7EFEC3488A86}
 		{1E320494-894E-4FEB-90CA-DF4FE20499F4} = {C9C47451-FCA6-4B7F-9BD0-20AD3B119737}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {622BB9B5-938F-41A2-BC8B-B7B3A64A73B5}
-	EndGlobalSection
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Build\Microsoft.Xbox.Services.GDK\Microsoft.Xbox.Services.GDK.vcxitems*{1e320494-894e-4feb-90ca-df4fe20499f4}*SharedItemsImports = 9
-		Tests\APIExplorer\APIExplorer.Shared.vcxitems*{46f31a54-4c74-41a8-b294-26b5689e51ef}*SharedItemsImports = 4
-		Build\Microsoft.Xbox.Services.Common\Microsoft.Xbox.Services.Common.vcxitems*{60139f62-bf37-4f11-bd93-5fbf4e92100c}*SharedItemsImports = 4
-		Build\Microsoft.Xbox.Services.GDK\Microsoft.Xbox.Services.GDK.vcxitems*{60139f62-bf37-4f11-bd93-5fbf4e92100c}*SharedItemsImports = 4
-		External\xal\External\libHttpClient\Build\libHttpClient.Common\libHttpClient.Common.vcxitems*{78c0122c-6b2d-4054-8c49-448277dd7a7d}*SharedItemsImports = 4
-		External\xal\External\libHttpClient\Build\libHttpClient.GDK\libHttpClient.GDK.vcxitems*{78c0122c-6b2d-4054-8c49-448277dd7a7d}*SharedItemsImports = 4
-		Tests\APIExplorer\APIExplorer.Shared.vcxitems*{cbc0bec4-131d-4868-9345-71813557fb39}*SharedItemsImports = 9
-		Build\Microsoft.Xbox.Services.Common\Microsoft.Xbox.Services.Common.vcxitems*{cf3350e5-00a2-4647-a996-baf7542b0327}*SharedItemsImports = 9
 	EndGlobalSection
 EndGlobal

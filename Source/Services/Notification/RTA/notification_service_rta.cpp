@@ -74,6 +74,8 @@ HRESULT RTANotificationService::RegisterWithNotificationService(
     "Win32",
 #elif HC_PLATFORM == HC_PLATFORM_NINTENDO_SWITCH
     "NintendoSwitch",
+#elif HC_PLATFORM_IS_PLAYSTATION
+    "PlayStation",
 #endif
     };
 

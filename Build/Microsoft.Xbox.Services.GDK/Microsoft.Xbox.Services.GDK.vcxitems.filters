@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{a7468e1e-9c65-4f1a-97db-702dd3013d46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Shared">
+      <UniqueIdentifier>{83fa3d12-617a-48df-9de0-edffcc78503e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Shared\WinRT">
+      <UniqueIdentifier>{7758f7f5-95ff-453a-a531-200c4dec6794}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Services">
+      <UniqueIdentifier>{b451b690-ab47-47b5-a948-e9a544907b98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Services\Events">
+      <UniqueIdentifier>{4593c653-a41d-403c-90d3-098726781331}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_api.cpp">
+      <Filter>Source\Services\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_gdk.cpp">
+      <Filter>Source\Services\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_etw.cpp">
+      <Filter>Source\Services\Events</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service.h">
+      <Filter>Source\Services\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_gdk.h">
+      <Filter>Source\Services\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Events\events_service_etw.h">
+      <Filter>Source\Services\Events</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

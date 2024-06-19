@@ -150,7 +150,7 @@
   <PropertyGroup>
     <HCPlatform Condition="'$(XsapiPlatform)' == 'DesktopBridge'">HC_PLATFORM_WIN32</HCPlatform>
   </PropertyGroup>
-  <Import Project="$(XsapiRoot)External\xal\External\libHttpClient\libHttpClient.props" />
+  <Import Project="$(XsapiRoot)External\xal\External\libHttpClient\Build\libHttpClient.import.props" />
 
   <!--CompactCoreCLL dependency-->
   <PropertyGroup Condition="'$(XsapiCllRefs)' == 'true'">
@@ -175,7 +175,7 @@
   <!--Xal dependency-->
   <PropertyGroup Condition="'$(XsapiXalHeaders)' == 'true'">
     <XalRoot>$(XsapiRoot)External\xal\</XalRoot>
-    <XalPlatform>$(HCLibPlatformType)</XalPlatform>
+    <XalPlatform>$(HCPlatform)</XalPlatform>
     <XalInclude>$(XalRoot)source\Xal\include\</XalInclude>
     <XalExtraInclude>$(XalRoot)source\XalExtra\include\</XalExtraInclude>
   </PropertyGroup>
@@ -231,7 +231,7 @@
     <Message Importance="High" Text="    CppRestSdkInclude            = '$(CppRestSdkInclude)'" />
     <Message Importance="High" Text="    CppRestSdkRoot               = '$(CppRestSdkRoot)'" />
     <Message Importance="High" Text="    VisualStudioMajorVersion     = '$(VisualStudioMajorVersion)'" />
-    <Message Importance="High" Text="    HCLibPlatformType            = '$(HCLibPlatformType)'" />
+    <Message Importance="High" Text="    HCPlatform                   = '$(HCPlatform)'" />
     <Message Importance="High" Text="    XalRoot                      = '$(XalRoot)'" />
     <Message Importance="High" Text="    XalPlatform                  = '$(XalPlatform)'" />
     <Message Importance="High" Text="    XalInclude                   = '$(XalInclude)'" />

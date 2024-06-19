@@ -15,6 +15,7 @@ extern "C"
 // GDK types
 //------------------------------------------------------------------------------
 
+#define XAL_OS_ERRORS 1
 #define XAL_OS_IMPL 1
 
 typedef XUserHandle XalUserHandle;

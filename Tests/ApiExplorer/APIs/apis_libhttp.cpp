@@ -68,6 +68,29 @@ int HCGetLibVersion_Lua(lua_State *L)
     return LuaReturnHR(L, hr);
 }
 
+int HCTrace_Lua(lua_State* L)
+{
+    LogToFile("HCTrace: testing small message");
+
+    HCTraceImplArea apiExplorerArea{ "ApiExplorer", HCTraceLevel::Important };
+    HCTraceImplMessage(&apiExplorerArea, apiExplorerArea.Verbosity, "testing small message");
+    LogToFile("HCTrace: succeeded with small message");
+
+    return LuaReturnHR(L, S_OK);
+}
+
+int HCTraceLarge_Lua(lua_State* L)
+{
+    LogToFile("HCTraceLarge: testing large message");
+
+    HCTraceImplArea apiExplorerArea{ "ApiExplorer", HCTraceLevel::Important };
+    std::vector<char> largeMessage(8192, 'w');
+    HCTraceImplMessage(&apiExplorerArea, apiExplorerArea.Verbosity, largeMessage.data());
+    LogToFile("HCTraceLarge: succeeded with large message");
+
+    return LuaReturnHR(L, S_OK);
+}
+
 int HCHttpCallCreate_Lua(lua_State *L)
 {
     // CODE SNIPPET START: HCHttpCallCreate
@@ -596,6 +619,8 @@ void SetupAPIs_LibHttp()
     lua_register(Data()->L, "HCCleanup", HCCleanup_Lua);
     lua_register(Data()->L, "HCCleanupAsync", HCCleanupAsync_Lua);
     lua_register(Data()->L, "HCGetLibVersion", HCGetLibVersion_Lua);
+    lua_register(Data()->L, "HCTrace", HCTrace_Lua);
+    lua_register(Data()->L, "HCTraceLarge", HCTraceLarge_Lua);
     //lua_register(Data()->L, "HCAddCallRoutedHandler", HCAddCallRoutedHandler_Lua);
     //lua_register(Data()->L, "HCRemoveCallRoutedHandler", HCRemoveCallRoutedHandler_Lua);
     lua_register(Data()->L, "HCHttpCallCreate", HCHttpCallCreate_Lua);

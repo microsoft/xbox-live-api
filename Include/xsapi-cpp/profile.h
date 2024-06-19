@@ -21,8 +21,7 @@ namespace social {
     {
     public:
         /// <summary>
-        /// The user's display name to be used in application UI.  This value is privacy gated and could
-        /// be a user's real name or their Gamertag.
+        /// Name for displaying in apps. This will be the user's gamertag.
         /// </summary>
         inline string_t app_display_name() const;
 
@@ -38,8 +37,7 @@ namespace social {
         inline web::uri app_display_picture_resize_uri() const;
 
         /// <summary>
-        /// The user's display name to be used in game UI.  This value is privacy gated and could
-        /// be a user's real name or their Gamertag.
+        /// Name for displaying in games. This will be the user's gamertag.
         /// </summary>
         inline string_t game_display_name() const;
 

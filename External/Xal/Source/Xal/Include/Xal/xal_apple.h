@@ -66,6 +66,16 @@ typedef struct XalAppleArgs
     /// The app custom redirect URI. (Optional on macOS).
     /// </summary>
     _Field_z_ char const* redirectUri;
+
+    /// <summary>
+    /// The number of consents present in the ucsConsents array
+    /// </summary>
+    uint32_t ucsConsentCount;
+
+    /// <summary>
+    /// An optional list of consent requests to UCS
+    /// </summary>
+    _Field_size_(ucsConsentCount) char const** ucsConsents;
 } XalAppleArgs;
 
 typedef XalAppleArgs XalInitArgs;

@@ -261,13 +261,25 @@ STDAPI XalSignOutUserResult(
 /// </summary>
 /// <param name="localId">The local id it to look up.</param>
 /// <param name="user">The user object.</param>
-/// <returns>Result code for this API operation.  Possible values are S_OK, E_XAL_NOTINITIALIZED, or E_FAIL.</returns>
+/// <returns>Result code for this API operation. Possible values are S_OK, E_XAL_NOTINITIALIZED, or E_FAIL.</returns>
 /// <remarks>
 /// If no user can be found matching the local id, E_XAL_USERNOTFOUND is returned.
 /// </remarks>
 STDAPI XalFindUserByLocalId(
     _In_ XalUserLocalId localId,
     _Out_ XalUserHandle* user
+) noexcept;
+
+/// <summary>
+/// Checks if the given consent is opted in by all the users in the user set.
+/// </summary>
+/// <param name="consentModelName">The UCS consent model name.</param>
+/// <param name="canOptIn">True if all the users in the user set are opted in.</param>
+/// <returns>Result code for this API operation. Possible values are S_OK,
+/// E_XAL_NOTINITIALIZED, E_XAL_UNLISTEDCONSENT, or E_FAIL.</returns>
+STDAPI XalCheckUcsConsentForAllUsers(
+    _In_z_ char const* consentModelName,
+    _Out_ bool* canOptIn
 ) noexcept;
 
 }
