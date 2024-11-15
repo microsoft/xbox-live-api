@@ -443,7 +443,7 @@ void SocialGraph::StopTrackingUsers(
     for (auto xuid : xuids)
     {
         auto iter{ m_trackedUsers.find(xuid) };
-        if (--iter->second.refCount == 0)
+        if (iter != m_trackedUsers.end() && --iter->second.refCount == 0)
         {
             m_trackedUsers.erase(iter);
             m_pendingUpdates[xuid] = { ProfileChanges::None, nullptr };

@@ -595,7 +595,7 @@ STDAPI XblPresenceGetPresenceForMultipleUsersResult(
 /// </summary>
 /// <param name="xblContextHandle">Xbox live context for the local user.</param>
 /// <param name="socialGroupName">The name of the group of users to get presence for.
-/// This can be either "Favorites" or "People".</param>
+/// This can be either "Favorites" to retrieve information about favorites, "People" to retrieve information about mutual friends and people a user follows, or "Friends" to retrieve information about mutual friends.</param>
 /// <param name="socialGroupOwnerXuid">The user whose group should be targeted. If the input is null, current user will be used.</param>
 /// <param name="filters">Optional filters struct to filter results.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>

@@ -218,7 +218,14 @@ public:
     inline bool is_favorite() const;
 
     /// <summary>
-    /// Indicates whether the person is following the person that requested the information.
+    /// Indicates whether the person is a friend (mutual follower) of the user.
+    /// </summary>
+    inline bool is_friend() const;
+
+    /// <summary>
+    /// Does not indicate a following/follower relation between caller user other users.
+    /// Currently will return true if a person is a mutual follower of a user that
+    /// requested information (this is dependent on the value of 'isFriend' field).
     /// </summary>
     inline bool is_following_caller() const;
 
@@ -238,6 +245,7 @@ private:
     string_t m_xuid;
     bool m_isFavorite{ false };
     bool m_isFollowingCaller{ false };
+    bool m_isFriend{ false };
     std::vector<string_t> m_socialNetworks;
 };
 

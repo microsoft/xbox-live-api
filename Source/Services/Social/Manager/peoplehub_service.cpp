@@ -36,7 +36,7 @@ HRESULT PeoplehubService::GetSocialUsers(
 {
     return MakeServiceCall(xuid, decorations, RelationshipType::Batch, xuids, async);
 }
-
+    
 HRESULT PeoplehubService::MakeServiceCall(
     _In_ uint64_t xuid,
     _In_ XblSocialManagerExtraDetailLevel decorations,
@@ -54,7 +54,7 @@ HRESULT PeoplehubService::MakeServiceCall(
     {
     case RelationshipType::Social:
     {
-        subpath << "social";
+        subpath << "friends";
         break;
     }
     case RelationshipType::Batch:
@@ -99,7 +99,7 @@ HRESULT PeoplehubService::MakeServiceCall(
         xbox_live_api::get_social_graph
     ));
 
-    httpCall->SetXblServiceContractVersion(5);
+    httpCall->SetXblServiceContractVersion(7);
 
     if (!bodyJson.IsNull())
     {
@@ -166,9 +166,8 @@ Result<XblSocialManagerUser> PeoplehubService::DeserializeUser(
     }
 
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonXuid(json, "xuid", user.xboxUserId, true));
-    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "isFavorite", user.isFavorite));
-    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "isFollowedByCaller", user.isFollowedByCaller));
-    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "isFollowingCaller", user.isFollowingUser));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "isFriend", user.isFriend));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "isFavorite", user.isFavorite));   
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "displayName", user.displayName, sizeof(user.displayName)));
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "realName", user.realName, sizeof(user.realName)));
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "displayPicRaw", user.displayPicUrlRaw, sizeof(user.displayPicUrlRaw)));
@@ -178,6 +177,14 @@ Result<XblSocialManagerUser> PeoplehubService::DeserializeUser(
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "modernGamertagSuffix", user.modernGamertagSuffix, sizeof(user.modernGamertagSuffix)));
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "uniqueModernGamertag", user.uniqueModernGamertag, sizeof(user.uniqueModernGamertag)));
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonStringToCharArray(json, "gamerScore", user.gamerscore, sizeof(user.gamerscore)));
+
+    // isFavorite should reflect both isFavorite && isFriend from the service response
+    user.isFavorite = user.isFavorite && user.isFriend;
+    // Shim isFollowingUser and isFollowedByCaller to be true if isFriend is true
+    // This is purely for compatibility purposes and doesn’t reflect a follower/following relationship
+    user.isFollowedByCaller = user.isFriend;
+    user.isFollowingUser = user.isFriend;
+
 
     auto presenceRecordResult = DeserializePresenceRecord(json);
     if (Succeeded(presenceRecordResult))

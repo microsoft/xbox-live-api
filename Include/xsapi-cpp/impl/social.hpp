@@ -16,6 +16,7 @@ xbox_social_relationship::xbox_social_relationship(
     m_xuid{ Utils::StringTFromUint64(socialRelationship.xboxUserId) },
     m_isFavorite{ socialRelationship.isFavorite },
     m_isFollowingCaller{ socialRelationship.isFollowingCaller },
+    m_isFriend{ socialRelationship.isFriend },
     m_socialNetworks{ Utils::Transform<string_t>(socialRelationship.socialNetworks, socialRelationship.socialNetworksCount, Utils::StringTFromUtf8) }
 {
 }
@@ -33,6 +34,11 @@ bool xbox_social_relationship::is_favorite() const
 bool xbox_social_relationship::is_following_caller() const
 {
     return m_isFollowingCaller;
+}
+
+bool xbox_social_relationship::is_friend() const
+{
+    return m_isFriend;
 }
 
 const std::vector<string_t>& xbox_social_relationship::social_networks() const

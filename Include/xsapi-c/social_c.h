@@ -217,7 +217,13 @@ typedef struct XblSocialRelationship
     bool isFavorite;
 
     /// <summary>
-    /// Indicates whether the person is following the person that requested the information.
+    /// Indicates whether there exists a mutual follower/following relation between a user and another Xbox User 
+    /// </summary>
+    bool isFriend;
+
+    /// <summary>
+    /// Does not reflect a follower/following relationship, is currently kept for backwards compatibility purposes.
+    /// The value of this field is determined by the value of 'isFriend' within a XblSocialRelationship
     /// </summary>
     bool isFollowingCaller;
 
