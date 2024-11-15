@@ -336,12 +336,19 @@ typedef struct XblSocialManagerUser
     bool isFavorite;
 
     /// <summary>
-    /// Whether the calling user is following them.
+    /// Indicates whether there exists a mutual follower/following relation between a user and another user
+    /// </summary>
+    bool isFriend;
+
+    /// <summary>
+    /// No longer indicates whether a calling user is following a given user. Kept for backwards compatibility purposes.
+    /// The value of this field is determined by the value of 'isFriend'
     /// </summary>
     bool isFollowingUser;
 
     /// <summary>
-    /// Whether they calling user is followed by this person.
+    /// No longer indicates whether a calling user is followed by given user. Kept for backwards compatibility purposes.
+    /// The value of this field is determined by the value of 'isFriend'
     /// </summary>
     bool isFollowedByCaller;
 

@@ -64,7 +64,6 @@ HRESULT SocialService::GetSocialRelationships(
     _In_ AsyncContext<Result<std::shared_ptr<XblSocialRelationshipResult>>> async
 ) const noexcept
 {
-    bool includeViewFilter = filter != XblSocialRelationshipFilter::All;
 
     xsapi_internal_stringstream subpath;
     subpath << "/users/xuid(";
@@ -73,13 +72,11 @@ HRESULT SocialService::GetSocialRelationships(
 
     xsapi_internal_string nextDelimiter = "?";
 
-    if (includeViewFilter)
-    {
-        subpath << nextDelimiter;
-        subpath << "view=";
-        subpath << SocialRelationshipFilterToString(filter);
-        nextDelimiter = "&";
-    }
+    subpath << nextDelimiter;
+    subpath << "view=";
+    subpath << SocialRelationshipFilterToString(filter);
+    nextDelimiter = "&";
+    
 
     if (startIndex > 0)
     {
@@ -107,6 +104,8 @@ HRESULT SocialService::GetSocialRelationships(
         XblHttpCall::BuildUrl("social", subpath.str()),
         xbox_live_api::get_social_relationships
     ));
+
+    httpCall->SetXblServiceContractVersion(3);
 
     return httpCall->Perform({
         async.Queue(),
@@ -150,12 +149,11 @@ xsapi_internal_string SocialService::SocialRelationshipFilterToString(
     case XblSocialRelationshipFilter::LegacyXboxLiveFriends:
     {
         return "LegacyXboxLiveFriends";
-    }
-
+    } 
     case XblSocialRelationshipFilter::All:
     default:
     {
-        return xsapi_internal_string{};
+        return "FriendList";
     }
     }
 }

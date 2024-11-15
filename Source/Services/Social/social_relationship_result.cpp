@@ -39,8 +39,13 @@ Result<std::shared_ptr<XblSocialRelationshipResult>> XblSocialRelationshipResult
                     XblSocialRelationship relationship{};
                     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonXuid(person, "xuid", relationship.xboxUserId, true));
                     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(person, "isFavorite", relationship.isFavorite));
-                    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(person, "isFollowingCaller", relationship.isFollowingCaller));
+                    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(person, "isFriend", relationship.isFriend)); 
 
+                    // isFavorite should reflect the vlaues of 'isFavorite' and  ‘isFriend’ from the service response
+                    relationship.isFavorite = relationship.isFavorite && relationship.isFriend;
+                    // Shimming isFriend response into isFollowingCaller for compatibility purposes.
+                    // This does not reflect a follower/following relationship.
+                    relationship.isFollowingCaller = relationship.isFriend;
                     xsapi_internal_vector<xsapi_internal_string> socialNetworksInternalVector;
                     JsonUtils::ExtractJsonVector<xsapi_internal_string>(JsonUtils::JsonStringExtractor, person, "socialNetworks", socialNetworksInternalVector, false);
                     UTF8StringArray socialNetworks(socialNetworksInternalVector);

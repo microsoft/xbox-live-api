@@ -180,7 +180,7 @@ int PresenceServiceGetPresenceForMultipleUsers_Lua(lua_State* L)
 int PresenceServiceGetPresenceForSocialGroup_Lua(lua_State *L)
 {
 #if CPP_TESTS_ENABLED
-    string_t socialGroup = xbox::services::Utils::StringTFromUtf8(GetStringFromLua(L, 1, "Favorites").c_str());
+    string_t socialGroup = xbox::services::Utils::StringTFromUtf8(GetStringFromLua(L, 1, "Friends").c_str());
 
     std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xboxLiveContext);
     xblc->presence_service().get_presence_for_social_group(socialGroup).then(

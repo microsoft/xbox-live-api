@@ -21,6 +21,16 @@ private:
         uint64_t xuid{ 1 };
         bool isFollowingCaller{ true };
         bool isFavorite{ false };
+        bool isFriend{ true };
+        std::vector<std::wstring> socialNetworks;
+    };
+
+    struct FriendRelationship
+    {
+        uint64_t xuid{ 1 };
+        bool isFollowingCaller{ false };
+        bool isFavorite{ false };
+        bool isFriend{ false };
         std::vector<std::wstring> socialNetworks;
     };
 
@@ -74,6 +84,10 @@ private:
                                     return _stricmp(convert::utf16_to_utf8(s).c_str(), "LegacyXboxLive") == 0;
                                 });
                             return iter != person.socialNetworks.end();
+                        } 
+                        else if (_stricmp("FriendList", view.c_str()) == 0)
+                        {
+                            return person.isFriend;
                         }
                         else
                         {
@@ -91,7 +105,8 @@ private:
 
                     personJson.AddMember("xuid", JsonValue(utils::uint64_to_internal_string(person.xuid).c_str(), allocator).Move(), allocator);
                     personJson.AddMember("isFavorite", person.isFavorite, allocator);
-                    personJson.AddMember("isFollowingCaller", person.isFollowingCaller, allocator);
+                    personJson.AddMember("isFollowingCaller", person.isFriend ? true : false, allocator);
+                    personJson.AddMember("isFriend", person.isFriend, allocator);
 
                     JsonValue socialNetworksJson(rapidjson::kArrayType);
                     for (auto& socialNetwork : person.socialNetworks)
@@ -110,6 +125,83 @@ private:
                 responseJson.AddMember("totalCount", static_cast<uint64_t>(filteredPeople.size()), allocator);
                 mock->SetResponseBody(responseJson);
             }
+        );
+
+        return mock;
+    }
+
+    std::shared_ptr<HttpMock> CreateFriendsMock(
+        const std::vector<FriendRelationship>& people,
+        xsapi_internal_string friendView
+    )
+    {
+        auto mock = std::make_shared<HttpMock>("GET", "https://social.xboxlive.com");
+
+        mock->SetMockMatchedCallback(
+            [
+                &people,
+                friendView
+            ]
+        (HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
+        {
+            assert(requestBody.empty());
+
+            xbox::services::uri url(requestUrl.data());
+            auto queryParams = url.split_query(url.query());
+
+            size_t startIndex{ 0 };
+            size_t maxItems{ people.size() };
+
+            std::vector<FriendRelationship> filteredPeople;
+            std::copy_if(people.begin(), people.end(), std::back_inserter(filteredPeople),
+                [&](const FriendRelationship& person)
+            {   
+                if (_stricmp("Favorite", friendView.c_str()) == 0)
+                {
+                    return person.isFavorite;
+                }
+                else if (_stricmp("FriendList", friendView.c_str()) == 0)
+                {
+                    return person.isFriend;
+                }
+                else {
+                    return false;
+                }
+            });
+
+            JsonDocument responseJson(rapidjson::kObjectType);
+            JsonDocument::AllocatorType& allocator = responseJson.GetAllocator();
+            JsonValue peopleJson(rapidjson::kArrayType);
+            for (size_t i = startIndex; i < startIndex + maxItems && i < filteredPeople.size(); ++i)
+            {
+                auto& person{ filteredPeople[i] };
+                JsonValue personJson(rapidjson::kObjectType);
+
+                personJson.AddMember("xuid", JsonValue(utils::uint64_to_internal_string(person.xuid).c_str(), allocator).Move(), allocator);
+                // isFavorite should reflect isFavorite and isFriend 
+                personJson.AddMember("isFavorite", (person.isFavorite && person.isFriend), allocator);
+                // isFollowingCaller should be set based on isFriend for backwards compat purposes
+                personJson.AddMember("isFollowingCaller", person.isFriend ? true : false, allocator);
+                personJson.AddMember("isFriend", person.isFriend, allocator);
+
+
+                JsonValue socialNetworksJson(rapidjson::kArrayType);
+                for (auto& socialNetwork : person.socialNetworks)
+                {
+                    socialNetworksJson.PushBack(JsonValue(utils::internal_string_from_string_t(socialNetwork).c_str(), allocator).Move(), allocator);
+                }
+                if (socialNetworksJson.Size() > 0)
+                {
+                    personJson.AddMember("socialNetworks", socialNetworksJson, allocator);
+                }
+
+                peopleJson.PushBack(personJson, allocator);
+            }
+
+            responseJson.AddMember("people", peopleJson, allocator);
+            responseJson.AddMember("totalCount", static_cast<uint64_t>(filteredPeople.size()), allocator);
+            mock->SetResponseBody(responseJson);
+        }
         );
 
         return mock;
@@ -146,6 +238,48 @@ private:
                 });
             VERIFY_IS_TRUE(iter != expectedSocialRelationships.end());
             VERIFY_ARE_EQUAL(iter->isFavorite, r.isFavorite);
+            VERIFY_ARE_EQUAL(iter->isFollowingCaller, r.isFollowingCaller);
+            VERIFY_ARE_EQUAL(iter->socialNetworks.size(), r.socialNetworksCount);
+
+            for (size_t j = 0; j < r.socialNetworksCount; ++j)
+            {
+                VERIFY_IS_TRUE(Utils::Stricmp(Utils::StringTFromUtf8(r.socialNetworks[j]), iter->socialNetworks[j]) == 0);
+            }
+        }
+    }
+
+    void ValidateFriendsRelationshipResult(
+        XblSocialRelationshipResultHandle resultHandle,
+        size_t expectedTotalCount,
+        bool expectedHasNext,
+        const std::vector<FriendRelationship>& expectedSocialRelationships
+    )
+    {
+        size_t totalCount{ 0 };
+        VERIFY_SUCCEEDED(XblSocialRelationshipResultGetTotalCount(resultHandle, &totalCount));
+        VERIFY_ARE_EQUAL_INT(totalCount, expectedTotalCount);
+
+        bool hasNext{ false };
+        VERIFY_SUCCEEDED(XblSocialRelationshipResultHasNext(resultHandle, &hasNext));
+        VERIFY_ARE_EQUAL(hasNext, expectedHasNext);
+
+        const XblSocialRelationship* socialRelationships{ nullptr };
+        size_t socialRelationshipsCount{ 0 };
+        VERIFY_SUCCEEDED(XblSocialRelationshipResultGetRelationships(resultHandle, &socialRelationships, &socialRelationshipsCount));
+        VERIFY_ARE_EQUAL_INT(socialRelationshipsCount, expectedSocialRelationships.size());
+
+        for (size_t i = 0; i < socialRelationshipsCount; ++i)
+        {
+            auto& r{ socialRelationships[i] };
+
+            auto iter = std::find_if(expectedSocialRelationships.begin(), expectedSocialRelationships.end(),
+                [&r](const FriendRelationship& expectedRelationship)
+            {
+                return expectedRelationship.xuid == r.xboxUserId;
+            });
+            VERIFY_IS_TRUE(iter != expectedSocialRelationships.end());
+            VERIFY_ARE_EQUAL(iter->isFavorite, r.isFavorite);
+            VERIFY_ARE_EQUAL(iter->isFriend, r.isFriend);
             VERIFY_ARE_EQUAL(iter->isFollowingCaller, r.isFollowingCaller);
             VERIFY_ARE_EQUAL(iter->socialNetworks.size(), r.socialNetworksCount);
 
@@ -384,6 +518,7 @@ private:
             VERIFY_IS_TRUE(iter != socialRelationships.end());
             VERIFY_ARE_EQUAL(iter->isFavorite, item.is_favorite());
             VERIFY_ARE_EQUAL(iter->isFollowingCaller, item.is_following_caller());
+            VERIFY_ARE_EQUAL(iter->isFriend, item.is_friend());
             VERIFY_ARE_EQUAL(iter->socialNetworks.size(), item.social_networks().size());
 
             for (size_t i = 0; i < item.social_networks().size(); ++i)
@@ -432,6 +567,115 @@ private:
         xboxLiveContext->social_service().remove_social_relationship_changed_handler(handlerToken);
         auto unsubscribeResult = xboxLiveContext->social_service().unsubscribe_from_social_relationship_change(subscriptionResult.payload());
         VERIFY_IS_TRUE(!unsubscribeResult.err());
+    }
+
+    DEFINE_TEST_CASE(TestGetMutualFriendsAsync)
+    {
+        TEST_LOG(L"Test starting: TestGetMutualFriendsAsync");
+
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        xsapi_internal_string friendView{ "FriendList" };
+
+        std::vector<FriendRelationship> friendRelationships(5);
+
+        uint64_t friendXuid{ 1 };
+        for (auto& user : friendRelationships)
+        {
+            user.xuid = friendXuid++;
+        }
+
+        // Set isFriend
+        friendRelationships[0].isFriend = true;
+        friendRelationships[1].isFriend = true;
+
+        // Mock Service Response for new Friends contract
+        auto socialMock{ CreateFriendsMock(friendRelationships, friendView)};
+
+        // Retrieve list of modern friends
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsAsync(
+            xboxLiveContext.get(),
+            xboxLiveContext->Xuid(),
+            XblSocialRelationshipFilter::All,
+            0,
+            0,
+            &async
+        ));
+
+        
+        XblSocialRelationshipResultHandle resultHandle{ nullptr };
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+        // isFollowingCaller is set in Mock (based of isFriend)
+        friendRelationships[0].isFollowingCaller = true;
+        friendRelationships[1].isFollowingCaller = true;
+        
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsResult(&async, &resultHandle));
+
+        // Expect 2 XUIDS to have isFriend value set to 'true' 
+        ValidateFriendsRelationshipResult(
+            resultHandle,
+            2,
+            false,
+            std::vector<FriendRelationship>(friendRelationships.begin(), friendRelationships.begin() + 2) 
+        );
+
+        XblSocialRelationshipResultCloseHandle(resultHandle);
+    }
+
+    DEFINE_TEST_CASE(TestGetMutualFriendsFavoriteAsync)
+    {
+        TEST_LOG(L"Test starting: TestGetMutualFriendsFavoriteAsync");
+
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        xsapi_internal_string favoriteView{ "Favorite" };
+
+        std::vector<FriendRelationship> friendRelationships(5);
+
+        uint64_t friendXuid{ 1 };
+        for (auto& user : friendRelationships)
+        {
+            user.xuid = friendXuid++;
+            user.isFriend = true;
+        }
+        
+        // Set isFavorite for 1 XUID
+        friendRelationships[0].isFavorite = true;
+
+        // Mock Service Response for new Friends contract
+        auto socialMock{ CreateFriendsMock(friendRelationships, favoriteView) };
+
+        // Retrieve list of modern favorite friends
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsAsync(
+            xboxLiveContext.get(),
+            xboxLiveContext->Xuid(),
+            XblSocialRelationshipFilter::All,
+            0,
+            0,
+            &async
+        ));
+
+
+        XblSocialRelationshipResultHandle resultHandle{ nullptr };
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+        // isFollowingCaller is set in Mock 
+        friendRelationships[0].isFollowingCaller = true;
+
+        VERIFY_SUCCEEDED(XblSocialGetSocialRelationshipsResult(&async, &resultHandle));
+
+        // Expect 1 XUID to have isFriend and isFavorite value set to 'true' 
+        ValidateFriendsRelationshipResult(
+            resultHandle,
+            1,
+            false,
+            std::vector<FriendRelationship>(friendRelationships.begin(), friendRelationships.begin() + 1)
+        );
+
+        XblSocialRelationshipResultCloseHandle(resultHandle);   
     }
 };
 
