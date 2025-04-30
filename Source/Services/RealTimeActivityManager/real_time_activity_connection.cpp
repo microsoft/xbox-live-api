@@ -651,9 +651,14 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
 
     if (SUCCEEDED(result.hr))
     {
+        // Ignore resync messages for 5 minutes after connecting to
+        // avoid overwhelming the service with update requests
+        m_ignoreResyncTimer = xbox::services::datetime::utc_now() + xbox::services::datetime::from_minutes(5);
+
         m_state = XblRealTimeActivityConnectionState::Connected;
         m_connectTime = std::chrono::system_clock::now();
         m_connectAttempt = 0;
+        m_connectNum++;
 
         assert(m_subsByServiceId.empty());
 
@@ -715,7 +720,13 @@ void Connection::ScheduleConnect() noexcept
     LOGS_DEBUG << __FUNCTION__;
 
     // Backoff and attempt to connect again. 
-    uint64_t backoff = __min(std::pow(m_connectAttempt++, 2), 60) * 1000;
+    auto timeNow{ chrono_clock_t::now() };
+    double lerpScaler = (timeNow.time_since_epoch().count() % 10000) / 10000.0; // from 0 to 1 based on clock
+    double jitterDelayMin = 0.0f;
+    double jitterDelayMax = (m_connectNum == 0) ? 0.0f : 5000.0f; // don't bother jitter in initial connection since it doesn't need it
+    uint64_t jitterDelay = static_cast<uint64_t>(jitterDelayMin + jitterDelayMax * lerpScaler); // lerp between min & max wait
+    uint64_t retryBackoffWithJitter = __min(std::pow(m_connectAttempt, 2), 60) * 1000 + jitterDelay;
+    m_connectAttempt++;
 
     m_queue.RunWork([weakThis = std::weak_ptr<Connection>{ shared_from_this() }, this]
     {
@@ -741,7 +752,7 @@ void Connection::ScheduleConnect() noexcept
             }
         }
     },
-    backoff
+    retryBackoffWithJitter
     );
 }
 
@@ -856,7 +867,11 @@ void Connection::WebsocketMessageReceived(const String& message) noexcept
     }
     case MessageType::Resync:
     {
-        m_resyncHandler();
+        int64_t delta = m_ignoreResyncTimer.to_interval() - xbox::services::datetime::utc_now().to_interval();
+        if (delta < 0)
+        {
+            m_resyncHandler();
+        }
         break;
     }
     default:

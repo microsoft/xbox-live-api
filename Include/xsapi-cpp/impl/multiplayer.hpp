@@ -1355,7 +1355,7 @@ multiplayer_session_change_types multiplayer_session::subscribed_change_types() 
 
 std::vector<string_t> multiplayer_session::host_candidates() const
 {
-    const XblDeviceToken* tokens;
+    const XblDeviceToken* tokens{ nullptr };
     size_t tokensCount;
     XblMultiplayerSessionHostCandidates(m_handle, &tokens, &tokensCount);
     return Utils::Transform<string_t>(tokens, tokens + tokensCount, [](const XblDeviceToken& token) 
@@ -1389,7 +1389,7 @@ std::shared_ptr<multiplayer_session_properties> multiplayer_session::session_pro
 
 std::shared_ptr<multiplayer_session_role_types> multiplayer_session::session_role_types() const
 {
-    const XblMultiplayerRoleType* roleTypes;
+    const XblMultiplayerRoleType* roleTypes{ nullptr };
     size_t roleTypesCount;
     XblMultiplayerSessionRoleTypes(m_handle, &roleTypes, &roleTypesCount);
     return std::shared_ptr<multiplayer_session_role_types>(new multiplayer_session_role_types(roleTypes, roleTypesCount));
@@ -1397,7 +1397,7 @@ std::shared_ptr<multiplayer_session_role_types> multiplayer_session::session_rol
 
 std::vector<std::shared_ptr<multiplayer_session_member>> multiplayer_session::members() const
 {
-    const XblMultiplayerSessionMember* members;
+    const XblMultiplayerSessionMember* members{ nullptr };
     size_t membersCount;
     XblMultiplayerSessionMembers(m_handle, &members, &membersCount);
 

@@ -354,6 +354,7 @@ typedef struct XblSocialManagerUser
 
     /// <summary>
     /// The UTF-8 encoded display name.
+    /// Many batch operations performed by XblSocialManager will not return a displayName for players. Use gamerTag or modernGamerTag instead
     /// </summary>
     char displayName[XBL_DISPLAY_NAME_CHAR_SIZE];
 

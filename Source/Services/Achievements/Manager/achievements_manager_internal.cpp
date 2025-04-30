@@ -762,12 +762,14 @@ Vector<XblAchievementsManagerEvent> GenerateEventFromAchievementDiff(uint64_t xu
             );
             LOGS_ERROR << String(errorMsg);
         }
-
-        // Compare the progress values.
-        if (utils::internal_string_to_uint32(cachedRequirement->currentProgressValue) <
-            utils::internal_string_to_uint32(updatedRequirement.currentProgressValue))
+        else
         {
-            updatedRequirements.push_back(updatedRequirement);
+            // Compare the progress values.
+            if (utils::internal_string_to_uint32(cachedRequirement->currentProgressValue) <
+                utils::internal_string_to_uint32(updatedRequirement.currentProgressValue))
+            {
+                updatedRequirements.push_back(updatedRequirement);
+            }
         }
     }
 

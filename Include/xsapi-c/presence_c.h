@@ -600,6 +600,10 @@ STDAPI XblPresenceGetPresenceForMultipleUsersResult(
 /// <param name="filters">Optional filters struct to filter results.</param>
 /// <param name="async">The AsyncBlock for this operation.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>
+/// To retrieve the result of calling XblPresenceGetPresenceForSocialGroupAsync, call [XblPresenceGetPresenceForSocialGroupResult](xblpresencegetpresenceforsocialgroupresult.md).  
+/// To retrieve the required buffer size to hold the results of calling XblPresenceGetPresenceForSocialGroupAsync, call [XblPresenceGetPresenceForSocialGroupResultCount](xblpresencegetpresenceforsocialgroupresultcount.md). 
+/// </remarks>
 STDAPI XblPresenceGetPresenceForSocialGroupAsync(
     _In_ XblContextHandle xblContextHandle,
     _In_z_ const char* socialGroupName,

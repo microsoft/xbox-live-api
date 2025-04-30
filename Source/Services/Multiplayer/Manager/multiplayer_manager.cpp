@@ -17,6 +17,11 @@ MultiplayerManager::~MultiplayerManager()
     {
         XTaskQueueCloseHandle(m_queue);
     }
+
+    if (m_multiplayerClientManager != nullptr)
+    {
+        m_multiplayerClientManager->Shutdown();
+    }
 }
 
 bool MultiplayerManager::IsInitialized()

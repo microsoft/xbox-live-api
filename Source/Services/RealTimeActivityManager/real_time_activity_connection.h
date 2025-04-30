@@ -84,8 +84,10 @@ private:
     TaskQueue const m_queue;
     std::shared_ptr<IWebsocket> m_websocket;
     uint32_t m_connectAttempt{ 0 };
+    uint32_t m_connectNum{ 0 };
     std::chrono::time_point<std::chrono::system_clock> m_connectTime;
     XblRealTimeActivityConnectionState m_state{ XblRealTimeActivityConnectionState::Connecting };
+    xbox::services::datetime m_ignoreResyncTimer;
     const ConnectionStateChangedHandler m_stateChangedHandler;
     const real_time_activity::ResyncHandler m_resyncHandler;
 
