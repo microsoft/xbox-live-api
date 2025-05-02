@@ -30,7 +30,6 @@
     "rem rt gdk-gameinvite\\game-invite.lua", // rt will run a single test
     "rem repeat social\\social_manager_2.lua", // "repeat" will repeat this single test without cleanup forever
     "rem loop", // "loop" will loop the entire cmds.json file including cleanup, forever
-    "rem rts",
-    "rt presence/presence-cpp.lua"
+    "rts"
   ]
 }

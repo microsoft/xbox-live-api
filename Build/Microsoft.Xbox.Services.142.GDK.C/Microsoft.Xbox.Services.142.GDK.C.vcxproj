@@ -11,5 +11,15 @@
   <Import Project="$(XsapiSourceRoot)\xsapi.staticlib.props" />
   <Import Project="$(XsapiSourceRoot)\Build\Microsoft.Xbox.Services.Common\Microsoft.Xbox.Services.Common.vcxitems" Label="Shared" />
   <Import Project="$(XsapiSourceRoot)\Build\Microsoft.Xbox.Services.GDK\Microsoft.Xbox.Services.GDK.vcxitems" Label="Shared" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Gaming.Desktop.x64'">
+    <ClCompile>
+      <AdditionalOptions>/Zi %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Gaming.Desktop.x64'">
+    <ClCompile>
+      <AdditionalOptions>/Zi %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

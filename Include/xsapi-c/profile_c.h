@@ -23,7 +23,7 @@ typedef struct XblUserProfile
     uint64_t xboxUserId;
 
     /// <summary>
-    /// Name for displaying in apps. This will always be the user's gamertag and identical to the gameDisplayName field.
+    /// The UTF-8 encoded user's display name to be used in application UI. This will always be the user's gamertag and identical to the gameDisplayName field.
     /// </summary>
     char appDisplayName[XBL_DISPLAY_NAME_CHAR_SIZE];
 
@@ -39,7 +39,7 @@ typedef struct XblUserProfile
     char appDisplayPictureResizeUri[XBL_DISPLAY_PIC_URL_RAW_CHAR_SIZE];
 
     /// <summary>
-    /// Name for displaying in games. This will always be the user's gamertag and identical to the appDisplayName field.
+    /// The UTF-8 encoded user's display name to be used in application UI. This will always be the user's gamertag and identical to the appDisplayName field.
     /// </summary>
     char gameDisplayName[XBL_DISPLAY_NAME_CHAR_SIZE];
 

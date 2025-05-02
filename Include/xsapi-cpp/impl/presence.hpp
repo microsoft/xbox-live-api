@@ -294,7 +294,7 @@ user_presence_state presence_record::user_state() const
 
 std::vector<presence_device_record> presence_record::presence_device_records() const
 {
-    const XblPresenceDeviceRecord* deviceRecords;
+    const XblPresenceDeviceRecord* deviceRecords{ nullptr };
     size_t deviceRecordsCount;
     XblPresenceRecordGetDeviceRecords(m_handle, &deviceRecords, &deviceRecordsCount);
 

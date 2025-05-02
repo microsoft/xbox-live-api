@@ -211,7 +211,7 @@ pplx::task<xbox_live_result<xbox_social_relationship_result>> social_service::ge
     _In_ size_t maxItems
 )
 {
-    XblContextHandle xblContextHandle;
+    XblContextHandle xblContextHandle{ nullptr };
     XblContextDuplicateHandle(m_xblContextHandle, &xblContextHandle);
     auto asyncWrapper = new AsyncWrapper<xbox_social_relationship_result>(
         [xblContextHandle](XAsyncBlock* async, xbox_social_relationship_result& result)

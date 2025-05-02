@@ -173,7 +173,7 @@ inline title_storage_blob_metadata_result::title_storage_blob_metadata_result(
     XblTitleStorageBlobMetadataResultDuplicateHandle(handle, &m_handle);
 
     size_t itemsCount;
-    const XblTitleStorageBlobMetadata* items;
+    const XblTitleStorageBlobMetadata* items{ nullptr };
     XblTitleStorageBlobMetadataResultGetItems(m_handle, &items, &itemsCount);
     
     for (size_t i = 0; i < itemsCount; i++)
@@ -189,7 +189,7 @@ title_storage_blob_metadata_result::title_storage_blob_metadata_result(
     XblTitleStorageBlobMetadataResultDuplicateHandle(other.m_handle, &m_handle);
 
     size_t itemsCount;
-    const XblTitleStorageBlobMetadata* items;
+    const XblTitleStorageBlobMetadata* items{ nullptr };
     XblTitleStorageBlobMetadataResultGetItems(m_handle, &items, &itemsCount);
 
     for (size_t i = 0; i < itemsCount; i++)
