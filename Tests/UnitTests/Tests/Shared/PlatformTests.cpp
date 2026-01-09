@@ -213,6 +213,10 @@ public:
 
         ec = TestEnumClassValue("InvalidName");
         VERIFY_IS_TRUE(ec == TestEnumClass{});
+
+        XblMultiplayerActivityPlatform platform = XblMultiplayerActivityPlatform::PlayStation;
+        auto platformString = EnumName<XblMultiplayerActivityPlatform, 0, static_cast<uint32_t>(XblMultiplayerActivityPlatform::All)>(platform);
+        VERIFY_ARE_EQUAL_STR("PlayStation", platformString);
     }
 
     DEFINE_TEST_CASE(TestPeriodicTask)

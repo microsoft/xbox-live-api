@@ -21,12 +21,12 @@ public:
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_EVENTS_CPP_END
 
-#if XSAPI_EVENTS_SERVICE
-    #if XSAPI_GRTS_EVENTS_SERVICE
+#ifdef XSAPI_EVENTS_SERVICE
+    #ifdef XSAPI_GRTS_EVENTS_SERVICE
         #include "events_service_gdk.h"
-    #elif XSAPI_WRL_EVENTS_SERVICE
+    #elif defined(XSAPI_WRL_EVENTS_SERVICE)
         #include "events_service_etw.h"
-    #elif XSAPI_INTERNAL_EVENTS_SERVICE
+    #elif defined(XSAPI_INTERNAL_EVENTS_SERVICE)
         #include "events_service_xsapi.h"
     #endif
 #endif

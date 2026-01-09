@@ -80,7 +80,7 @@ public:
     inline ~notification_service();
 
     inline pplx::task<xbox_live_result<void>> subscribe_to_notifications(
-#if HC_PLATFORM == HC_PLATFORM_WIN32 && !XSAPI_UNIT_TESTS
+#if HC_PLATFORM == HC_PLATFORM_WIN32 && !defined(XSAPI_UNIT_TESTS)
         _In_ const std::function<void(achievement_unlocked_notification_event_args&)>& achievementUnlockHandler,
         _In_ const std::function<void(invite_notification_event_args&)>& multiplayerInviteHandler
 #elif (HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_ANDROID)
@@ -90,7 +90,7 @@ public:
 
     inline pplx::task<xbox_live_result<void>> unsubscribe_from_notifications();
 
-#if HC_PLATFORM == HC_PLATFORM_WIN32 && !XSAPI_UNIT_TESTS
+#if HC_PLATFORM == HC_PLATFORM_WIN32 && !defined(XSAPI_UNIT_TESTS)
     inline std::function<void(invite_notification_event_args&)>& game_invite_handler();
 
     inline std::function<void(achievement_unlocked_notification_event_args&)>& achievement_unlock_handler();
@@ -99,7 +99,7 @@ public:
 private:
     XblContextHandle m_xblContext;
 
-#if HC_PLATFORM == HC_PLATFORM_WIN32 && !XSAPI_UNIT_TESTS
+#if HC_PLATFORM == HC_PLATFORM_WIN32 && !defined(XSAPI_UNIT_TESTS)
     XblFunctionContext m_gameinviteFunctionContext;
     XblFunctionContext m_achievementUnlockFunctionContext;
 

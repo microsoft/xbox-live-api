@@ -3,7 +3,7 @@
 
 #pragma once
 
-#if XSAPI_WRL_EVENTS_SERVICE
+#ifdef XSAPI_WRL_EVENTS_SERVICE
 
 #include <wrl.h>
 #include <windows.foundation.diagnostics.h>

@@ -241,7 +241,7 @@ public:
     inline void set_use_crossplatform_qos_servers(_In_ bool value);
 
 public:
-#if XSAPI_UNIT_TESTS
+#ifdef XSAPI_UNIT_TESTS
     XblContextHandle XboxLiveContextHandle()
     {
         return m_xblContextHandle;

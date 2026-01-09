@@ -4,13 +4,13 @@
 #include "pch.h"
 #include "xbox_live_context_internal.h"
 #include "multiplayer_activity_internal.h"
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
 #include "notification_internal.h"
 #endif
 
 using namespace xbox::services::multiplayer_activity;
 
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
 using namespace xbox::services::notification;
 #endif
 
@@ -299,7 +299,7 @@ try
 }
 CATCH_RETURN()
 
-#if (HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL) && !XSAPI_UNIT_TESTS
+#if (HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL) && !defined(XSAPI_UNIT_TESTS)
 STDAPI_(XblFunctionContext) XblMultiplayerActivityAddInviteHandler(
     _In_ XblContextHandle xblContext,
     _In_ XblMultiplayerActivityInviteHandler* handler,

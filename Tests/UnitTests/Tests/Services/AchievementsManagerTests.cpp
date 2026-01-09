@@ -3098,7 +3098,7 @@ public:
         ));
 
         VERIFY_IS_TRUE(achievement->progressState == XblAchievementProgressState::Achieved);
-        for (uint8_t i = 0; i < achievement->progression.requirementsCount; ++i)
+        for (size_t i = 0; i < achievement->progression.requirementsCount; ++i)
         {
             VERIFY_ARE_EQUAL_STR(
                 achievement->progression.requirements[i].currentProgressValue,

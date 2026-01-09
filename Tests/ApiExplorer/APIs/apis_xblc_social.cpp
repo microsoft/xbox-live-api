@@ -18,6 +18,7 @@ static struct SocialState
     XblSocialRelationshipResultHandle socialResultHandle{ nullptr };
     XblRealTimeActivitySubscriptionHandle socialSubscriptionHandle{ nullptr };
     XblFunctionContext socialRelationshipChangedHandlerToken{ 0 };
+    XblFunctionContext friendRequestCountChangedHandlerToken{ 0 };
 } state;
 
 XblSocialRelationshipFilter ConvertStringToXblSocialRelationshipFilter(const char* str)
@@ -231,6 +232,38 @@ int XblSocialRemoveSocialRelationshipChangedHandler_Lua(lua_State *L)
     return LuaReturnHR(L, hr);
 }
 
+int XblSocialAddFriendRequestCountChangedHandler_Lua(lua_State* L)
+{
+    // CODE SNIPPET START: XblSocialAddSocialRelationshipChangedHandler_C
+    HRESULT hr = XblSocialAddFriendRequestCountChangedHandler(
+        Data()->xboxLiveContext,
+        [](const XblSocialFriendRequestCountChangedEventArgs* args, void* context)
+    {
+        UNREFERENCED_PARAMETER(context);
+        LogToFile("Incoming friend request count changed: %u", args->incomingFriendRequestCount);
+        CallLuaFunction("OnFriendRequestCountChanged"); // CODE SNIP SKIP
+    },
+        nullptr,
+        &state.friendRequestCountChangedHandlerToken
+    );
+    // CODE SNIPPET END
+
+    LogToFile("XblSocialAddFriendRequestCountChangedHandler: hr=%s", ConvertHR(hr).data());
+    return LuaReturnHR(L, hr);
+}
+
+int XblSocialRemoveFriendRequestCountChangedHandler_Lua(lua_State* L)
+{
+    // CODE SNIPPET START: XblSocialRemoveSocialRelationshipChangedHandler_C
+    HRESULT hr = XblSocialRemoveFriendRequestCountChangedHandler(Data()->xboxLiveContext, state.friendRequestCountChangedHandlerToken);
+
+    state.friendRequestCountChangedHandlerToken = 0;
+    // CODE SNIPPET END
+
+    LogToFile("XblSocialRemoveFriendRequestCountChangedHandler: hr=%s", ConvertHR(hr).data());
+    return LuaReturnHR(L, hr);
+}
+
 int XblSocialSubmitReputationFeedbackAsync_Lua(lua_State* L)
 {
     // CODE SNIPPET START: XblSocialSubmitReputationFeedbackAsync_C
@@ -436,6 +469,8 @@ void SetupAPIs_XblSocial()
     lua_register(Data()->L, "XblSocialUnsubscribeFromSocialRelationshipChange", XblSocialUnsubscribeFromSocialRelationshipChange_Lua);
     lua_register(Data()->L, "XblSocialAddSocialRelationshipChangedHandler", XblSocialAddSocialRelationshipChangedHandler_Lua);
     lua_register(Data()->L, "XblSocialRemoveSocialRelationshipChangedHandler", XblSocialRemoveSocialRelationshipChangedHandler_Lua);
+    lua_register(Data()->L, "XblSocialAddFriendRequestCountChangedHandler", XblSocialAddFriendRequestCountChangedHandler_Lua);
+    lua_register(Data()->L, "XblSocialRemoveFriendRequestCountChangedHandler", XblSocialRemoveFriendRequestCountChangedHandler_Lua);
 
     lua_register(Data()->L, "XblSocialSubmitReputationFeedbackAsync", XblSocialSubmitReputationFeedbackAsync_Lua);
     lua_register(Data()->L, "XblSocialSubmitBatchReputationFeedbackAsync", XblSocialSubmitBatchReputationFeedbackAsync_Lua);

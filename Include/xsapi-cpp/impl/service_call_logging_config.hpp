@@ -17,7 +17,7 @@ std::shared_ptr<service_call_logging_config> service_call_logging_config::get_si
 
 void service_call_logging_config::enable() {}
 void service_call_logging_config::disable() {}
-#if HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_UWP || XSAPI_UNIT_TESTS
+#if HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_UWP || defined(XSAPI_UNIT_TESTS)
 void service_call_logging_config::_Register_for_protocol_activation() {}
 #endif
 

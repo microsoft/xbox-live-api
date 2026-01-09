@@ -26,7 +26,7 @@ public:
     /// </summary>
     _XSAPICPP_DEPRECATED inline void disable();
 
-#if HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_UWP || XSAPI_UNIT_TESTS
+#if HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_UWP || defined(XSAPI_UNIT_TESTS)
     /// <summary>
     /// Deprecated
     /// </summary>

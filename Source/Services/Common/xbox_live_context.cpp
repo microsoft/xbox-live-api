@@ -13,7 +13,7 @@
 #include "xbox_live_app_config_internal.h"
 #include "xbox_live_context_settings_internal.h"
 #include "title_storage_internal.h"
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
 #include "notification_internal.h"
 #endif
 
@@ -153,10 +153,10 @@ HRESULT XblContext::Initialize(
     {
         Result<xbox::services::User> userResult = m_user.Copy();
         RETURN_HR_IF_FAILED(userResult.Hresult());
-#if XSAPI_EVENTS_SERVICE
+#ifdef XSAPI_EVENTS_SERVICE
         m_eventsService = MakeShared<events::EventsService>(
             userResult.ExtractPayload()
-#if XSAPI_INTERNAL_EVENTS_SERVICE
+#ifdef XSAPI_INTERNAL_EVENTS_SERVICE
             , globalQueue
 #endif
             );
@@ -167,8 +167,8 @@ HRESULT XblContext::Initialize(
     {
         Result<xbox::services::User> userResult = m_user.Copy();
         RETURN_HR_IF_FAILED(userResult.Hresult());
-#if XSAPI_NOTIFICATION_SERVICE
-#if !XSAPI_UNIT_TESTS && (HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL)
+#ifdef XSAPI_NOTIFICATION_SERVICE
+#if !defined(XSAPI_UNIT_TESTS) && (HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL)
         m_notificationService = MakeShared<xbox::services::notification::RTANotificationService>(userResult.ExtractPayload(), globalQueue, m_xboxLiveContextSettings, rtaManager);
         RETURN_HR_IF_FAILED(m_notificationService->Initialize());
 #elif HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_IOS
@@ -177,7 +177,7 @@ HRESULT XblContext::Initialize(
 #endif
     }
 
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
     auto userChangedRegistrationResult = User::RegisterChangeEventHandler(
         [
             thisWeakPtr,
@@ -267,7 +267,7 @@ std::shared_ptr<title_storage::TitleStorageService> XblContext::TitleStorageServ
     return m_titleStorageService;
 }
 
-#if XSAPI_EVENTS_SERVICE
+#ifdef XSAPI_EVENTS_SERVICE
 std::shared_ptr<events::IEventsService> XblContext::EventsService()
 {
     return m_eventsService;
@@ -279,7 +279,7 @@ std::shared_ptr<presence::PresenceService> XblContext::PresenceService()
     return m_presenceService;
 }
 
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
 std::shared_ptr<notification::NotificationService> XblContext::NotificationService()
 {
     return m_notificationService;

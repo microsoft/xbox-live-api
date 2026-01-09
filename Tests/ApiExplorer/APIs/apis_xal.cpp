@@ -87,9 +87,9 @@ void SetupXalNsalMock()
 
 int XalInitialize_Lua(lua_State *L)
 {
-    std::string clientId = GetStringFromLua(L, 1, "000000004C26FED0");
-    uint32_t titleId = (uint32_t)GetUint64FromLua(L, 2, 1979882317);
-    std::string sandbox = GetStringFromLua(L, 3, "XDKS.1");
+    std::string clientId = GetStringFromLua(L, 1, "000000004C251635");
+    uint32_t titleId = (uint32_t)GetUint64FromLua(L, 2, 1626464874);
+    std::string sandbox = GetStringFromLua(L, 3, "RETAIL");
 
     // Alternate config for XboxLiveE2E Stats 2017
     //std::string clientId = GetStringFromLua(L, 1, "0000000044296E10");

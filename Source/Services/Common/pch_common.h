@@ -21,7 +21,7 @@
 #pragma warning(disable: 4634) // C4634: Discarding XML document comment for invalid target.
 #pragma warning(disable: 26812)  // enum instead of enum class
 
-#if _DEBUG && XSAPI_UNIT_TESTS
+#if _DEBUG && defined(XSAPI_UNIT_TESTS)
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>

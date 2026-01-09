@@ -38,7 +38,7 @@ GlobalState::GlobalState(
 #endif
     m_logger->add_log_output(MakeShared<log_hc_output>());
 
-#if _DEBUG && XSAPI_UNIT_TESTS && XSAPI_PROFILE
+#if _DEBUG && defined(XSAPI_UNIT_TESTS) && XSAPI_PROFILE
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 }
@@ -214,7 +214,7 @@ HRESULT GlobalState::CleanupAsync(
                     return E_PENDING;
                 }
 
-#if XSAPI_UNIT_TESTS
+#ifdef XSAPI_UNIT_TESTS
                 // As a sanity check, ensure there aren't other references to RTA manager.
                 // Don't always block on this - unclosed XblContexts would then prevent XblCleanup from completing.
                 auto rtaManagerUseCount{ state->m_rtaManager.use_count() };

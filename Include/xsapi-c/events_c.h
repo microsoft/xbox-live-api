@@ -6,7 +6,7 @@
 
 #pragma once
 
-#if XSAPI_EVENTS_SERVICE
+#ifdef XSAPI_EVENTS_SERVICE
 
 extern "C"
 {
@@ -43,7 +43,7 @@ STDAPI XblEventsWriteInGameEvent(
     _In_opt_z_ const char* measurementsJson
 ) XBL_NOEXCEPT;
 
-#if XSAPI_INTERNAL_EVENTS_SERVICE
+#ifdef XSAPI_INTERNAL_EVENTS_SERVICE
 
 /// <summary>
 /// Set the maximum amount of disk space that Xsapi can use to store the events pending retry and upload before 

@@ -208,7 +208,7 @@ STDAPI XalPlatformStorageClearComplete(
 /// </remarks>
 STDAPI XalPlatformRemoteConnectSetEventHandlers(
     _In_opt_ XTaskQueueHandle queue,
-    _In_ XalPlatformRemoteConnectEventHandlers2* handlers
+    _In_ XalPlatformRemoteConnectEventHandlers3* handlers
 ) noexcept;
 
 /// <summary>
@@ -266,6 +266,49 @@ STDAPI XalPlatformCryptoSetCallbacks(
 /// </remarks>
 STDAPI XalPlatformDateTimeSetCallbacks(
     _In_ XalPlatformDateTimeCallbacks* callbacks
+) noexcept;
+
+//-----------------------------------------------------------------------------
+// Spop Prompt (only used in generic mode, when configured for it)
+
+/// <summary>
+/// Sets the SPOP prompt event handler.
+/// </summary>
+/// <param name="handler">The event handler,
+/// <see cref="XalPlatformSpopPromptEventHandler"/>.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// Must be called before XalInitialize.
+/// </remarks>
+
+STDAPI XalPlatformSpopPromptSetEventHandlers(
+    _In_opt_ XTaskQueueHandle queue,
+    _In_ XalPlatformSpopPromptEventHandler* handler,
+    _In_opt_ void* context
+) noexcept;
+
+/// <summary>
+/// Clears the SPOP event handlers.
+/// </summary>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// Must be called before XalInitialize or after XalCleanupAsync completes.
+/// </remarks>
+STDAPI XalPlatformSpopPromptClearEventHandler() noexcept;
+
+/// <summary>
+/// Signal to Xal that the user finished interacting with the SPOP prompt.
+/// </summary>
+/// <param name="operation">The handle for this operation.</param>
+/// <param name="result">The result of the user interaction.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// This should be called after a XalPlatformSpopPromptEventHandler when the
+/// user makes a choice or if a failure occurs.
+/// </remarks>
+STDAPI XalPlatformSpopPromptComplete(
+    _In_ XalPlatformOperation operation,
+    _In_ XalSpopOperationResult result
 ) noexcept;
 
 }
@@ -384,6 +427,43 @@ HRESULT XalPlatformStorageSetEventHandlers(
 inline
 HRESULT XalPlatformRemoteConnectSetEventHandlers(
     _In_opt_ XTaskQueueHandle queue,
+    _In_ XalPlatformRemoteConnectEventHandlers2* handlers
+) noexcept
+{
+    static XalPlatformRemoteConnectEventHandlers2 s_handlers{};
+
+    s_handlers = *handlers;
+
+    XalPlatformRemoteConnectEventHandlers3 trampolines = {};
+    trampolines.show = [](void* ctx, uint32_t cuid, XalPlatformOperation op, char const* url, char const* code, size_t /*qrCodeSize*/, void const* /*qrCode*/)
+    {
+        auto handlers = static_cast<XalPlatformRemoteConnectEventHandlers2*>(ctx);
+        handlers->show(handlers->context, cuid, op, url, code);
+    };
+    trampolines.close = [](void* ctx, uint32_t cuid, XalPlatformOperation op)
+    {
+        auto handlers = static_cast<XalPlatformRemoteConnectEventHandlers2*>(ctx);
+        handlers->close(handlers->context, cuid, op);
+    };
+    trampolines.context = &s_handlers;
+
+    return XalPlatformRemoteConnectSetEventHandlers(queue, &trampolines);
+}
+
+/// <summary>
+/// Sets the remote connect event handlers.
+/// </summary>
+/// <param name="queue">The async queue the callbacks should be invoked on.
+/// </param>
+/// <param name="handlers">The event handlers,
+/// <see cref="XalPlatformRemoteConnectEventHandlers"/>.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// Must be called before XalInitialize.
+/// </remarks>
+inline
+HRESULT XalPlatformRemoteConnectSetEventHandlers(
+    _In_opt_ XTaskQueueHandle queue,
     _In_ XalPlatformRemoteConnectEventHandlers* handlers
 ) noexcept
 {
@@ -391,8 +471,8 @@ HRESULT XalPlatformRemoteConnectSetEventHandlers(
 
     s_handlers = *handlers;
 
-    XalPlatformRemoteConnectEventHandlers2 trampolines = {};
-    trampolines.show = [](void* ctx, uint32_t /*cuid*/, XalPlatformOperation op, char const* url, char const* code)
+    XalPlatformRemoteConnectEventHandlers3 trampolines = {};
+    trampolines.show = [](void* ctx, uint32_t /*cuid*/, XalPlatformOperation op, char const* url, char const* code, size_t /*qrCodeSize*/, void const* /*qrCode*/)
     {
         auto handlers = static_cast<XalPlatformRemoteConnectEventHandlers*>(ctx);
         handlers->show(handlers->context, nullptr, op, url, code);

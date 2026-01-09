@@ -11,7 +11,7 @@
 #define GRAPH_REFRESH_INTERVAL_MS (20 * 60 * 1000)
 
 // Presence poll interval - 30 seconds in ms. Presence is only polled if rich presence polling is enabled.
-#if XSAPI_UNIT_TESTS
+#ifdef XSAPI_UNIT_TESTS
 #define PRESENCE_POLL_INTERVAL_MS (1 * 1000)
 #else
 #define PRESENCE_POLL_INTERVAL_MS (30 * 1000)
@@ -118,7 +118,7 @@ SocialGraph::~SocialGraph()
 
     if (m_socialRelationshipChangedToken)
     {
-        m_xblContext->SocialService()->RemoveSocialRelationshipChangedHandler(m_socialRelationshipChangedToken);
+        m_xblContext->SocialService()->RemoveSocialRTAHandler(m_socialRelationshipChangedToken);
     }
     if (m_devicePresenceChangedToken)
     {

@@ -183,9 +183,16 @@ Result<void> AchievementsManagerUser::Initialize(
         auto state{ GlobalState::Get() };
         if (sharedThis && state)
         {
+            std::lock_guard<std::mutex> lock{ sharedThis->m_mutex };
+            sharedThis->m_isFetchingAchievements = false;
             if (FAILED(hr))
             {
                 LOGS_ERROR << "Fetching state of achievements for user with ID " << sharedThis->Xuid() << " for RTA Resync failed with error code " << hr;
+            }
+            else
+            {
+                // Needed if not already initialized, for instance if the user was added while offline
+                sharedThis->m_isInitialized = true;
             }
         }
     };
@@ -196,6 +203,8 @@ Result<void> AchievementsManagerUser::Initialize(
         {
             if (auto sharedThis{ weakThis.lock() })
             {
+                std::lock_guard<std::mutex> lock{ sharedThis->m_mutex };
+                sharedThis->m_isFetchingAchievements = true;
                 sharedThis->FetchAchievements(AsyncContext<HRESULT> {
                     sharedThis->m_queue,
                     resyncCallback
@@ -215,13 +224,14 @@ Result<void> AchievementsManagerUser::Initialize(
 
             if (auto sharedThis{ weakThis.lock() })
             {
-                // We only want to refetch state data if we're already initialized,
-                //  otherwise there is already a fetch happening.
-                if (!sharedThis->m_isInitialized)
+                std::lock_guard<std::mutex> lock{ sharedThis->m_mutex };
+                // We only want to refetch state data if we're not in the middle of a fetch
+                if (sharedThis->m_isFetchingAchievements)
                 {
                     return;
                 }
 
+                sharedThis->m_isFetchingAchievements = true;
                 // If this function hasn't returned yet, this means that the
                 //  RTA connection dropped at some point (whether the network 
                 //  connection dropped, or an issue with the RTA service, 
@@ -247,9 +257,13 @@ Result<void> AchievementsManagerUser::Initialize(
             auto state{ GlobalState::Get() };
             if (sharedThis && state)
             {
-                if (SUCCEEDED(hr))
                 {
-                    sharedThis->m_isInitialized = true;
+                    std::lock_guard<std::mutex> lock{ sharedThis->m_mutex };
+                    sharedThis->m_isFetchingAchievements = false;
+                    if (SUCCEEDED(hr))
+                    {
+                        sharedThis->m_isInitialized = true;
+                    }
                 }
                 async.Complete(hr);
             }
@@ -359,6 +373,12 @@ uint64_t AchievementsManagerUser::GetAchievementCount() const
 
 Result<void> AchievementsManagerUser::CanUpdateAchievement(_In_ const String & achievementId, _In_ uint8_t progress)
 {
+    // User added offline if still uninitialized, so must assume we can update for offline achievements
+    if (!m_isInitialized)
+    {
+        return S_OK;
+    }
+
     if (m_userAchievements.find(achievementId) == m_userAchievements.end())
     {
         char errorMsg[1024];
@@ -1259,7 +1279,7 @@ HRESULT AchievementsManager::AddLocalUser(
             auto user{ weakUser.lock() };
             if (FAILED(hr))
             {
-                LOGS_ERROR << "Failed to initialize local user with ID " << user->Xuid() << " with error code " << hr;
+                LOGS_WARN << "Failed to initialize local user online with ID " << user->Xuid() << " with error code " << hr;
             }
 
             std::lock_guard<std::mutex> lock{ sharedThis->m_mutex };
@@ -1396,13 +1416,6 @@ Result<void> AchievementsManager::UpdateAchievement(
     }
 
     std::shared_ptr<AchievementsManagerUser> localUser = m_localUsers[xuid];
-    if (!localUser->IsInitialized())
-    {
-        char errorMsg[1024];
-        SPRINTF(errorMsg, 1024, "User with ID %llu not yet initialized.", static_cast<unsigned long long>(xuid));
-        return { E_UNEXPECTED, errorMsg };
-    }
-
     auto isAchievementUpdateable = localUser->CanUpdateAchievement(achievementId, progress);
     if (Failed(isAchievementUpdateable))
     {

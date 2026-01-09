@@ -7,7 +7,7 @@
 #include <Rpc.h>
 #include <codecvt>
 #endif
-#if XSAPI_WRL_EVENTS_SERVICE
+#ifdef XSAPI_WRL_EVENTS_SERVICE
 #include <wrl.h>
 #endif
 #include "errors_legacy.h"
@@ -167,7 +167,7 @@ public:
 #if HC_PLATFORM_IS_MICROSOFT
     static xsapi_internal_string internal_string_from_utf16(_In_z_ const wchar_t* utf16);
 #endif
-#if XSAPI_WRL_EVENTS_SERVICE
+#ifdef XSAPI_WRL_EVENTS_SERVICE
     static Microsoft::WRL::Wrappers::HString HStringFromUtf8(_In_z_ const char* utf8);
 #endif
 #if __cplusplus_winrt

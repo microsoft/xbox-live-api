@@ -4,7 +4,7 @@
 #include "pch.h"
 #include "web_socket.h"
 #include "xsapi_utils.h"
-#if XSAPI_UNIT_TESTS
+#ifdef XSAPI_UNIT_TESTS
 #include "mock_web_socket.h"
 #endif
 
@@ -205,7 +205,7 @@ std::shared_ptr<IWebsocket> IWebsocket::Make(
 ) noexcept
 {
 
-#if XSAPI_UNIT_TESTS
+#ifdef XSAPI_UNIT_TESTS
     auto webSocket = MakeShared<MockWebsocket>(std::move(user), std::move(queue));
 #else
     auto webSocket = MakeShared<Websocket>(std::move(user), std::move(queue));

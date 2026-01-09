@@ -64,7 +64,7 @@ Result<Vector<ActivityInfo>> ActivityInfo::Deserialize(
 
                 String platform;
                 JsonUtils::ExtractJsonString(activity, "platform", platform, false);
-                i.platform = EnumValue<XblMultiplayerActivityPlatform>(platform.data());
+                i.platform = EnumValue<XblMultiplayerActivityPlatform, 0, static_cast<uint32_t>(XblMultiplayerActivityPlatform::All)>(platform.data());
 
                 result.push_back(i);
             }

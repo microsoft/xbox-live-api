@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Toolkit.Wpf.UI.Controls.WebView" Version="6.1.2" />
+  </ItemGroup>
+</Project>

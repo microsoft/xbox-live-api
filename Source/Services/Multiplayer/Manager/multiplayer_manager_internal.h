@@ -596,7 +596,7 @@ public:
 
     std::shared_ptr<MultiplayerLobbyClient> LobbyClient();
 
-#if XSAPI_UNIT_TESTS
+#ifdef XSAPI_UNIT_TESTS
     void Shutdown();
 #endif
 

@@ -3,7 +3,7 @@
 
 #include "pch.h"
 
-#if XSAPI_WRL_EVENTS_SERVICE
+#ifdef XSAPI_WRL_EVENTS_SERVICE
 
 #include "events_service_etw.h"
 

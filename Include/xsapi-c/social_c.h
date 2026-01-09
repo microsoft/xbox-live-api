@@ -195,7 +195,12 @@ enum class XblSocialNotificationType : uint32_t
     /// <summary>
     /// User(s) were removed.
     /// </summary>
-    Removed
+    Removed,
+
+    /// <summary>
+    /// The number of pending incoming friend requests has changed.
+    /// </summary>
+    IncomingFriendRequestCountChanged
 };
 
 /// <summary>
@@ -264,6 +269,19 @@ typedef struct XblSocialRelationshipChangeEventArgs
     /// </summary>
     size_t xboxUserIdsCount;
 } XblSocialRelationshipChangeEventArgs;
+
+typedef struct XblSocialFriendRequestCountChangedEventArgs
+{
+    /// <summary>
+    /// The Xbox user ID for the user who's social graph changes are being listed for.
+    /// </summary>
+    uint64_t callerXboxUserId;
+
+    /// <summary>
+    /// Current number of pending incoming friend requests.
+    /// </summary>
+    size_t incomingFriendRequestCount;
+} XblSocialFriendRequestCountChangedEventArgs;
 
 /// <summary>
 /// A handle to a social relationship result.
@@ -505,6 +523,51 @@ STDAPI_(XblFunctionContext) XblSocialAddSocialRelationshipChangedHandler(
 /// Call this API only if <see cref="XblSocialAddSocialRelationshipChangedHandler"/> was used to register an event handler.
 /// </remarks>
 STDAPI XblSocialRemoveSocialRelationshipChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblFunctionContext handlerFunctionContext
+) XBL_NOEXCEPT;
+
+/// <summary>
+/// A callback invoked the number of incoming friend requests for a user changes. 
+/// </summary>
+/// <param name="eventArgs">The arguments associated with the change.
+/// The fields of the struct are only valid during the callback.</param>
+/// <param name="context">Context provided by when the handler is added.</param>
+/// <returns></returns>
+typedef void
+(STDAPIVCALLTYPE* XblSocialIncomingFriendRequestCountChangedHandler)(
+    _In_ const XblSocialFriendRequestCountChangedEventArgs* eventArgs,
+    _In_opt_ void* context
+);
+
+/// <summary>
+/// Registers an event handler for notifications of incoming friend requests for the registering user.
+/// This callback is only useful for developers trying to build social experiences on non-Windows platforms.
+/// </summary>
+/// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
+/// <param name="handler">The callback function that receives notifications.</param>
+/// <param name="handlerContext">Client context pointer to be passed back to the handler.</param>
+/// <param name="handlerFunctionContext">Token to be populated and later used to remove the handler.</param>
+/// <returns></returns>
+/// <remarks></remarks>
+STDAPI XblSocialAddFriendRequestCountChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblSocialIncomingFriendRequestCountChangedHandler handler,
+    _In_opt_ void* handlerContext,
+    _Out_ XblFunctionContext* handlerFunctionContext
+) XBL_NOEXCEPT;
+
+/// <summary>
+/// Removes a friend request count change handler.
+/// </summary>
+/// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
+/// <param name="handlerFunctionContext">Context for the handler to remove.</param>
+/// <returns></returns>
+/// <remarks>
+/// <prereq/>
+/// Call this API only if <see cref="XblSocialAddFriendRequestCountChangedHandler"/> was used to register an event handler.
+/// </remarks>
+STDAPI XblSocialRemoveFriendRequestCountChangedHandler(
     _In_ XblContextHandle xboxLiveContext,
     _In_ XblFunctionContext handlerFunctionContext
 ) XBL_NOEXCEPT;

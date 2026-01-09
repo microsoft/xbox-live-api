@@ -1210,7 +1210,7 @@ xsapi_internal_string utils::internal_string_from_utf16(_In_z_ const wchar_t* ut
 }
 #endif
 
-#if XSAPI_WRL_EVENTS_SERVICE
+#ifdef XSAPI_WRL_EVENTS_SERVICE
 Microsoft::WRL::Wrappers::HString utils::HStringFromUtf8(_In_z_ const char* utf8)
 {
     auto cchOutString = char_t_from_utf8(utf8, nullptr, 0);
