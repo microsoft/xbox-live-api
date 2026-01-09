@@ -152,6 +152,13 @@
   </PropertyGroup>
   <Import Project="$(XsapiRoot)External\xal\External\libHttpClient\Build\libHttpClient.import.props" />
 
+  <!-- Ensure libHttpClient headers are on the include path for GDK builds -->
+  <ItemDefinitionGroup Condition="'$(HCPlatform)' == 'GDK'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(HCIncludeDir)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
   <!--CompactCoreCLL dependency-->
   <PropertyGroup Condition="'$(XsapiCllRefs)' == 'true'">
     <XalRoot>$(XsapiRoot)External\xal\</XalRoot>

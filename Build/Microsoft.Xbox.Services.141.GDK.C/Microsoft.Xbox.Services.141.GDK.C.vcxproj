@@ -6,6 +6,12 @@
     <PlatformToolset>v141</PlatformToolset>
     <XsapiImpl>true</XsapiImpl>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <TargetName>Microsoft.Xbox.Services.141.GDK.C.$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <TargetName>Microsoft.Xbox.Services.141.GDK.C</TargetName>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetPathOfFileAbove(xsapi.gdk.props))" />
   <Import Project="$(XsapiSourceRoot)\xsapi.staticlib.props" />
   <Import Project="$(XsapiSourceRoot)\Build\Microsoft.Xbox.Services.Common\Microsoft.Xbox.Services.Common.vcxitems" Label="Shared" />

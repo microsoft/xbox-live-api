@@ -17,7 +17,7 @@
 #include "xsapi-cpp/matchmaking.h"
 #include "xsapi-cpp/user_statistics.h"
 #include "xsapi-cpp/string_verify.h"
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
 #include "xsapi-cpp/notification_service.h"
 #endif
 
@@ -136,14 +136,14 @@ public:
     /// </summary>
     inline presence::presence_service presence_service();
 
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
     /// <summary>
     /// A service for receiving notifications.
     /// </summary>
     inline std::shared_ptr<notification::notification_service> notification_service();
 #endif
 
-#if XSAPI_EVENTS_SERVICE
+#ifdef XSAPI_EVENTS_SERVICE
     /// <summary>
     /// A service used to write in game events.
     /// </summary>
@@ -161,7 +161,7 @@ public:
 private:
     XblContextHandle m_handle = nullptr;
 
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
     std::shared_ptr <notification::notification_service> m_notificationService;
 #endif
 };

@@ -7,6 +7,12 @@
     <XsapiLibBuildFromSource>true</XsapiLibBuildFromSource>
     <LibHttpClientBuildFromSource>true</LibHttpClientBuildFromSource>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <TargetName>Microsoft.Xbox.Services.141.GDK.C.Thunks.$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <TargetName>Microsoft.Xbox.Services.141.GDK.C.Thunks</TargetName>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetPathOfFileAbove(xsapi.gdk.props))" />
   <Import Project="$(XsapiSourceRoot)\xsapi.staticlib.props" />
   <ItemGroup>

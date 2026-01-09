@@ -118,7 +118,7 @@ typedef void (*XblLocalStorageClearHandler)(
     _In_z_ const char* key
 );
 
-#if XSAPI_INTERNAL_EVENTS_SERVICE
+#ifdef XSAPI_INTERNAL_EVENTS_SERVICE
 
 /// <summary>
 /// Completes a local storage write operation.

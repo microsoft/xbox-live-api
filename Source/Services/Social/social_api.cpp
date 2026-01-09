@@ -237,7 +237,52 @@ STDAPI XblSocialRemoveSocialRelationshipChangedHandler(
 try
 {
     RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
-    xboxLiveContext->SocialService()->RemoveSocialRelationshipChangedHandler(handlerFunctionContext);
+    xboxLiveContext->SocialService()->RemoveSocialRTAHandler(handlerFunctionContext);
+    return S_OK;
+}
+CATCH_RETURN()
+
+STDAPI XblSocialAddFriendRequestCountChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblSocialIncomingFriendRequestCountChangedHandler handler,
+    _In_opt_ void* handlerContext,
+    _Out_ XblFunctionContext* handlerFunctionContext
+) XBL_NOEXCEPT
+try
+{
+    RETURN_HR_INVALIDARGUMENT_IF(xboxLiveContext == nullptr);
+    RETURN_HR_INVALIDARGUMENT_IF(handler == nullptr);
+    RETURN_HR_INVALIDARGUMENT_IF(handlerFunctionContext == nullptr);
+
+    *handlerFunctionContext = xboxLiveContext->SocialService()->AddFriendRequestCountChangedHandler(
+        [
+            handler,
+            handlerContext
+        ]
+        (const XblSocialFriendRequestCountChangedEventArgs& args)
+    {
+        try
+        {
+            handler(&args, handlerContext);
+        }
+        catch (...)
+        {
+            LOGS_ERROR << __FUNCTION__ << ": exception in client handler!";
+        }
+    });
+
+    return S_OK;
+}
+CATCH_RETURN()
+
+STDAPI XblSocialRemoveFriendRequestCountChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblFunctionContext handlerFunctionContext
+) XBL_NOEXCEPT
+try
+{
+    RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
+    xboxLiveContext->SocialService()->RemoveSocialRTAHandler(handlerFunctionContext);
     return S_OK;
 }
 CATCH_RETURN()

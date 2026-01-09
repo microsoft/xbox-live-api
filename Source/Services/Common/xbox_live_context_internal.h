@@ -18,7 +18,7 @@
 #include "string_service_internal.h"
 #include "social_internal.h"
 #include "multiplayer_activity_internal.h"
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
 #include "notification_internal.h"
 #endif
 
@@ -102,7 +102,7 @@ public:
     /// </summary>
     std::shared_ptr<xbox::services::presence::PresenceService> PresenceService();
 
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
     /// <summary>
     /// A service used for delivering notifications.
     /// </summary>
@@ -119,7 +119,7 @@ public:
     /// </summary>
     std::shared_ptr<xbox::services::multiplayer_activity::MultiplayerActivityService> MultiplayerActivityService() noexcept;
 
-#if XSAPI_EVENTS_SERVICE
+#ifdef XSAPI_EVENTS_SERVICE
     /// <summary>
     /// A service used to write in game events.
     /// </summary>
@@ -159,17 +159,17 @@ private:
     std::shared_ptr<xbox::services::multiplayer_activity::MultiplayerActivityService> m_multiplayerActivityService;
 
     std::shared_ptr<xbox::services::presence::PresenceService> m_presenceService;
-#if !XSAPI_UNIT_TESTS && (HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL)
+#if !defined(XSAPI_UNIT_TESTS) && (HC_PLATFORM == HC_PLATFORM_WIN32 || HC_PLATFORM_IS_EXTERNAL)
     std::shared_ptr<xbox::services::notification::RTANotificationService> m_notificationService;
 #elif HC_PLATFORM == HC_PLATFORM_UWP
     std::shared_ptr<xbox::services::notification::UWPNotificationService> m_notificationService;
 #elif HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_IOS
     std::shared_ptr<xbox::services::notification::MobileNotificationService> m_notificationService;
-#elif XSAPI_NOTIFICATION_SERVICE
+#elif defined(XSAPI_NOTIFICATION_SERVICE)
     std::shared_ptr<xbox::services::notification::NotificationService> m_notificationService;
 #endif
 
-#if XSAPI_EVENTS_SERVICE
+#ifdef XSAPI_EVENTS_SERVICE
     std::shared_ptr<xbox::services::events::IEventsService> m_eventsService;
 #endif
 

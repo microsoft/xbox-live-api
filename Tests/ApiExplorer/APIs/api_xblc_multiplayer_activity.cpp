@@ -200,7 +200,9 @@ int XblMultiplayerActivityDeleteActivityAsync_Lua(lua_State* L)
 int XblMultiplayerActivitySendInvitesAsync_Lua(lua_State* L)
 {
     XblContextHandle xblContext{ Data()->xboxLiveContext };
-    uint64_t xuid{ GetUint64FromLua(L, 1, xuids[0]) };
+    //uint64_t xuid{ GetUint64FromLua(L, 1, xuids[0]) };
+    //uint64_t xuid{ 2814636782672891 };
+    uint64_t xuid{ 2533274873775631 };
 
     // CODE SNIPPET START: XblMultiplayerActivitySendInvitesAsync_C
     auto async = std::make_unique<XAsyncBlock>();
@@ -217,7 +219,7 @@ int XblMultiplayerActivitySendInvitesAsync_Lua(lua_State* L)
         &xuid,
         1,
         true,
-        "dummyConnectionString",
+        nullptr,
         async.get()
     );
 

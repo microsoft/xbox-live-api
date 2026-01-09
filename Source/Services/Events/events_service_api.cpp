@@ -22,7 +22,7 @@ try
 }
 CATCH_RETURN()
 
-#if XSAPI_INTERNAL_EVENTS_SERVICE
+#ifdef XSAPI_INTERNAL_EVENTS_SERVICE
 
 STDAPI XblEventsSetStorageAllotment(
     uint64_t storageAllotmentInBytes

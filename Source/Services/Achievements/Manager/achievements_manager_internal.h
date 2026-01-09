@@ -149,6 +149,7 @@ private:
 
     std::mutex m_mutex;
     bool m_isInitialized = false;
+    bool m_isFetchingAchievements = true;
 
     Map<String, XblAchievement*> m_userAchievements;
     XblAchievement* m_achievementCache{ nullptr };

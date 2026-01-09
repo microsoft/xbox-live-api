@@ -11,7 +11,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_MULTIPLAYER_MANAGER_CPP_BEGIN
 
 #if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK
 #define TIME_PER_CALL_MS (1 * 1000)
-#elif XSAPI_UNIT_TESTS
+#elif defined(XSAPI_UNIT_TESTS)
 #define TIME_PER_CALL_MS (30 * 1000)
 #endif
 
@@ -462,7 +462,7 @@ HRESULT MultiplayerSessionWriter::GetCurrentSessionHelper(
 
 void MultiplayerSessionWriter::Resync()
 {
-#if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK || XSAPI_UNIT_TESTS
+#if HC_PLATFORM == HC_PLATFORM_UWP || HC_PLATFORM == HC_PLATFORM_XDK || defined(XSAPI_UNIT_TESTS)
     std::lock_guard<std::mutex> lock(m_resyncLock);
 
     auto cachedSession = Session();

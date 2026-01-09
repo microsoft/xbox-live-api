@@ -17,7 +17,7 @@
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
     class XboxLiveContextSettings;
 
-#if !XSAPI_UNIT_TESTS && !XSAPI_NO_PPL
+#if !defined(XSAPI_UNIT_TESTS) && !XSAPI_NO_PPL
     namespace events {
         class events_service;
     }

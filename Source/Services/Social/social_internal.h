@@ -52,6 +52,7 @@ namespace legacy
 }
 
 typedef Callback<const XblSocialRelationshipChangeEventArgs&> SocialRelationshipChangedHandler;
+typedef Callback<const XblSocialFriendRequestCountChangedEventArgs&> FriendRequestCountChangedHandler;
 
 class SocialRelationshipChangeSubscription : public real_time_activity::Subscription
 {
@@ -59,6 +60,7 @@ public:
     SocialRelationshipChangeSubscription(_In_ uint64_t xuid) noexcept;
 
     XblFunctionContext AddHandler(SocialRelationshipChangedHandler handler) noexcept;
+    XblFunctionContext AddHandler(FriendRequestCountChangedHandler handler) noexcept;
     size_t RemoveHandler(XblFunctionContext token) noexcept;
 
 protected:
@@ -67,6 +69,7 @@ protected:
 private:
     uint64_t m_xuid;
     Map<XblFunctionContext, SocialRelationshipChangedHandler> m_handlers;
+    Map<XblFunctionContext, FriendRequestCountChangedHandler> m_friendRequestCountChangedHandlers;
     XblFunctionContext m_nextHandlerToken{ 1 };
     mutable std::mutex m_lock;
 };
@@ -86,7 +89,11 @@ public:
         _In_ SocialRelationshipChangedHandler handler
     ) noexcept;
 
-    void RemoveSocialRelationshipChangedHandler(
+    XblFunctionContext AddFriendRequestCountChangedHandler(
+        _In_ FriendRequestCountChangedHandler handler
+    ) noexcept;
+
+    void RemoveSocialRTAHandler(
         _In_ XblFunctionContext token
     ) noexcept;
 

@@ -34,6 +34,6 @@
 #include <xsapi-c/http_call_c.h>
 #include <xsapi-c/title_storage_c.h>
 #include <xsapi-c/game_invite_c.h>
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
 #include <xsapi-c/notification_c.h>
 #endif

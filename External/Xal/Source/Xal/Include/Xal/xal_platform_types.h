@@ -293,6 +293,8 @@ typedef struct XalPlatformStorageEventHandlers2
 /// <param name="operation">The handle for this operation.</param>
 /// <param name="url">The url to show in the prompt.</param>
 /// <param name="code">The code to show in the prompt.</param>
+/// <param name="qrCodeSize">Size of the qrCode buffer</param>
+/// <param name="qrCode">A pointer to a buffer containing the QR code for the url as PNG.</param>
 /// <returns></returns>
 /// <remarks>
 /// This event is raised when Xal needs to prompt the user to perform the
@@ -301,14 +303,19 @@ typedef struct XalPlatformStorageEventHandlers2
 /// XalPlatformRemoteConnectClosePromptEventHandler is called or it is dismissed
 /// by the user.
 ///
+/// Game should still render the URL and code that it got back in case the user can’t scan
+/// the QR code. The QR code will also not contain the code embedded into it.
+///
 /// All arguments are owned by the caller (except context).
 /// </remarks>
-typedef void (XalPlatformRemoteConnectShowPromptEventHandler2)(
+typedef void (XalPlatformRemoteConnectShowPromptEventHandler3)(
     _In_opt_ void* context,
     _In_ uint32_t userIdentifier,
     _In_ XalPlatformOperation operation,
     _In_z_ char const* url,
-    _In_z_ char const* code
+    _In_z_ char const* code,
+    _In_ size_t qrCodeSize,
+    _In_reads_bytes_(qrCodeSize) void const* qrCode
 );
 
 /// <summary>
@@ -328,7 +335,7 @@ typedef void (XalPlatformRemoteConnectShowPromptEventHandler2)(
 ///
 /// All arguments are owned by the caller (except context).
 /// </remarks>
-typedef void (XalPlatformRemoteConnectClosePromptEventHandler2)(
+typedef void (XalPlatformRemoteConnectClosePromptEventHandler3)(
     _In_opt_ void* context,
     _In_ uint32_t userIdentifier,
     _In_ XalPlatformOperation operation
@@ -340,23 +347,23 @@ typedef void (XalPlatformRemoteConnectClosePromptEventHandler2)(
 /// <remarks>
 /// Both handlers must be set at the same time.
 /// </remarks>
-typedef struct XalPlatformRemoteConnectEventHandlers2
+typedef struct XalPlatformRemoteConnectEventHandlers3
 {
     /// <summary>
     /// Show the prompt handler.
     /// </summary>
-    XalPlatformRemoteConnectShowPromptEventHandler2* show;
+    XalPlatformRemoteConnectShowPromptEventHandler3* show;
 
     /// <summary>
     /// Close the prompt handler.
     /// </summary>
-    XalPlatformRemoteConnectClosePromptEventHandler2* close;
+    XalPlatformRemoteConnectClosePromptEventHandler3* close;
 
     /// <summary>
     /// Optional pointer to data used by the event handlers.
     /// </summary>
     void* context;
-} XalPlatformRemoteConnectEventHandlers2;
+} XalPlatformRemoteConnectEventHandlers3;
 
 //------------------------------------------------------------------------------
 // Crypto (only used in generic mode)
@@ -540,6 +547,62 @@ struct XalPlatformDateTimeCallbacks
     void* context;
 };
 
+//-----------------------------------------------------------------------------
+// Spop Prompt (only used in generic mode, when configured for it)
+
+/// <summary>
+/// Show prompt for SPOP operation event handler.
+/// </summary>
+/// <param name="context">Optional pointer to data used by the event handler.
+/// </param>
+/// <param name="userIdentifier">The user identifier that was passed to Xal when
+/// the user was added.</param>
+/// <param name="operation">The handle for this operation.</param>
+/// <param name="modernGamertag">Modern gamertag</param>
+/// <param name="modernGamertagSuffix">Modern gamertag suffix if there is one.</param>
+/// <returns></returns>
+/// <remarks>
+/// This event is raised when the user is already signed in on a different
+/// device and therefore hits an SPOP veto. Xal needs to prompt the user to
+/// decide whether they want to sign-out the other session and sign-in on the
+/// current device. This will only occur as a response to a call to
+/// XalAddUserWithUiAsync that resulted in an SPOP veto.
+///
+/// The modern gamertag suffix might be null for certain users.
+///
+/// All arguments are owned by the caller (except context).
+/// </remarks>
+typedef void (XalPlatformSpopPromptEventHandler)(
+    _In_opt_ void* context,
+    _In_ uint32_t userIdentifier,
+    _In_ XalPlatformOperation operation,
+    _In_z_ char const* modernGamertag,
+    _In_opt_z_ char const* modernGamertagSuffix
+);
+
+/// <summary>
+/// Enum defining the results of a client operation.
+/// </summary>
+typedef enum XalSpopOperationResult
+{
+    /// <summary>
+    /// User agreed to sign-out the existing session, and sign-in on the current device
+    /// </summary>
+    XalSpopOperationResult_SignInHere = 0,
+    /// <summary>
+    /// User selected a "switch account" option
+    /// </summary>
+    XalSpopOperationResult_SwitchAccount = 1,
+    /// <summary>
+    /// Canceled client operation.
+    /// </summary>
+    XalSpopOperationResult_Canceled = 2,
+    /// <summary>
+    /// Unrecoverable failure in client operation.
+    /// </summary>
+    XalSpopOperationResult_Failure = 3,
+} XalSpopOperationResult;
+
 }
 
 // Back compat handlers
@@ -707,6 +770,90 @@ typedef struct XalPlatformStorageEventHandlers
 
 //-----------------------------------------------------------------------------
 // Remote Connect (only used in generic mode, when configured for it)
+
+/// <summary>
+/// Show prompt for remote connect authentication event handler.
+/// </summary>
+/// <param name="context">Optional pointer to data used by the event handler.
+/// </param>
+/// <param name="userIdentifier">The user identifier that was passed to Xal when
+/// the user was added.</param>
+/// <param name="operation">The handle for this operation.</param>
+/// <param name="url">The url to show in the prompt.</param>
+/// <param name="code">The code to show in the prompt.</param>
+/// <returns></returns>
+/// <remarks>
+/// This version of the handler is deprecated, please switch to
+/// XalPlatformRemoteConnectShowPromptEventHandler3.
+///
+/// This event is raised when Xal needs to prompt the user to perform the
+/// remote connect authentication process.
+/// The prompt ui should be displayed until
+/// XalPlatformRemoteConnectClosePromptEventHandler is called or it is dismissed
+/// by the user.
+///
+/// All arguments are owned by the caller (except context).
+/// </remarks>
+typedef void (XalPlatformRemoteConnectShowPromptEventHandler2)(
+    _In_opt_ void* context,
+    _In_ uint32_t userIdentifier,
+    _In_ XalPlatformOperation operation,
+    _In_z_ char const* url,
+    _In_z_ char const* code
+);
+
+/// <summary>
+/// Close prompt for remote authentication event handler.
+/// </summary>
+/// <param name="context">Optional pointer to data used by the event handler.
+/// </param>
+/// <param name="userIdentifier">The user identifier that was passed to Xal when
+/// the user was added.</param>
+/// <param name="operation">The handle for this operation.</param>
+/// <returns></returns>
+/// <remarks>
+/// This version of the handler is deprecated, please switch to
+/// XalPlatformRemoteConnectClosePromptEventHandler3.
+///
+/// This event is raised when the remote connect authentication process has been
+/// completed and the prompt is no longer necessary.
+/// This event will always be called with the same operation as a previous
+/// XalPlatformRemoteConnectShowPromptEventHandler event.
+///
+/// All arguments are owned by the caller (except context).
+/// </remarks>
+typedef void (XalPlatformRemoteConnectClosePromptEventHandler2)(
+    _In_opt_ void* context,
+    _In_ uint32_t userIdentifier,
+    _In_ XalPlatformOperation operation
+);
+
+/// <summary>
+/// Struct encapsulating the remote connect event handlers.
+/// </summary>
+/// <remarks>
+/// This version of the api is deprecated, please switch to
+/// XalPlatformRemoteConnectEventHandlers3.
+///
+/// Both handlers must be set at the same time.
+/// </remarks>
+typedef struct XalPlatformRemoteConnectEventHandlers2
+{
+    /// <summary>
+    /// Show the prompt handler.
+    /// </summary>
+    XalPlatformRemoteConnectShowPromptEventHandler2* show;
+
+    /// <summary>
+    /// Close the prompt handler.
+    /// </summary>
+    XalPlatformRemoteConnectClosePromptEventHandler2* close;
+
+    /// <summary>
+    /// Optional pointer to data used by the event handlers.
+    /// </summary>
+    void* context;
+} XalPlatformRemoteConnectEventHandlers2;
 
 /// <summary>
 /// Show prompt for remote connect authentication event handler.

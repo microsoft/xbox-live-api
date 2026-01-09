@@ -79,8 +79,8 @@ inline title_storage_blob_metadata::title_storage_blob_metadata(
     _In_ string_t blobPath,
     _In_ title_storage_blob_type blobType,
     _In_ string_t xboxUserId,
-    _In_ string_t displayName,
-    _In_ string_t eTag
+    _In_ string_t /*displayName*/,
+    _In_ string_t /*eTag*/
 )
     :
     title_storage_blob_metadata(

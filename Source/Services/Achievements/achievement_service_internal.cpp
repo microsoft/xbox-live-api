@@ -299,7 +299,7 @@ HRESULT AchievementsService::WriteOfflineUpdateAchievement(
     properties.AddMember("AchievementId", JsonValue(achievementId.c_str(), properties.GetAllocator()).Move(), properties.GetAllocator());
     properties.AddMember("PercentComplete", percentComplete, properties.GetAllocator());
     auto propertiesStrUtf8 = JsonUtils::SerializeJson(properties);
-#if XSAPI_EVENTS_SERVICE
+#ifdef XSAPI_EVENTS_SERVICE
     HRESULT hr = xboxLiveContextImpl->EventsService()->WriteInGameEvent("AchievementUpdate", propertiesStrUtf8.c_str(), nullptr);
 #else // aka XSAPI_UNIT_TESTS
     HRESULT hr = E_FAIL; 

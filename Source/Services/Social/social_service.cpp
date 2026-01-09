@@ -40,7 +40,21 @@ XblFunctionContext SocialService::AddSocialRelationshipChangedHandler(
     return m_socialRelationshipChangedSubscription->AddHandler(std::move(handler));
 }
 
-void SocialService::RemoveSocialRelationshipChangedHandler(
+XblFunctionContext SocialService::AddFriendRequestCountChangedHandler(
+    _In_ FriendRequestCountChangedHandler handler
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_lock };
+
+    if (!m_socialRelationshipChangedSubscription)
+    {
+        m_socialRelationshipChangedSubscription = MakeShared<SocialRelationshipChangeSubscription>(m_user.Xuid());
+        m_rtaManager->AddSubscription(m_user, m_socialRelationshipChangedSubscription);
+    }
+    return m_socialRelationshipChangedSubscription->AddHandler(std::move(handler));
+}
+
+void SocialService::RemoveSocialRTAHandler(
     _In_ XblFunctionContext token
 ) noexcept
 {

@@ -11,7 +11,7 @@
 
 #include "xsapi-cpp/xbox_live_context.h"
 #include "xsapi-cpp/events.h"
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
 #include "xsapi-cpp/notification_service.h"
 #endif
 NAMESPACE_MICROSOFT_XBOX_SERVICES_CPP_BEGIN
@@ -22,7 +22,7 @@ xbox_live_context::xbox_live_context(_In_ XblUserHandle user)
     if (FAILED(hr)) throw std::runtime_error("XblContextCreateHandle failed");
     XblSetApiType(XblApiType::XblCPPApi);
 
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
     // Unlike the rest of the services, notification_service needs to maintain state
     // That is because of the differences between C-APIs for subscribing for RTA events
     // and the C++ subscribe_to_notifications call
@@ -36,7 +36,7 @@ xbox_live_context::xbox_live_context(_In_ XblContextHandle xboxLiveContextHandle
     if (FAILED(hr)) throw std::runtime_error("XblContextCreateHandle failed");
     XblSetApiType(XblApiType::XblCPPApi);
 
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
     // Unlike the rest of the services, notification_service needs to maintain state
     // That is because of the differences between C-APIs for subscribing for RTA events
     // and the C++ subscribe_to_notifications call
@@ -148,14 +148,14 @@ presence::presence_service xbox_live_context::presence_service()
     return presence::presence_service(m_handle);
 }
 
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
 std::shared_ptr<notification::notification_service> xbox_live_context::notification_service()
 {
     return m_notificationService;
 }
 #endif
 
-#if XSAPI_EVENTS_SERVICE
+#ifdef XSAPI_EVENTS_SERVICE
 events::events_service xbox_live_context::events_service()
 {
     return events::events_service(m_handle);

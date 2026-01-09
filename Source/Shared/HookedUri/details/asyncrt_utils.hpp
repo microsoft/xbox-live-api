@@ -696,7 +696,7 @@ xsapi_internal_string datetime::to_string_internal(date_format format) const
             for (int i = 7; fracSecBuf[i] == '0'; i--) fracSecBuf[i] = '\0';
         }
 
-        _snwprintf_s(dateTimeBuffer, sizeof(dateTimeBuffer), L"%sT%sZ%s", dateStr, timeStr, fracSecBuf);
+        _snwprintf_s(dateTimeBuffer, dateTimeMaxLength, L"%sT%sZ%s", dateStr, timeStr, fracSecBuf);
     }
 
     return conversions::to_utf8string_internal(dateTimeBuffer);

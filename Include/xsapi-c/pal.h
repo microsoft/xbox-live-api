@@ -20,7 +20,7 @@
 #endif
 
 // Events/Notifications services
-#if !(HC_PLATFORM == HC_PLATFORM_XDK || XSAPI_UNIT_TESTS)
+#if !(HC_PLATFORM == HC_PLATFORM_XDK || defined(XSAPI_UNIT_TESTS))
     #ifndef XSAPI_EVENTS_SERVICE
         #define XSAPI_EVENTS_SERVICE 1
     #endif
@@ -38,20 +38,20 @@
     #endif
 #endif
 
-#if !XSAPI_GRTS_EVENTS_SERVICE && !XSAPI_WRL_EVENTS_SERVICE
+#if !defined(XSAPI_GRTS_EVENTS_SERVICE) && !defined(XSAPI_WRL_EVENTS_SERVICE)
     #ifndef XSAPI_INTERNAL_EVENTS_SERVICE
         #define XSAPI_INTERNAL_EVENTS_SERVICE 1
     #endif
 #endif
 
-#if !(HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_GDK || XSAPI_UNIT_TESTS)
+#if !(HC_PLATFORM == HC_PLATFORM_XDK || HC_PLATFORM == HC_PLATFORM_GDK || defined(XSAPI_UNIT_TESTS))
     #ifndef XSAPI_NOTIFICATION_SERVICE
         #define XSAPI_NOTIFICATION_SERVICE 1
     #endif
 #endif
 
 // WinRT APIs
-#if XSAPI_UNIT_TESTS
+#ifdef XSAPI_UNIT_TESTS
     #define XSAPI_WINRT 1
 #endif
 

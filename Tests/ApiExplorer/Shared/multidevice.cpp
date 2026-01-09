@@ -373,7 +373,7 @@ HRESULT ApiRunnerMultiDeviceManager::JoinSession(
 HRESULT ApiRunnerMultiDeviceManager::SetSessionState(
     _In_ const std::string& key,
     _In_ const std::string& value,
-    _In_ std::function<void(HRESULT)> handler)
+    _In_ std::function<void(HRESULT)> /*handler*/)
 {
     std::vector<std::vector<std::string>> headers;
     if (value.length() == 0)

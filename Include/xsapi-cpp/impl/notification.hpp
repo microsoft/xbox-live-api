@@ -5,7 +5,7 @@
 #include "public_utils.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_NOTIFICATION_CPP_BEGIN 
-#if XSAPI_NOTIFICATION_SERVICE
+#ifdef XSAPI_NOTIFICATION_SERVICE
 notification_service::notification_service(_In_ XblContextHandle contextHandle)
 {
     XblContextDuplicateHandle(contextHandle, &m_xblContext);
@@ -13,7 +13,7 @@ notification_service::notification_service(_In_ XblContextHandle contextHandle)
 
 notification_service::~notification_service()
 {
-#if !XSAPI_UNIT_TESTS
+#ifndef XSAPI_UNIT_TESTS
     unsubscribe_from_notifications().wait();
 #endif
     XblContextCloseHandle(m_xblContext);
@@ -33,7 +33,7 @@ pplx::task<xbox_live_result<void>> notification_service::subscribe_to_notificati
 
     return asyncWrapper->Task(hr);
 }
-#elif HC_PLATFORM == HC_PLATFORM_WIN32 && !XSAPI_UNIT_TESTS
+#elif HC_PLATFORM == HC_PLATFORM_WIN32 && !defined(XSAPI_UNIT_TESTS)
 
 inline invite_notification_event_args::invite_notification_event_args(_In_ const XblGameInviteNotificationEventArgs& gameInviteargs)
     :m_gameInviteArgs(gameInviteargs)
@@ -184,7 +184,7 @@ pplx::task<xbox_live_result<void>> notification_service::unsubscribe_from_notifi
 
     return asyncWrapper->Task(hr);
 }
-#elif HC_PLATFORM == HC_PLATFORM_WIN32 && !XSAPI_UNIT_TESTS
+#elif HC_PLATFORM == HC_PLATFORM_WIN32 && !defined(XSAPI_UNIT_TESTS)
 pplx::task<xbox_live_result<void>> notification_service::unsubscribe_from_notifications()
 {
     XblGameInviteRemoveNotificationHandler(m_xblContext, m_gameinviteFunctionContext);

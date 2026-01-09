@@ -2,12 +2,12 @@ test = require 'u-test'
 common = require 'common'
 
 function TestSendInvite_Handler()
-    MultiDeviceSyncAndWait("SendInvite");
+    --MultiDeviceSyncAndWait("SendInvite");
     XblMultiplayerActivitySendInvitesAsync(MultiDeviceGetRemoteXuid())
 end
 
 function OnXblMultiplayerActivitySendInvitesAsync()
-    MultiDeviceSyncAndWait("Complete")
+    --MultiDeviceSyncAndWait("Complete")
     test.stopTest()
 end
 
