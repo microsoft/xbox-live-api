@@ -9,7 +9,40 @@ To learn more about these programs, please refer to the [developer program overv
 *   Xbox Live Features - profile, social, presence, leaderboards, achievements, multiplayer, matchmaking, title storage
 *   Xbox Live Authentication Library (XAL) public headers - Note that this repository does not contain full XAL source, it only contains XAL source files needed to support building with the Microsoft GDK.
 *   Platforms - Microsoft GDK (targeting both PC and Console). Installing the Microsoft GDK is a prerequisite for building XSAPI. Additionally, source and projects for XDK and UWP platforms can be found at https://github.com/microsoft/xbox-live-api/tree/1807_xdk_qfe_preview
-*   Support for Visual Studio 2017 and 2019
+*   Support for Visual Studio 2019 (v142) and Visual Studio 2022 (v143)
+
+## How to build
+
+Install the [Microsoft GDK](https://github.com/microsoft/GDK) first - it is a prerequisite, and the build resolves headers and libraries from the installed GDK.
+
+Open the solution matching your toolset and build the library project you need:
+
+| Visual Studio | Solution | Static library project |
+| --- | --- | --- |
+| 2019 (v142) | `Microsoft.Xbox.Services.GDK.VS2019.sln` | `Microsoft.Xbox.Services.142.GDK.C` |
+| 2022 (v143) | `Microsoft.Xbox.Services.GDK.VS2022.sln` | `Microsoft.Xbox.Services.143.GDK.C` |
+
+Build for the **`x64`** or **`ARM64`** platform. These are the only platforms the projects define - do not select a `Gaming.Desktop.*` or `Gaming.Xbox.*` platform, as those are not configured here and will fail to build.
+
+From the command line:
+
+    msbuild Build\Microsoft.Xbox.Services.143.GDK.C\Microsoft.Xbox.Services.143.GDK.C.vcxproj /p:Configuration=Debug /p:Platform=x64
+
+Build output goes to `Bins\Binaries\<Configuration>\<Platform>\`.
+
+### Building the Thunks DLL
+
+XSAPI is normally consumed as a static library, which links the C runtime dynamically (`/MD`). If your title uses the static C runtime (`/MT`), or you otherwise need XSAPI behind a DLL boundary, build the **Thunks DLL** instead. The DLL boundary isolates XSAPI's C runtime from your title's.
+
+    msbuild Build\Microsoft.Xbox.Services.GDK.C.Thunks\Microsoft.Xbox.Services.GDK.C.Thunks.vcxproj /p:Configuration=Debug /p:Platform=x64
+
+This produces `Microsoft.Xbox.Services.C.Thunks.dll` and its import library `Microsoft.Xbox.Services.C.Thunks.lib`. Link against the import library and ship the DLL alongside your title.
+
+Note that the Thunks DLL exports the XSAPI **C** API (`xsapi-c`) only. It does not export the C++ wrapper (`xsapi-cpp`), which is header-only and compiles into your title.
+
+The exported function list is generated from the public headers by the `Microsoft.Xbox.Services.ThunksGenerator` project. That project is C#, so it does not restore automatically as part of a native solution build - pass `-restore` when building it directly:
+
+    msbuild Build\Microsoft.Xbox.Services.GDK.C.Thunks\generator\ThunksGenerator\ThunksGenerator.csproj -restore
 
 ## How to use the Xbox Live Services API (XSAPI)
 
