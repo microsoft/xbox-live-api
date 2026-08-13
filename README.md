@@ -11,6 +11,25 @@ To learn more about these programs, please refer to the [developer program overv
 *   Platforms - Microsoft GDK (targeting both PC and Console). Installing the Microsoft GDK is a prerequisite for building XSAPI. Additionally, source and projects for XDK and UWP platforms can be found at https://github.com/microsoft/xbox-live-api/tree/1807_xdk_qfe_preview
 *   Support for Visual Studio 2019 (v142) and Visual Studio 2022 (v143)
 
+## Breaking changes in this release
+
+This release updates the repo to a current Microsoft GDK. If you are upgrading from a previous version, the toolsets and the output binary names have both changed.
+
+**Visual Studio 2017 (v141) is no longer supported.** `Microsoft.Xbox.Services.GDK.VS2017.sln` and the `Microsoft.Xbox.Services.141.GDK.C` static library project have been removed, matching the toolsets supported by the current GDK. Use Visual Studio 2019 (v142) or Visual Studio 2022 (v143). A v143 project, `Microsoft.Xbox.Services.143.GDK.C`, has been added.
+
+**Output binaries no longer carry the `.GDK.` segment.** The library file names have changed even though the project and folder names still contain `.GDK.`. If you link by file name, update your references:
+
+| | Previous | Current |
+| --- | --- | --- |
+| Static library | `Microsoft.Xbox.Services.142.GDK.C.lib` | `Microsoft.Xbox.Services.142.C.lib` |
+| Thunks DLL | `Microsoft.Xbox.Services.141.GDK.C.Thunks.dll` | `Microsoft.Xbox.Services.C.Thunks.dll` |
+
+To keep the previous `.GDK.` names, build with `/p:XsapiUseLegacyGdkSegment=true`, which produces `Microsoft.Xbox.Services.142.GDK.C.lib` and `Microsoft.Xbox.Services.GDK.C.Thunks.dll`. A custom segment can be supplied with `/p:XsapiGdkSegment=.YourTag`.
+
+**The Thunks project has moved and is no longer tied to a single toolset.** It was previously v141-only; it now builds from either solution:
+
+    Build\Microsoft.Xbox.Services.141.GDK.C.Thunks\   ->   Build\Microsoft.Xbox.Services.GDK.C.Thunks\
+
 ## How to build
 
 Install the [Microsoft GDK](https://github.com/microsoft/GDK) first - it is a prerequisite, and the build resolves headers and libraries from the installed GDK.
@@ -28,7 +47,7 @@ From the command line:
 
     msbuild Build\Microsoft.Xbox.Services.143.GDK.C\Microsoft.Xbox.Services.143.GDK.C.vcxproj /p:Configuration=Debug /p:Platform=x64
 
-Build output goes to `Bins\Binaries\<Configuration>\<Platform>\<ProjectName>\`, so the command above writes to `Bins\Binaries\Debug\x64\Microsoft.Xbox.Services.143.GDK.C\`.
+Build output goes to `Bins\Binaries\<Configuration>\<Platform>\<ProjectName>\`, so the command above writes to `Bins\Binaries\Debug\x64\Microsoft.Xbox.Services.143.GDK.C\`. Note that the library file itself is named `Microsoft.Xbox.Services.143.C.lib` - the folder keeps the `.GDK.` segment but the binary does not. See [Breaking changes in this release](#breaking-changes-in-this-release).
 
 The static library depends on libHttpClient, which is built from the `External\Xal\External\libHttpClient` submodule and copied next to the XSAPI library. On a completely clean tree the first build copies `libHttpClient.GDK.dll` but not its import library `libHttpClient.GDK.lib`, so linking against a freshly built XSAPI can fail with:
 
