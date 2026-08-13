@@ -32,17 +32,29 @@ Build output goes to `Bins\Binaries\<Configuration>\<Platform>\`.
 
 ### Building the Thunks DLL
 
-XSAPI is normally consumed as a static library, which links the C runtime dynamically (`/MD`). If your title uses the static C runtime (`/MT`), or you otherwise need XSAPI behind a DLL boundary, build the **Thunks DLL** instead. The DLL boundary isolates XSAPI's C runtime from your title's.
+**Linking XSAPI statically is the recommended configuration and is what most titles should use.** The Thunks DLL exists for titles that cannot link statically, or prefer not to.
+
+The usual reason is the C runtime. The static library links the C runtime dynamically (`/MD`), so a title that uses the static C runtime (`/MT`) cannot link it without a runtime library mismatch. The Thunks DLL puts XSAPI behind a DLL boundary, which isolates its C runtime from your title's.
 
     msbuild Build\Microsoft.Xbox.Services.GDK.C.Thunks\Microsoft.Xbox.Services.GDK.C.Thunks.vcxproj /p:Configuration=Debug /p:Platform=x64
 
 This produces `Microsoft.Xbox.Services.C.Thunks.dll` and its import library `Microsoft.Xbox.Services.C.Thunks.lib`. Link against the import library and ship the DLL alongside your title.
+
+The DLL depends on `libHttpClient.GDK.dll`, which is built by a separate project and must be deployed with it:
+
+    msbuild External\Xal\External\libHttpClient\Build\libHttpClient.GDK\libHttpClient.GDK.vcxproj /p:Configuration=Debug /p:Platform=x64
+
+That project writes to `External\Xal\External\libHttpClient\Out\<Platform>\<Configuration>\libHttpClient.GDK\` rather than to `Bins`.
 
 Note that the Thunks DLL exports the XSAPI **C** API (`xsapi-c`) only. It does not export the C++ wrapper (`xsapi-cpp`), which is header-only and compiles into your title.
 
 The exported function list is generated from the public headers by the `Microsoft.Xbox.Services.ThunksGenerator` project. That project is C#, so it does not restore automatically as part of a native solution build - pass `-restore` when building it directly:
 
     msbuild Build\Microsoft.Xbox.Services.GDK.C.Thunks\generator\ThunksGenerator\ThunksGenerator.csproj -restore
+
+### Validating a build
+
+`Tests\BuildValidation` contains checks that confirm a build exposes the full public API surface, and that the Thunks DLL's exports have not drifted from the headers. See [Tests/BuildValidation/README.md](Tests/BuildValidation/README.md).
 
 ## How to use the Xbox Live Services API (XSAPI)
 
