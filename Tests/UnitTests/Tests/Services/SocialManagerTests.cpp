@@ -6,6 +6,8 @@
 #include "xsapi-c/social_manager_c.h"
 #include "xsapi-cpp/social_manager.h"
 #include "social_manager_internal.h"
+#include "httpClient/httpClient.h"
+#include "httpClient/httpProvider.h"
 
 using namespace xbox::services::presence;
 using namespace xbox::services::real_time_activity;
@@ -96,6 +98,149 @@ const char offlinePresenceResponseTemplate[] = R"(
 
 const char* presenceOnlineRtaMessageSubscribeComplete = R"({"xuid":"2814613569642996","state":"Online","devices":[{"type":"MCapensis","titles":[{"id":"1234","name":"Default Title","placement":"Full","state":"Active", "activity": {"richPresence":"Home"}, "lastModified":"2016-09-30T00:15:35.5994615Z"}]}]})";
 const char* presenceOfflineRtaMessageSubscribeComplete = R"({"xuid":"2814613569642996","state":"Offline"})";
+
+// ---------------------------------------------------------------------------------------------------
+// Fault-injection infrastructure for the initial People Hub GetFollowedUsers stall (AB#63099583).
+//
+// SocialGraph only schedules a People Hub retry from the request's completion callback (the Failed
+// branch) and only sets m_initialized on success. A People Hub GetFollowedUsers request that NEVER
+// completes must therefore be recovered by the completion-independent watchdog; otherwise
+// m_initialized stays false and LocalUserAdded is never raised - a permanent empty-friends stall
+// (only a reboot or the 20-min refresh would recover). The tests below reproduce the never-completing
+// case deterministically by hanging the initial People Hub request at the libHttpClient provider
+// layer.
+//
+// Mechanism: libHttpClient resolves HCMocks BEFORE the provider (httpcall.cpp), so to reach a custom
+// perform function the target call must be UNMOCKED; all other traffic stays mocked and never reaches
+// the hook. The external perform function lives in a process-wide singleton that CANNOT be unset
+// (ExternalHttpProvider::SetCallback rejects null) and persists across HCCleanup, so state is kept in
+// a file-static guarded by 'active': while active it hangs People Hub calls; once the test ends it
+// fast-completes anything that reaches it, which is safe because the unit-test suite mocks all HTTP.
+// It must be installed BEFORE XblInitialize (HCSetHttpCallPerformFunction requires HC uninitialized).
+struct HangingPeoplehubState
+{
+    std::mutex mutex;
+    bool active{ false };
+    bool releasing{ false };
+    bool hangOnlyFirstCall{ false }; // If set, only the first People Hub call hangs; the rest succeed.
+    int peoplehubCallCount{ 0 };     // Total People Hub calls that reached the provider (issued + retried).
+    std::vector<std::pair<HCCallHandle, XAsyncBlock*>> hungCalls;
+};
+
+static HangingPeoplehubState s_hangingPeoplehubState;
+
+inline void CompletePeoplehubEmptyOk(HCCallHandle call, XAsyncBlock* asyncBlock) noexcept
+{
+    static const char emptyPeople[] = R"({"people":[]})";
+    HCHttpCallResponseSetStatusCode(call, 200);
+    HCHttpCallResponseSetResponseBodyBytes(call, reinterpret_cast<const uint8_t*>(emptyPeople), sizeof(emptyPeople) - 1);
+    XAsyncComplete(asyncBlock, S_OK, 0);
+}
+
+static void CALLBACK HangingPeoplehubPerform(HCCallHandle call, XAsyncBlock* asyncBlock, void* /*context*/, HCPerformEnv /*env*/)
+{
+    const char* method{ nullptr };
+    const char* url{ nullptr };
+    HCHttpCallRequestGetUrl(call, &method, &url);
+    const bool isPeoplehub{ url != nullptr && strstr(url, "peoplehub.xboxlive.com") != nullptr };
+
+    bool hang{ false };
+    {
+        std::lock_guard<std::mutex> lock{ s_hangingPeoplehubState.mutex };
+        if (s_hangingPeoplehubState.active && !s_hangingPeoplehubState.releasing && isPeoplehub)
+        {
+            const int callIndex{ ++s_hangingPeoplehubState.peoplehubCallCount };
+            const bool shouldHang{ !s_hangingPeoplehubState.hangOnlyFirstCall || callIndex == 1 };
+            if (shouldHang)
+            {
+                // Never complete: capture and drop. The request hangs for its entire lifetime.
+                s_hangingPeoplehubState.hungCalls.emplace_back(call, asyncBlock);
+                hang = true;
+            }
+        }
+    }
+
+    if (hang)
+    {
+        return;
+    }
+
+    // Non-hung People Hub calls (and any released / post-test / unexpected call) complete immediately
+    // so nothing hangs at teardown and no later test dereferences stale state.
+    CompletePeoplehubEmptyOk(call, asyncBlock);
+}
+
+// RAII installer for the hanging People Hub provider. MUST be declared BEFORE the SMTestEnvironment
+// (i.e. before XblInitialize) in a test.
+class ScopedHangingPeoplehubProvider
+{
+public:
+    // hangOnlyFirstCall: when true, only the first People Hub request hangs and any subsequent (e.g.
+    // watchdog-retried) request completes successfully - used to validate watchdog-driven recovery.
+    explicit ScopedHangingPeoplehubProvider(bool hangOnlyFirstCall = false) noexcept
+    {
+        {
+            std::lock_guard<std::mutex> lock{ s_hangingPeoplehubState.mutex };
+            s_hangingPeoplehubState.active = true;
+            s_hangingPeoplehubState.releasing = false;
+            s_hangingPeoplehubState.hangOnlyFirstCall = hangOnlyFirstCall;
+            s_hangingPeoplehubState.peoplehubCallCount = 0;
+            s_hangingPeoplehubState.hungCalls.clear();
+        }
+        // Requires HC to be uninitialized (before the environment's XblInitialize / HCInit).
+        VERIFY_SUCCEEDED(HCSetHttpCallPerformFunction(HangingPeoplehubPerform, &s_hangingPeoplehubState));
+    }
+
+    ~ScopedHangingPeoplehubProvider() noexcept
+    {
+        Release();
+        std::lock_guard<std::mutex> lock{ s_hangingPeoplehubState.mutex };
+        s_hangingPeoplehubState.active = false;
+        // The external provider persists process-wide and cannot be unset (SetCallback rejects null).
+        // Leaving active=false turns the hook into a safe fast-completer for any later call; the unit
+        // test suite mocks all HTTP, so it is effectively never invoked again.
+    }
+
+    size_t HungCallCount() noexcept
+    {
+        std::lock_guard<std::mutex> lock{ s_hangingPeoplehubState.mutex };
+        return s_hangingPeoplehubState.hungCalls.size();
+    }
+
+    int PeoplehubCallCount() noexcept
+    {
+        std::lock_guard<std::mutex> lock{ s_hangingPeoplehubState.mutex };
+        return s_hangingPeoplehubState.peoplehubCallCount;
+    }
+
+    // Complete any hung People Hub calls with an empty successful response so outstanding async work
+    // can drain and test teardown (XblCleanup) does not block.
+    void Release() noexcept
+    {
+        std::vector<std::pair<HCCallHandle, XAsyncBlock*>> calls;
+        {
+            std::lock_guard<std::mutex> lock{ s_hangingPeoplehubState.mutex };
+            s_hangingPeoplehubState.releasing = true;
+            calls.swap(s_hangingPeoplehubState.hungCalls);
+        }
+
+        for (auto& c : calls)
+        {
+            CompletePeoplehubEmptyOk(c.first, c.second);
+        }
+    }
+};
+
+// Releases any hung People Hub calls when it leaves scope. Declared immediately AFTER the
+// SMTestEnvironment so it is destroyed BEFORE that environment: on a thrown VERIFY_* the hung calls are
+// completed before env's dtor runs XblCleanup, which would otherwise block forever on the still-hung
+// call (its releaser, the provider dtor, cannot run until env is gone) and mask the assertion failure.
+// Release() is idempotent, so this composes safely with the explicit Release() on the success path.
+struct ScopedHungCallReleaser
+{
+    ScopedHangingPeoplehubProvider& provider;
+    ~ScopedHungCallReleaser() noexcept { provider.Release(); }
+};
 
 #define NUM_USERS 100
 
@@ -275,13 +420,15 @@ private:
                     isFavorite,
                     isFollowedByCaller
                 ]
-            (HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
+            (HttpMock* mock, xsapi_internal_string /*requestUrl*/, xsapi_internal_string requestBody)
                 {
                     std::vector<uint64_t> xuids;
 
                     auto jsonRequest = Utils::ParseJson(requestBody.data());
                     if (jsonRequest.is_null())
                     {
+                        // Empty request body => "get followed users" fetch (the call the watchdog guards).
+                        ++this->m_followedUsersCallCount;
                         xuids = this->FollowedXuids;
                     }
                     else
@@ -312,6 +459,76 @@ private:
                     responseBody.AddMember("people", peopleArray, allocator);
                     mock->SetResponseBody(responseBody);
                 });
+        }
+
+        // Peoplehub mock that fails the FIRST "followed users" fetch (the initial GetFollowedUsers,
+        // which has an empty request body) with a non-retriable HTTP 404 - chosen so libHttpClient
+        // does not auto-retry it and the failure surfaces as a completed error to SocialGraph - then
+        // serves normal successful responses. Backs the test that a COMPLETED failure on the initial
+        // fetch is retried by SocialGraph (c_failureRetryIntervalMs) and the graph recovers.
+        void SetPeoplehubMockFailFirstFollowedUsersCall() noexcept
+        {
+            auto followedUsersCallCount = std::make_shared<std::atomic<int>>(0);
+
+            m_peoplehubMock = std::make_shared<HttpMock>("", "https://peoplehub.xboxlive.com");
+
+            m_peoplehubMock->SetMockMatchedCallback(
+                [
+                    this,
+                    followedUsersCallCount
+                ]
+            (HttpMock* mock, xsapi_internal_string /*requestUrl*/, xsapi_internal_string requestBody)
+                {
+                    std::vector<uint64_t> xuids;
+
+                    auto jsonRequest = Utils::ParseJson(requestBody.data());
+                    if (jsonRequest.is_null())
+                    {
+                        // Followed-users (initial graph) fetch. Fail only the very first one.
+                        if (followedUsersCallCount->fetch_add(1) == 0)
+                        {
+                            mock->SetResponseHttpStatus(404);
+                            mock->ClearReponseBody();
+                            return;
+                        }
+                        xuids = this->FollowedXuids;
+                    }
+                    else
+                    {
+                        auto xuidArray = jsonRequest[L"xuids"];
+                        for (size_t i = 0; i < xuidArray.size(); ++i)
+                        {
+                            xuids.push_back(Utils::Uint64FromStringT(xuidArray[i].as_string()));
+                        }
+                    }
+
+                    JsonDocument responseBody(rapidjson::kObjectType);
+                    JsonDocument::AllocatorType& allocator = responseBody.GetAllocator();
+
+                    JsonValue peopleArray(rapidjson::kArrayType);
+                    for (auto& xuid : xuids)
+                    {
+                        JsonDocument jsonBlob(&allocator);
+                        jsonBlob.Parse(defaultPeoplehubTemplate);
+                        JsonUtils::SetMember(jsonBlob, "xuid", JsonValue(utils::uint64_to_internal_string(xuid).c_str(), allocator));
+                        JsonUtils::SetMember(jsonBlob, "presenceState", JsonValue("Online", allocator));
+                        JsonUtils::SetMember(jsonBlob, "isFavorite", JsonValue(false));
+                        JsonUtils::SetMember(jsonBlob, "isFollowedByCaller", JsonValue(true));
+                        peopleArray.PushBack(jsonBlob, allocator);
+                    }
+
+                    responseBody.AddMember("people", peopleArray, allocator);
+                    mock->SetResponseHttpStatus(200);
+                    mock->SetResponseBody(responseBody);
+                });
+        }
+
+        // Remove the People Hub HttpMock so People Hub requests fall through to the libHttpClient
+        // provider (see ScopedHangingPeoplehubProvider). Mocks are resolved before the provider, so
+        // an installed mock would otherwise short-circuit the call before it can be hung.
+        void RemovePeoplehubMock() noexcept
+        {
+            m_peoplehubMock.reset();
         }
 
         // Presence service will respond that all users are online except for those specified in offlineXuids
@@ -383,6 +600,11 @@ private:
 
         // Xuids Local Users follow
         std::vector<uint64_t> FollowedXuids;
+
+        // Number of "get followed users" People Hub calls (empty request body) served by the default
+        // mock. Lets a test assert the watchdog does not spuriously re-issue a healthy initial fetch.
+        std::atomic<int> m_followedUsersCallCount{ 0 };
+        int FollowedUsersCallCount() const noexcept { return m_followedUsersCallCount.load(); }
 
     private:
         static void RTASubscribeHandler(uint32_t n, xsapi_internal_string uri)
@@ -499,6 +721,230 @@ public:
         auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
         env.AddLocalUser(xboxLiveContext->User());
     }
+
+    // A COMPLETED failure (HTTP error) on the initial People Hub GetFollowedUsers must be retried by
+    // SocialGraph (c_failureRetryIntervalMs) so the graph still initializes and LocalUserAdded is
+    // raised. This is the control for the never-completing case (AB#63099583): a failed completion
+    // self-heals, whereas a request that never completes is recovered by the watchdog (tests below).
+    DEFINE_TEST_CASE(TestInitialFollowedUsersFailureIsRetried)
+    {
+        TEST_LOG(L"Test starting: TestInitialFollowedUsersFailureIsRetried");
+
+        SMTestEnvironment env{};
+        env.SetPeoplehubMockFailFirstFollowedUsersCall();
+
+        auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+
+        VERIFY_SUCCEEDED(XblSocialManagerAddLocalUser(
+            xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
+
+        // Drive DoWork with a bounded deadline so a genuine stall fails the test instead of hanging.
+        const auto start{ std::chrono::steady_clock::now() };
+        const auto deadline{ start + std::chrono::seconds(30) };
+        bool localUserAdded{ false };
+        int64_t elapsedMs{ 0 };
+
+        while (std::chrono::steady_clock::now() < deadline && !localUserAdded)
+        {
+            for (auto e : env.DoWork())
+            {
+                if (e->eventType == XblSocialManagerEventType::LocalUserAdded)
+                {
+                    localUserAdded = true;
+                    elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::steady_clock::now() - start).count();
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+
+        LOGS_DEBUG << "LocalUserAdded received after " << elapsedMs << "ms (expected ~10000ms retry)";
+
+        // The graph recovered from a failed initial fetch: the failure path is self-healing.
+        VERIFY_IS_TRUE(localUserAdded);
+
+        // Recovery came from the delayed retry, not the initial (failed) attempt.
+        VERIFY_IS_TRUE(elapsedMs >= 5000);
+    }
+
+    DEFINE_TEST_CASE(TestInitialFollowedUsersHangIsRetriedByWatchdog)
+    {
+        TEST_LOG(L"Test starting: TestInitialFollowedUsersHangIsRetriedByWatchdog");
+
+        // Empty-friends bug (AB#63099583): fault-inject People Hub GetFollowedUsers requests that
+        // NEVER complete. SocialGraph only schedules a retry from the request's completion callback
+        // (Failed branch), so a never-completing request relies entirely on the completion-independent
+        // watchdog to make progress. The watchdog re-issues the hung request on a timer, so the
+        // hung-call count keeps growing while the (still-down) service prevents initialization.
+
+        // The hanging provider must be installed before the environment initializes XSAPI (HCInit).
+        ScopedHangingPeoplehubProvider hangingProvider{}; // Every People Hub call hangs.
+
+        {
+            SMTestEnvironment env{};
+            ScopedHungCallReleaser releaseHungCalls{ hangingProvider }; // Release hung calls before env teardown on every exit path.
+            env.RemovePeoplehubMock(); // Unmock People Hub so its calls reach the hanging provider.
+
+            auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+
+            VERIFY_SUCCEEDED(XblSocialManagerAddLocalUser(
+                xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
+
+            // Drive DoWork long enough for the watchdog (2s in unit-test builds) to fire at least once
+            // and re-issue the hung request.
+            const auto deadline{ std::chrono::steady_clock::now() + std::chrono::seconds(10) };
+            bool localUserAdded{ false };
+
+            while (std::chrono::steady_clock::now() < deadline && hangingProvider.HungCallCount() < 2)
+            {
+                for (auto e : env.DoWork())
+                {
+                    if (e->eventType == XblSocialManagerEventType::LocalUserAdded)
+                    {
+                        localUserAdded = true;
+                    }
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            }
+
+            LOGS_DEBUG << "Hung People Hub call count: " << hangingProvider.HungCallCount()
+                << ", localUserAdded: " << localUserAdded;
+
+            // The watchdog re-issued the hung request (>= 2 hung calls) instead of stalling on a single
+            // never-completing request.
+            VERIFY_IS_TRUE(hangingProvider.HungCallCount() >= 2);
+            // The service is still down (all calls hang), so the graph has not initialized.
+            VERIFY_IS_FALSE(localUserAdded);
+
+            // Complete the outstanding hung call(s) so XblCleanup (env dtor) can drain instead of
+            // blocking at teardown.
+            hangingProvider.Release();
+
+            const auto drainDeadline{ std::chrono::steady_clock::now() + std::chrono::seconds(10) };
+            while (std::chrono::steady_clock::now() < drainDeadline && !localUserAdded)
+            {
+                for (auto e : env.DoWork())
+                {
+                    if (e->eventType == XblSocialManagerEventType::LocalUserAdded)
+                    {
+                        localUserAdded = true;
+                    }
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            }
+        } // env dtor -> RemoveLocalUser + XblCleanup (hung calls already released)
+    }
+
+    DEFINE_TEST_CASE(TestInitialFollowedUsersHangRecoversViaWatchdog)
+    {
+        TEST_LOG(L"Test starting: TestInitialFollowedUsersHangRecoversViaWatchdog");
+
+        // Empty-friends bug (AB#63099583): the initial People Hub GetFollowedUsers request hangs
+        // (never completes); the watchdog re-issues it and the retry succeeds. Confirms recovery of a
+        // hung initial fetch WITHOUT any external intervention (no reboot, no 20-min refresh) - the
+        // graph initializes and LocalUserAdded is raised.
+
+        // The hanging provider must be installed before the environment initializes XSAPI (HCInit).
+        ScopedHangingPeoplehubProvider hangingProvider{ /* hangOnlyFirstCall */ true };
+
+        {
+            SMTestEnvironment env{};
+            ScopedHungCallReleaser releaseHungCalls{ hangingProvider }; // Release hung calls before env teardown on every exit path.
+            env.RemovePeoplehubMock(); // Unmock People Hub so its calls reach the hanging provider.
+
+            auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+
+            VERIFY_SUCCEEDED(XblSocialManagerAddLocalUser(
+                xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
+
+            // The first fetch hangs; the watchdog (2s in unit-test builds) re-issues it and the retry
+            // succeeds, so the graph initializes shortly after the watchdog interval.
+            const auto deadline{ std::chrono::steady_clock::now() + std::chrono::seconds(15) };
+            bool localUserAdded{ false };
+
+            while (std::chrono::steady_clock::now() < deadline && !localUserAdded)
+            {
+                for (auto e : env.DoWork())
+                {
+                    if (e->eventType == XblSocialManagerEventType::LocalUserAdded)
+                    {
+                        localUserAdded = true;
+                    }
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            }
+
+            LOGS_DEBUG << "localUserAdded: " << localUserAdded
+                << ", hung: " << hangingProvider.HungCallCount()
+                << ", total People Hub calls: " << hangingProvider.PeoplehubCallCount();
+
+            // Recovery happened automatically via the watchdog-driven retry.
+            VERIFY_IS_TRUE(localUserAdded);
+            // Exactly the first request hung...
+            VERIFY_ARE_EQUAL(size_t{ 1 }, hangingProvider.HungCallCount());
+            // ...and recovery required a retry (the watchdog re-issued the fetch).
+            VERIFY_IS_TRUE(hangingProvider.PeoplehubCallCount() >= 2);
+
+            // Complete the abandoned first (hung) request so XblCleanup (env dtor) can drain cleanly.
+            hangingProvider.Release();
+        } // env dtor -> RemoveLocalUser + XblCleanup (hung call already released)
+    }
+
+    DEFINE_TEST_CASE(TestNormalFollowedUsersFetchDoesNotReissue)
+    {
+        TEST_LOG(L"Test starting: TestNormalFollowedUsersFetchDoesNotReissue");
+
+        // Watchdog "no side effects" guard (AB#63099583). On the happy path a normal, fast, successful
+        // initial People Hub GetFollowedUsers completes via its own completion callback and the watchdog
+        // must NOT fire, so the fetch is issued exactly once (no duplicate service call) and only one
+        // LocalUserAdded event is raised. The shared `settled` atomic guarantees the completion "wins"
+        // and the later watchdog tick no-ops.
+
+        SMTestEnvironment env{}; // Default mock: fast, succeeding People Hub fetch.
+        auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+
+        VERIFY_SUCCEEDED(XblSocialManagerAddLocalUser(
+            xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
+
+        // Wait for initialization (the fast fetch completes in well under the 2s unit-test watchdog).
+        const auto deadline{ std::chrono::steady_clock::now() + std::chrono::seconds(10) };
+        int localUserAddedCount{ 0 };
+        while (std::chrono::steady_clock::now() < deadline && localUserAddedCount == 0)
+        {
+            for (auto e : env.DoWork())
+            {
+                if (e->eventType == XblSocialManagerEventType::LocalUserAdded)
+                {
+                    ++localUserAddedCount;
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+        VERIFY_ARE_EQUAL(1, localUserAddedCount);
+
+        // Keep pumping DoWork past a full watchdog interval (2s in unit-test builds) to prove the
+        // watchdog does not re-issue the already-completed fetch and does not raise a second event.
+        const auto settleDeadline{ std::chrono::steady_clock::now() + std::chrono::seconds(4) };
+        while (std::chrono::steady_clock::now() < settleDeadline)
+        {
+            for (auto e : env.DoWork())
+            {
+                if (e->eventType == XblSocialManagerEventType::LocalUserAdded)
+                {
+                    ++localUserAddedCount;
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+
+        LOGS_DEBUG << "followed-users calls: " << env.FollowedUsersCallCount()
+            << ", LocalUserAdded events: " << localUserAddedCount;
+
+        // The initial fetch completed on its own; the watchdog did not spuriously re-issue it.
+        VERIFY_ARE_EQUAL(1, env.FollowedUsersCallCount());
+        // And exactly one LocalUserAdded event was raised (no duplicate handler invocation).
+        VERIFY_ARE_EQUAL(1, localUserAddedCount);
+    } // env dtor -> RemoveLocalUser + XblCleanup
 
     DEFINE_TEST_CASE(TestBasicCreateFilterGroup)
     {

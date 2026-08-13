@@ -3,7 +3,7 @@
 //
 // Helper functions for texture loaders and screen grabber
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
@@ -16,6 +16,12 @@
 #include "DDSTextureLoader.h"
 #include "PlatformHelpers.h"
 
+#include <algorithm>
+#include <cfloat>
+#include <cmath>
+#include <memory>
+#include <new>
+#include <tuple>
 
 namespace DirectX
 {
@@ -28,165 +34,165 @@ namespace DirectX
         {
             switch (fmt)
             {
-                case DXGI_FORMAT_R32G32B32A32_TYPELESS:
-                case DXGI_FORMAT_R32G32B32A32_FLOAT:
-                case DXGI_FORMAT_R32G32B32A32_UINT:
-                case DXGI_FORMAT_R32G32B32A32_SINT:
-                    return 128;
+            case DXGI_FORMAT_R32G32B32A32_TYPELESS:
+            case DXGI_FORMAT_R32G32B32A32_FLOAT:
+            case DXGI_FORMAT_R32G32B32A32_UINT:
+            case DXGI_FORMAT_R32G32B32A32_SINT:
+                return 128;
 
-                case DXGI_FORMAT_R32G32B32_TYPELESS:
-                case DXGI_FORMAT_R32G32B32_FLOAT:
-                case DXGI_FORMAT_R32G32B32_UINT:
-                case DXGI_FORMAT_R32G32B32_SINT:
-                    return 96;
+            case DXGI_FORMAT_R32G32B32_TYPELESS:
+            case DXGI_FORMAT_R32G32B32_FLOAT:
+            case DXGI_FORMAT_R32G32B32_UINT:
+            case DXGI_FORMAT_R32G32B32_SINT:
+                return 96;
 
-                case DXGI_FORMAT_R16G16B16A16_TYPELESS:
-                case DXGI_FORMAT_R16G16B16A16_FLOAT:
-                case DXGI_FORMAT_R16G16B16A16_UNORM:
-                case DXGI_FORMAT_R16G16B16A16_UINT:
-                case DXGI_FORMAT_R16G16B16A16_SNORM:
-                case DXGI_FORMAT_R16G16B16A16_SINT:
-                case DXGI_FORMAT_R32G32_TYPELESS:
-                case DXGI_FORMAT_R32G32_FLOAT:
-                case DXGI_FORMAT_R32G32_UINT:
-                case DXGI_FORMAT_R32G32_SINT:
-                case DXGI_FORMAT_R32G8X24_TYPELESS:
-                case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
-                case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
-                case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
-                case DXGI_FORMAT_Y416:
-                case DXGI_FORMAT_Y210:
-                case DXGI_FORMAT_Y216:
-                    return 64;
+            case DXGI_FORMAT_R16G16B16A16_TYPELESS:
+            case DXGI_FORMAT_R16G16B16A16_FLOAT:
+            case DXGI_FORMAT_R16G16B16A16_UNORM:
+            case DXGI_FORMAT_R16G16B16A16_UINT:
+            case DXGI_FORMAT_R16G16B16A16_SNORM:
+            case DXGI_FORMAT_R16G16B16A16_SINT:
+            case DXGI_FORMAT_R32G32_TYPELESS:
+            case DXGI_FORMAT_R32G32_FLOAT:
+            case DXGI_FORMAT_R32G32_UINT:
+            case DXGI_FORMAT_R32G32_SINT:
+            case DXGI_FORMAT_R32G8X24_TYPELESS:
+            case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+            case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+            case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
+            case DXGI_FORMAT_Y416:
+            case DXGI_FORMAT_Y210:
+            case DXGI_FORMAT_Y216:
+                return 64;
 
-                case DXGI_FORMAT_R10G10B10A2_TYPELESS:
-                case DXGI_FORMAT_R10G10B10A2_UNORM:
-                case DXGI_FORMAT_R10G10B10A2_UINT:
-                case DXGI_FORMAT_R11G11B10_FLOAT:
-                case DXGI_FORMAT_R8G8B8A8_TYPELESS:
-                case DXGI_FORMAT_R8G8B8A8_UNORM:
-                case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
-                case DXGI_FORMAT_R8G8B8A8_UINT:
-                case DXGI_FORMAT_R8G8B8A8_SNORM:
-                case DXGI_FORMAT_R8G8B8A8_SINT:
-                case DXGI_FORMAT_R16G16_TYPELESS:
-                case DXGI_FORMAT_R16G16_FLOAT:
-                case DXGI_FORMAT_R16G16_UNORM:
-                case DXGI_FORMAT_R16G16_UINT:
-                case DXGI_FORMAT_R16G16_SNORM:
-                case DXGI_FORMAT_R16G16_SINT:
-                case DXGI_FORMAT_R32_TYPELESS:
-                case DXGI_FORMAT_D32_FLOAT:
-                case DXGI_FORMAT_R32_FLOAT:
-                case DXGI_FORMAT_R32_UINT:
-                case DXGI_FORMAT_R32_SINT:
-                case DXGI_FORMAT_R24G8_TYPELESS:
-                case DXGI_FORMAT_D24_UNORM_S8_UINT:
-                case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
-                case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
-                case DXGI_FORMAT_R9G9B9E5_SHAREDEXP:
-                case DXGI_FORMAT_R8G8_B8G8_UNORM:
-                case DXGI_FORMAT_G8R8_G8B8_UNORM:
-                case DXGI_FORMAT_B8G8R8A8_UNORM:
-                case DXGI_FORMAT_B8G8R8X8_UNORM:
-                case DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
-                case DXGI_FORMAT_B8G8R8A8_TYPELESS:
-                case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
-                case DXGI_FORMAT_B8G8R8X8_TYPELESS:
-                case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
-                case DXGI_FORMAT_AYUV:
-                case DXGI_FORMAT_Y410:
-                case DXGI_FORMAT_YUY2:
-#if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
-                case DXGI_FORMAT_R10G10B10_7E3_A2_FLOAT:
-                case DXGI_FORMAT_R10G10B10_6E4_A2_FLOAT:
-                case DXGI_FORMAT_R10G10B10_SNORM_A2_UNORM:
-#endif
-                    return 32;
+            case DXGI_FORMAT_R10G10B10A2_TYPELESS:
+            case DXGI_FORMAT_R10G10B10A2_UNORM:
+            case DXGI_FORMAT_R10G10B10A2_UINT:
+            case DXGI_FORMAT_R11G11B10_FLOAT:
+            case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+            case DXGI_FORMAT_R8G8B8A8_UNORM:
+            case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+            case DXGI_FORMAT_R8G8B8A8_UINT:
+            case DXGI_FORMAT_R8G8B8A8_SNORM:
+            case DXGI_FORMAT_R8G8B8A8_SINT:
+            case DXGI_FORMAT_R16G16_TYPELESS:
+            case DXGI_FORMAT_R16G16_FLOAT:
+            case DXGI_FORMAT_R16G16_UNORM:
+            case DXGI_FORMAT_R16G16_UINT:
+            case DXGI_FORMAT_R16G16_SNORM:
+            case DXGI_FORMAT_R16G16_SINT:
+            case DXGI_FORMAT_R32_TYPELESS:
+            case DXGI_FORMAT_D32_FLOAT:
+            case DXGI_FORMAT_R32_FLOAT:
+            case DXGI_FORMAT_R32_UINT:
+            case DXGI_FORMAT_R32_SINT:
+            case DXGI_FORMAT_R24G8_TYPELESS:
+            case DXGI_FORMAT_D24_UNORM_S8_UINT:
+            case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
+            case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+            case DXGI_FORMAT_R9G9B9E5_SHAREDEXP:
+            case DXGI_FORMAT_R8G8_B8G8_UNORM:
+            case DXGI_FORMAT_G8R8_G8B8_UNORM:
+            case DXGI_FORMAT_B8G8R8A8_UNORM:
+            case DXGI_FORMAT_B8G8R8X8_UNORM:
+            case DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
+            case DXGI_FORMAT_B8G8R8A8_TYPELESS:
+            case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+            case DXGI_FORMAT_B8G8R8X8_TYPELESS:
+            case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+            case DXGI_FORMAT_AYUV:
+            case DXGI_FORMAT_Y410:
+            case DXGI_FORMAT_YUY2:
+            #if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
+            case DXGI_FORMAT_R10G10B10_7E3_A2_FLOAT:
+            case DXGI_FORMAT_R10G10B10_6E4_A2_FLOAT:
+            case DXGI_FORMAT_R10G10B10_SNORM_A2_UNORM:
+            #endif
+                return 32;
 
-                case DXGI_FORMAT_P010:
-                case DXGI_FORMAT_P016:
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
-                case DXGI_FORMAT_V408:
-#endif
-#if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
-                case DXGI_FORMAT_D16_UNORM_S8_UINT:
-                case DXGI_FORMAT_R16_UNORM_X8_TYPELESS:
-                case DXGI_FORMAT_X16_TYPELESS_G8_UINT:
-#endif
-                    return 24;
+            case DXGI_FORMAT_P010:
+            case DXGI_FORMAT_P016:
+            #if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+            case DXGI_FORMAT_V408:
+            #endif
+            #if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
+            case DXGI_FORMAT_D16_UNORM_S8_UINT:
+            case DXGI_FORMAT_R16_UNORM_X8_TYPELESS:
+            case DXGI_FORMAT_X16_TYPELESS_G8_UINT:
+            #endif
+                return 24;
 
-                case DXGI_FORMAT_R8G8_TYPELESS:
-                case DXGI_FORMAT_R8G8_UNORM:
-                case DXGI_FORMAT_R8G8_UINT:
-                case DXGI_FORMAT_R8G8_SNORM:
-                case DXGI_FORMAT_R8G8_SINT:
-                case DXGI_FORMAT_R16_TYPELESS:
-                case DXGI_FORMAT_R16_FLOAT:
-                case DXGI_FORMAT_D16_UNORM:
-                case DXGI_FORMAT_R16_UNORM:
-                case DXGI_FORMAT_R16_UINT:
-                case DXGI_FORMAT_R16_SNORM:
-                case DXGI_FORMAT_R16_SINT:
-                case DXGI_FORMAT_B5G6R5_UNORM:
-                case DXGI_FORMAT_B5G5R5A1_UNORM:
-                case DXGI_FORMAT_A8P8:
-                case DXGI_FORMAT_B4G4R4A4_UNORM:
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
-                case DXGI_FORMAT_P208:
-                case DXGI_FORMAT_V208:
-#endif
-                    return 16;
+            case DXGI_FORMAT_R8G8_TYPELESS:
+            case DXGI_FORMAT_R8G8_UNORM:
+            case DXGI_FORMAT_R8G8_UINT:
+            case DXGI_FORMAT_R8G8_SNORM:
+            case DXGI_FORMAT_R8G8_SINT:
+            case DXGI_FORMAT_R16_TYPELESS:
+            case DXGI_FORMAT_R16_FLOAT:
+            case DXGI_FORMAT_D16_UNORM:
+            case DXGI_FORMAT_R16_UNORM:
+            case DXGI_FORMAT_R16_UINT:
+            case DXGI_FORMAT_R16_SNORM:
+            case DXGI_FORMAT_R16_SINT:
+            case DXGI_FORMAT_B5G6R5_UNORM:
+            case DXGI_FORMAT_B5G5R5A1_UNORM:
+            case DXGI_FORMAT_A8P8:
+            case DXGI_FORMAT_B4G4R4A4_UNORM:
+            #if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+            case DXGI_FORMAT_P208:
+            case DXGI_FORMAT_V208:
+            #endif
+                return 16;
 
-                case DXGI_FORMAT_NV12:
-                case DXGI_FORMAT_420_OPAQUE:
-                case DXGI_FORMAT_NV11:
-                    return 12;
+            case DXGI_FORMAT_NV12:
+            case DXGI_FORMAT_420_OPAQUE:
+            case DXGI_FORMAT_NV11:
+                return 12;
 
-                case DXGI_FORMAT_R8_TYPELESS:
-                case DXGI_FORMAT_R8_UNORM:
-                case DXGI_FORMAT_R8_UINT:
-                case DXGI_FORMAT_R8_SNORM:
-                case DXGI_FORMAT_R8_SINT:
-                case DXGI_FORMAT_A8_UNORM:
-                case DXGI_FORMAT_BC2_TYPELESS:
-                case DXGI_FORMAT_BC2_UNORM:
-                case DXGI_FORMAT_BC2_UNORM_SRGB:
-                case DXGI_FORMAT_BC3_TYPELESS:
-                case DXGI_FORMAT_BC3_UNORM:
-                case DXGI_FORMAT_BC3_UNORM_SRGB:
-                case DXGI_FORMAT_BC5_TYPELESS:
-                case DXGI_FORMAT_BC5_UNORM:
-                case DXGI_FORMAT_BC5_SNORM:
-                case DXGI_FORMAT_BC6H_TYPELESS:
-                case DXGI_FORMAT_BC6H_UF16:
-                case DXGI_FORMAT_BC6H_SF16:
-                case DXGI_FORMAT_BC7_TYPELESS:
-                case DXGI_FORMAT_BC7_UNORM:
-                case DXGI_FORMAT_BC7_UNORM_SRGB:
-                case DXGI_FORMAT_AI44:
-                case DXGI_FORMAT_IA44:
-                case DXGI_FORMAT_P8:
-#if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
-                case DXGI_FORMAT_R4G4_UNORM:
-#endif
-                    return 8;
+            case DXGI_FORMAT_R8_TYPELESS:
+            case DXGI_FORMAT_R8_UNORM:
+            case DXGI_FORMAT_R8_UINT:
+            case DXGI_FORMAT_R8_SNORM:
+            case DXGI_FORMAT_R8_SINT:
+            case DXGI_FORMAT_A8_UNORM:
+            case DXGI_FORMAT_BC2_TYPELESS:
+            case DXGI_FORMAT_BC2_UNORM:
+            case DXGI_FORMAT_BC2_UNORM_SRGB:
+            case DXGI_FORMAT_BC3_TYPELESS:
+            case DXGI_FORMAT_BC3_UNORM:
+            case DXGI_FORMAT_BC3_UNORM_SRGB:
+            case DXGI_FORMAT_BC5_TYPELESS:
+            case DXGI_FORMAT_BC5_UNORM:
+            case DXGI_FORMAT_BC5_SNORM:
+            case DXGI_FORMAT_BC6H_TYPELESS:
+            case DXGI_FORMAT_BC6H_UF16:
+            case DXGI_FORMAT_BC6H_SF16:
+            case DXGI_FORMAT_BC7_TYPELESS:
+            case DXGI_FORMAT_BC7_UNORM:
+            case DXGI_FORMAT_BC7_UNORM_SRGB:
+            case DXGI_FORMAT_AI44:
+            case DXGI_FORMAT_IA44:
+            case DXGI_FORMAT_P8:
+            #if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
+            case DXGI_FORMAT_R4G4_UNORM:
+            #endif
+                return 8;
 
-                case DXGI_FORMAT_R1_UNORM:
-                    return 1;
+            case DXGI_FORMAT_R1_UNORM:
+                return 1;
 
-                case DXGI_FORMAT_BC1_TYPELESS:
-                case DXGI_FORMAT_BC1_UNORM:
-                case DXGI_FORMAT_BC1_UNORM_SRGB:
-                case DXGI_FORMAT_BC4_TYPELESS:
-                case DXGI_FORMAT_BC4_UNORM:
-                case DXGI_FORMAT_BC4_SNORM:
-                    return 4;
+            case DXGI_FORMAT_BC1_TYPELESS:
+            case DXGI_FORMAT_BC1_UNORM:
+            case DXGI_FORMAT_BC1_UNORM_SRGB:
+            case DXGI_FORMAT_BC4_TYPELESS:
+            case DXGI_FORMAT_BC4_UNORM:
+            case DXGI_FORMAT_BC4_SNORM:
+                return 4;
 
-                case DXGI_FORMAT_UNKNOWN:
-                case DXGI_FORMAT_FORCE_UINT:
-                default:
-                    return 0;
+            case DXGI_FORMAT_UNKNOWN:
+            case DXGI_FORMAT_FORCE_UINT:
+            default:
+                return 0;
             }
         }
 
@@ -195,29 +201,60 @@ namespace DirectX
         {
             switch (format)
             {
-                case DXGI_FORMAT_R8G8B8A8_UNORM:
-                    return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+            case DXGI_FORMAT_R8G8B8A8_UNORM:
+                return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
-                case DXGI_FORMAT_BC1_UNORM:
-                    return DXGI_FORMAT_BC1_UNORM_SRGB;
+            case DXGI_FORMAT_BC1_UNORM:
+                return DXGI_FORMAT_BC1_UNORM_SRGB;
 
-                case DXGI_FORMAT_BC2_UNORM:
-                    return DXGI_FORMAT_BC2_UNORM_SRGB;
+            case DXGI_FORMAT_BC2_UNORM:
+                return DXGI_FORMAT_BC2_UNORM_SRGB;
 
-                case DXGI_FORMAT_BC3_UNORM:
-                    return DXGI_FORMAT_BC3_UNORM_SRGB;
+            case DXGI_FORMAT_BC3_UNORM:
+                return DXGI_FORMAT_BC3_UNORM_SRGB;
 
-                case DXGI_FORMAT_B8G8R8A8_UNORM:
-                    return DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+            case DXGI_FORMAT_B8G8R8A8_UNORM:
+                return DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
 
-                case DXGI_FORMAT_B8G8R8X8_UNORM:
-                    return DXGI_FORMAT_B8G8R8X8_UNORM_SRGB;
+            case DXGI_FORMAT_B8G8R8X8_UNORM:
+                return DXGI_FORMAT_B8G8R8X8_UNORM_SRGB;
 
-                case DXGI_FORMAT_BC7_UNORM:
-                    return DXGI_FORMAT_BC7_UNORM_SRGB;
+            case DXGI_FORMAT_BC7_UNORM:
+                return DXGI_FORMAT_BC7_UNORM_SRGB;
 
-                default:
-                    return format;
+            default:
+                return format;
+            }
+        }
+
+        //--------------------------------------------------------------------------------------
+        inline DXGI_FORMAT MakeLinear(_In_ DXGI_FORMAT format) noexcept
+        {
+            switch (format)
+            {
+            case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+                return DXGI_FORMAT_R8G8B8A8_UNORM;
+
+            case DXGI_FORMAT_BC1_UNORM_SRGB:
+                return DXGI_FORMAT_BC1_UNORM;
+
+            case DXGI_FORMAT_BC2_UNORM_SRGB:
+                return DXGI_FORMAT_BC2_UNORM;
+
+            case DXGI_FORMAT_BC3_UNORM_SRGB:
+                return DXGI_FORMAT_BC3_UNORM;
+
+            case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+                return DXGI_FORMAT_B8G8R8A8_UNORM;
+
+            case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+                return DXGI_FORMAT_B8G8R8X8_UNORM;
+
+            case DXGI_FORMAT_BC7_UNORM_SRGB:
+                return DXGI_FORMAT_BC7_UNORM;
+
+            default:
+                return format;
             }
         }
 
@@ -226,31 +263,31 @@ namespace DirectX
         {
             switch (fmt)
             {
-                case DXGI_FORMAT_BC1_TYPELESS:
-                case DXGI_FORMAT_BC1_UNORM:
-                case DXGI_FORMAT_BC1_UNORM_SRGB:
-                case DXGI_FORMAT_BC2_TYPELESS:
-                case DXGI_FORMAT_BC2_UNORM:
-                case DXGI_FORMAT_BC2_UNORM_SRGB:
-                case DXGI_FORMAT_BC3_TYPELESS:
-                case DXGI_FORMAT_BC3_UNORM:
-                case DXGI_FORMAT_BC3_UNORM_SRGB:
-                case DXGI_FORMAT_BC4_TYPELESS:
-                case DXGI_FORMAT_BC4_UNORM:
-                case DXGI_FORMAT_BC4_SNORM:
-                case DXGI_FORMAT_BC5_TYPELESS:
-                case DXGI_FORMAT_BC5_UNORM:
-                case DXGI_FORMAT_BC5_SNORM:
-                case DXGI_FORMAT_BC6H_TYPELESS:
-                case DXGI_FORMAT_BC6H_UF16:
-                case DXGI_FORMAT_BC6H_SF16:
-                case DXGI_FORMAT_BC7_TYPELESS:
-                case DXGI_FORMAT_BC7_UNORM:
-                case DXGI_FORMAT_BC7_UNORM_SRGB:
-                    return true;
+            case DXGI_FORMAT_BC1_TYPELESS:
+            case DXGI_FORMAT_BC1_UNORM:
+            case DXGI_FORMAT_BC1_UNORM_SRGB:
+            case DXGI_FORMAT_BC2_TYPELESS:
+            case DXGI_FORMAT_BC2_UNORM:
+            case DXGI_FORMAT_BC2_UNORM_SRGB:
+            case DXGI_FORMAT_BC3_TYPELESS:
+            case DXGI_FORMAT_BC3_UNORM:
+            case DXGI_FORMAT_BC3_UNORM_SRGB:
+            case DXGI_FORMAT_BC4_TYPELESS:
+            case DXGI_FORMAT_BC4_UNORM:
+            case DXGI_FORMAT_BC4_SNORM:
+            case DXGI_FORMAT_BC5_TYPELESS:
+            case DXGI_FORMAT_BC5_UNORM:
+            case DXGI_FORMAT_BC5_SNORM:
+            case DXGI_FORMAT_BC6H_TYPELESS:
+            case DXGI_FORMAT_BC6H_UF16:
+            case DXGI_FORMAT_BC6H_SF16:
+            case DXGI_FORMAT_BC7_TYPELESS:
+            case DXGI_FORMAT_BC7_UNORM:
+            case DXGI_FORMAT_BC7_UNORM_SRGB:
+                return true;
 
-                default:
-                    return false;
+            default:
+                return false;
             }
         }
 
@@ -260,26 +297,26 @@ namespace DirectX
             // Assumes UNORM or FLOAT; doesn't use UINT or SINT
             switch (fmt)
             {
-                case DXGI_FORMAT_R32G32B32A32_TYPELESS: return DXGI_FORMAT_R32G32B32A32_FLOAT;
-                case DXGI_FORMAT_R32G32B32_TYPELESS:    return DXGI_FORMAT_R32G32B32_FLOAT;
-                case DXGI_FORMAT_R16G16B16A16_TYPELESS: return DXGI_FORMAT_R16G16B16A16_UNORM;
-                case DXGI_FORMAT_R32G32_TYPELESS:       return DXGI_FORMAT_R32G32_FLOAT;
-                case DXGI_FORMAT_R10G10B10A2_TYPELESS:  return DXGI_FORMAT_R10G10B10A2_UNORM;
-                case DXGI_FORMAT_R8G8B8A8_TYPELESS:     return DXGI_FORMAT_R8G8B8A8_UNORM;
-                case DXGI_FORMAT_R16G16_TYPELESS:       return DXGI_FORMAT_R16G16_UNORM;
-                case DXGI_FORMAT_R32_TYPELESS:          return DXGI_FORMAT_R32_FLOAT;
-                case DXGI_FORMAT_R8G8_TYPELESS:         return DXGI_FORMAT_R8G8_UNORM;
-                case DXGI_FORMAT_R16_TYPELESS:          return DXGI_FORMAT_R16_UNORM;
-                case DXGI_FORMAT_R8_TYPELESS:           return DXGI_FORMAT_R8_UNORM;
-                case DXGI_FORMAT_BC1_TYPELESS:          return DXGI_FORMAT_BC1_UNORM;
-                case DXGI_FORMAT_BC2_TYPELESS:          return DXGI_FORMAT_BC2_UNORM;
-                case DXGI_FORMAT_BC3_TYPELESS:          return DXGI_FORMAT_BC3_UNORM;
-                case DXGI_FORMAT_BC4_TYPELESS:          return DXGI_FORMAT_BC4_UNORM;
-                case DXGI_FORMAT_BC5_TYPELESS:          return DXGI_FORMAT_BC5_UNORM;
-                case DXGI_FORMAT_B8G8R8A8_TYPELESS:     return DXGI_FORMAT_B8G8R8A8_UNORM;
-                case DXGI_FORMAT_B8G8R8X8_TYPELESS:     return DXGI_FORMAT_B8G8R8X8_UNORM;
-                case DXGI_FORMAT_BC7_TYPELESS:          return DXGI_FORMAT_BC7_UNORM;
-                default:                                return fmt;
+            case DXGI_FORMAT_R32G32B32A32_TYPELESS: return DXGI_FORMAT_R32G32B32A32_FLOAT;
+            case DXGI_FORMAT_R32G32B32_TYPELESS:    return DXGI_FORMAT_R32G32B32_FLOAT;
+            case DXGI_FORMAT_R16G16B16A16_TYPELESS: return DXGI_FORMAT_R16G16B16A16_UNORM;
+            case DXGI_FORMAT_R32G32_TYPELESS:       return DXGI_FORMAT_R32G32_FLOAT;
+            case DXGI_FORMAT_R10G10B10A2_TYPELESS:  return DXGI_FORMAT_R10G10B10A2_UNORM;
+            case DXGI_FORMAT_R8G8B8A8_TYPELESS:     return DXGI_FORMAT_R8G8B8A8_UNORM;
+            case DXGI_FORMAT_R16G16_TYPELESS:       return DXGI_FORMAT_R16G16_UNORM;
+            case DXGI_FORMAT_R32_TYPELESS:          return DXGI_FORMAT_R32_FLOAT;
+            case DXGI_FORMAT_R8G8_TYPELESS:         return DXGI_FORMAT_R8G8_UNORM;
+            case DXGI_FORMAT_R16_TYPELESS:          return DXGI_FORMAT_R16_UNORM;
+            case DXGI_FORMAT_R8_TYPELESS:           return DXGI_FORMAT_R8_UNORM;
+            case DXGI_FORMAT_BC1_TYPELESS:          return DXGI_FORMAT_BC1_UNORM;
+            case DXGI_FORMAT_BC2_TYPELESS:          return DXGI_FORMAT_BC2_UNORM;
+            case DXGI_FORMAT_BC3_TYPELESS:          return DXGI_FORMAT_BC3_UNORM;
+            case DXGI_FORMAT_BC4_TYPELESS:          return DXGI_FORMAT_BC4_UNORM;
+            case DXGI_FORMAT_BC5_TYPELESS:          return DXGI_FORMAT_BC5_UNORM;
+            case DXGI_FORMAT_B8G8R8A8_TYPELESS:     return DXGI_FORMAT_B8G8R8A8_UNORM;
+            case DXGI_FORMAT_B8G8R8X8_TYPELESS:     return DXGI_FORMAT_B8G8R8X8_UNORM;
+            case DXGI_FORMAT_BC7_TYPELESS:          return DXGI_FORMAT_BC7_UNORM;
+            default:                                return fmt;
             }
         }
 
@@ -296,18 +333,20 @@ namespace DirectX
                 return E_POINTER;
             }
 
+            *bitSize = 0;
+
             if (ddsDataSize > UINT32_MAX)
             {
                 return E_FAIL;
             }
 
-            if (ddsDataSize < (sizeof(uint32_t) + sizeof(DDS_HEADER)))
+            if (ddsDataSize < DDS_MIN_HEADER_SIZE)
             {
                 return E_FAIL;
             }
 
             // DDS files always start with the same magic number ("DDS ")
-            auto dwMagicNumber = *reinterpret_cast<const uint32_t*>(ddsData);
+            const auto dwMagicNumber = *reinterpret_cast<const uint32_t*>(ddsData);
             if (dwMagicNumber != DDS_MAGIC)
             {
                 return E_FAIL;
@@ -328,7 +367,7 @@ namespace DirectX
                 (MAKEFOURCC('D', 'X', '1', '0') == hdr->ddspf.fourCC))
             {
                 // Must be long enough for both headers and magic value
-                if (ddsDataSize < (sizeof(DDS_HEADER) + sizeof(uint32_t) + sizeof(DDS_HEADER_DXT10)))
+                if (ddsDataSize < DDS_DX10_HEADER_SIZE)
                 {
                     return E_FAIL;
                 }
@@ -338,8 +377,7 @@ namespace DirectX
 
             // setup the pointers in the process request
             *header = hdr;
-            auto offset = sizeof(uint32_t)
-                + sizeof(DDS_HEADER)
+            auto offset = DDS_MIN_HEADER_SIZE
                 + (bDXT10Header ? sizeof(DDS_HEADER_DXT10) : 0u);
             *bitData = ddsData + offset;
             *bitSize = ddsDataSize - offset;
@@ -360,23 +398,13 @@ namespace DirectX
                 return E_POINTER;
             }
 
-            // open the file
-        #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-            ScopedHandle hFile(safe_handle(CreateFile2(fileName,
-                               GENERIC_READ,
-                               FILE_SHARE_READ,
-                               OPEN_EXISTING,
-                               nullptr)));
-        #else
-            ScopedHandle hFile(safe_handle(CreateFileW(fileName,
-                               GENERIC_READ,
-                               FILE_SHARE_READ,
-                               nullptr,
-                               OPEN_EXISTING,
-                               FILE_ATTRIBUTE_NORMAL,
-                               nullptr)));
-        #endif
+            *bitSize = 0;
 
+            // open the file
+            ScopedHandle hFile(safe_handle(CreateFile2(
+                fileName,
+                GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING,
+                nullptr)));
             if (!hFile)
             {
                 return HRESULT_FROM_WIN32(GetLastError());
@@ -396,7 +424,7 @@ namespace DirectX
             }
 
             // Need at least enough data to fill the header and magic number to be a valid DDS
-            if (fileInfo.EndOfFile.LowPart < (sizeof(uint32_t) + sizeof(DDS_HEADER)))
+            if (fileInfo.EndOfFile.LowPart < DDS_MIN_HEADER_SIZE)
             {
                 return E_FAIL;
             }
@@ -409,26 +437,29 @@ namespace DirectX
             }
 
             // read the data in
-            DWORD BytesRead = 0;
+            DWORD bytesRead = 0;
             if (!ReadFile(hFile.get(),
                 ddsData.get(),
                 fileInfo.EndOfFile.LowPart,
-                &BytesRead,
+                &bytesRead,
                 nullptr
-                ))
+            ))
             {
+                ddsData.reset();
                 return HRESULT_FROM_WIN32(GetLastError());
             }
 
-            if (BytesRead < fileInfo.EndOfFile.LowPart)
+            if (bytesRead < fileInfo.EndOfFile.LowPart)
             {
+                ddsData.reset();
                 return E_FAIL;
             }
 
             // DDS files always start with the same magic number ("DDS ")
-            auto dwMagicNumber = *reinterpret_cast<const uint32_t*>(ddsData.get());
+            const auto dwMagicNumber = *reinterpret_cast<const uint32_t*>(ddsData.get());
             if (dwMagicNumber != DDS_MAGIC)
             {
+                ddsData.reset();
                 return E_FAIL;
             }
 
@@ -438,6 +469,7 @@ namespace DirectX
             if (hdr->size != sizeof(DDS_HEADER) ||
                 hdr->ddspf.size != sizeof(DDS_PIXELFORMAT))
             {
+                ddsData.reset();
                 return E_FAIL;
             }
 
@@ -447,8 +479,9 @@ namespace DirectX
                 (MAKEFOURCC('D', 'X', '1', '0') == hdr->ddspf.fourCC))
             {
                 // Must be long enough for both headers and magic value
-                if (fileInfo.EndOfFile.LowPart < (sizeof(DDS_HEADER) + sizeof(uint32_t) + sizeof(DDS_HEADER_DXT10)))
+                if (fileInfo.EndOfFile.LowPart < DDS_DX10_HEADER_SIZE)
                 {
+                    ddsData.reset();
                     return E_FAIL;
                 }
 
@@ -457,7 +490,7 @@ namespace DirectX
 
             // setup the pointers in the process request
             *header = hdr;
-            auto offset = sizeof(uint32_t) + sizeof(DDS_HEADER)
+            auto offset = DDS_MIN_HEADER_SIZE
                 + (bDXT10Header ? sizeof(DDS_HEADER_DXT10) : 0u);
             *bitData = ddsData.get() + offset;
             *bitSize = fileInfo.EndOfFile.LowPart - offset;
@@ -486,6 +519,9 @@ namespace DirectX
             size_t bpe = 0;
             switch (fmt)
             {
+            case DXGI_FORMAT_UNKNOWN:
+                return E_INVALIDARG;
+
             case DXGI_FORMAT_BC1_TYPELESS:
             case DXGI_FORMAT_BC1_UNORM:
             case DXGI_FORMAT_BC1_UNORM_SRGB:
@@ -530,20 +566,36 @@ namespace DirectX
 
             case DXGI_FORMAT_NV12:
             case DXGI_FORMAT_420_OPAQUE:
-        #if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
-            case DXGI_FORMAT_P208:
-        #endif
+                if ((height % 2) != 0)
+                {
+                    // Requires a height alignment of 2.
+                    return E_INVALIDARG;
+                }
                 planar = true;
                 bpe = 2;
                 break;
 
+            #if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+
+            case DXGI_FORMAT_P208:
+                planar = true;
+                bpe = 2;
+                break;
+
+            #endif
+
             case DXGI_FORMAT_P010:
             case DXGI_FORMAT_P016:
+                if ((height % 2) != 0)
+                {
+                    // Requires a height alignment of 2.
+                    return E_INVALIDARG;
+                }
                 planar = true;
                 bpe = 4;
                 break;
 
-        #if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
+            #if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
 
             case DXGI_FORMAT_D16_UNORM_S8_UINT:
             case DXGI_FORMAT_R16_UNORM_X8_TYPELESS:
@@ -552,7 +604,7 @@ namespace DirectX
                 bpe = 4;
                 break;
 
-        #endif
+            #endif
 
             default:
                 break;
@@ -594,7 +646,7 @@ namespace DirectX
             }
             else
             {
-                size_t bpp = BitsPerPixel(fmt);
+                const size_t bpp = BitsPerPixel(fmt);
                 if (!bpp)
                     return E_INVALIDARG;
 
@@ -638,81 +690,116 @@ namespace DirectX
 
                 switch (ddpf.RGBBitCount)
                 {
-                    case 32:
-                        if (ISBITMASK(0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000))
-                        {
-                            return DXGI_FORMAT_R8G8B8A8_UNORM;
-                        }
+                case 32:
+                    if (ISBITMASK(0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000))
+                    {
+                        return DXGI_FORMAT_R8G8B8A8_UNORM;
+                    }
 
-                        if (ISBITMASK(0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000))
-                        {
-                            return DXGI_FORMAT_B8G8R8A8_UNORM;
-                        }
+                    if (ISBITMASK(0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000))
+                    {
+                        return DXGI_FORMAT_B8G8R8A8_UNORM;
+                    }
 
-                        if (ISBITMASK(0x00ff0000, 0x0000ff00, 0x000000ff, 0))
-                        {
-                            return DXGI_FORMAT_B8G8R8X8_UNORM;
-                        }
+                    if (ISBITMASK(0x00ff0000, 0x0000ff00, 0x000000ff, 0))
+                    {
+                        return DXGI_FORMAT_B8G8R8X8_UNORM;
+                    }
 
-                        // No DXGI format maps to ISBITMASK(0x000000ff,0x0000ff00,0x00ff0000,0) aka D3DFMT_X8B8G8R8
+                    // No DXGI format maps to ISBITMASK(0x000000ff,0x0000ff00,0x00ff0000,0) aka D3DFMT_X8B8G8R8
 
-                        // Note that many common DDS reader/writers (including D3DX) swap the
-                        // the RED/BLUE masks for 10:10:10:2 formats. We assume
-                        // below that the 'backwards' header mask is being used since it is most
-                        // likely written by D3DX. The more robust solution is to use the 'DX10'
-                        // header extension and specify the DXGI_FORMAT_R10G10B10A2_UNORM format directly
+                    // Note that many common DDS reader/writers (including D3DX) swap the
+                    // the RED/BLUE masks for 10:10:10:2 formats. We assume
+                    // below that the 'backwards' header mask is being used since it is most
+                    // likely written by D3DX. The more robust solution is to use the 'DX10'
+                    // header extension and specify the DXGI_FORMAT_R10G10B10A2_UNORM format directly
 
-                        // For 'correct' writers, this should be 0x000003ff,0x000ffc00,0x3ff00000 for RGB data
-                        if (ISBITMASK(0x3ff00000, 0x000ffc00, 0x000003ff, 0xc0000000))
-                        {
-                            return DXGI_FORMAT_R10G10B10A2_UNORM;
-                        }
+                    // For 'correct' writers, this should be 0x000003ff,0x000ffc00,0x3ff00000 for RGB data
+                    if (ISBITMASK(0x3ff00000, 0x000ffc00, 0x000003ff, 0xc0000000))
+                    {
+                        return DXGI_FORMAT_R10G10B10A2_UNORM;
+                    }
 
-                        // No DXGI format maps to ISBITMASK(0x000003ff,0x000ffc00,0x3ff00000,0xc0000000) aka D3DFMT_A2R10G10B10
+                    // No DXGI format maps to ISBITMASK(0x000003ff,0x000ffc00,0x3ff00000,0xc0000000) aka D3DFMT_A2R10G10B10
 
-                        if (ISBITMASK(0x0000ffff, 0xffff0000, 0, 0))
-                        {
-                            return DXGI_FORMAT_R16G16_UNORM;
-                        }
+                    if (ISBITMASK(0x0000ffff, 0xffff0000, 0, 0))
+                    {
+                        return DXGI_FORMAT_R16G16_UNORM;
+                    }
 
-                        if (ISBITMASK(0xffffffff, 0, 0, 0))
-                        {
-                            // Only 32-bit color channel format in D3D9 was R32F
-                            return DXGI_FORMAT_R32_FLOAT; // D3DX writes this out as a FourCC of 114
-                        }
-                        break;
+                    if (ISBITMASK(0xffffffff, 0, 0, 0))
+                    {
+                        // Only 32-bit color channel format in D3D9 was R32F
+                        return DXGI_FORMAT_R32_FLOAT; // D3DX writes this out as a FourCC of 114
+                    }
+                    break;
 
-                    case 24:
-                        // No 24bpp DXGI formats aka D3DFMT_R8G8B8
-                        break;
+                case 24:
+                    // No 24bpp DXGI formats aka D3DFMT_R8G8B8
+                    break;
 
-                    case 16:
-                        if (ISBITMASK(0x7c00, 0x03e0, 0x001f, 0x8000))
-                        {
-                            return DXGI_FORMAT_B5G5R5A1_UNORM;
-                        }
-                        if (ISBITMASK(0xf800, 0x07e0, 0x001f, 0))
-                        {
-                            return DXGI_FORMAT_B5G6R5_UNORM;
-                        }
+                case 16:
+                    if (ISBITMASK(0x7c00, 0x03e0, 0x001f, 0x8000))
+                    {
+                        return DXGI_FORMAT_B5G5R5A1_UNORM;
+                    }
+                    if (ISBITMASK(0xf800, 0x07e0, 0x001f, 0))
+                    {
+                        return DXGI_FORMAT_B5G6R5_UNORM;
+                    }
 
-                        // No DXGI format maps to ISBITMASK(0x7c00,0x03e0,0x001f,0) aka D3DFMT_X1R5G5B5
+                    // No DXGI format maps to ISBITMASK(0x7c00,0x03e0,0x001f,0) aka D3DFMT_X1R5G5B5
 
-                        if (ISBITMASK(0x0f00, 0x00f0, 0x000f, 0xf000))
-                        {
-                            return DXGI_FORMAT_B4G4R4A4_UNORM;
-                        }
+                    if (ISBITMASK(0x0f00, 0x00f0, 0x000f, 0xf000))
+                    {
+                        return DXGI_FORMAT_B4G4R4A4_UNORM;
+                    }
 
-                        // No DXGI format maps to ISBITMASK(0x0f00,0x00f0,0x000f,0) aka D3DFMT_X4R4G4B4
+                    // NVTT versions 1.x wrote this as RGB instead of LUMINANCE
+                    if (ISBITMASK(0x00ff, 0, 0, 0xff00))
+                    {
+                        return DXGI_FORMAT_R8G8_UNORM;
+                    }
+                    if (ISBITMASK(0xffff, 0, 0, 0))
+                    {
+                        return DXGI_FORMAT_R16_UNORM;
+                    }
 
-                        // No 3:3:2, 3:3:2:8, or paletted DXGI formats aka D3DFMT_A8R3G3B2, D3DFMT_R3G3B2, D3DFMT_P8, D3DFMT_A8P8, etc.
-                        break;
+                    // No DXGI format maps to ISBITMASK(0x0f00,0x00f0,0x000f,0) aka D3DFMT_X4R4G4B4
+
+                    // No 3:3:2:8 or paletted DXGI formats aka D3DFMT_A8R3G3B2, D3DFMT_A8P8, etc.
+                    break;
+
+                case 8:
+                    // NVTT versions 1.x wrote this as RGB instead of LUMINANCE
+                    if (ISBITMASK(0xff, 0, 0, 0))
+                    {
+                        return DXGI_FORMAT_R8_UNORM;
+                    }
+
+                    // No 3:3:2 or paletted DXGI formats aka D3DFMT_R3G3B2, D3DFMT_P8
+                    break;
+
+                default:
+                    return DXGI_FORMAT_UNKNOWN;
                 }
             }
             else if (ddpf.flags & DDS_LUMINANCE)
             {
-                if (8 == ddpf.RGBBitCount)
+                switch (ddpf.RGBBitCount)
                 {
+                case 16:
+                    if (ISBITMASK(0xffff, 0, 0, 0))
+                    {
+                        return DXGI_FORMAT_R16_UNORM; // D3DX10/11 writes this out as DX10 extension
+                    }
+                    if (ISBITMASK(0x00ff, 0, 0, 0xff00))
+                    {
+                        return DXGI_FORMAT_R8G8_UNORM; // D3DX10/11 writes this out as DX10 extension
+                    }
+                    break;
+
+                case 8:
                     if (ISBITMASK(0xff, 0, 0, 0))
                     {
                         return DXGI_FORMAT_R8_UNORM; // D3DX10/11 writes this out as DX10 extension
@@ -724,18 +811,10 @@ namespace DirectX
                     {
                         return DXGI_FORMAT_R8G8_UNORM; // Some DDS writers assume the bitcount should be 8 instead of 16
                     }
-                }
+                    break;
 
-                if (16 == ddpf.RGBBitCount)
-                {
-                    if (ISBITMASK(0xffff, 0, 0, 0))
-                    {
-                        return DXGI_FORMAT_R16_UNORM; // D3DX10/11 writes this out as DX10 extension
-                    }
-                    if (ISBITMASK(0x00ff, 0, 0, 0xff00))
-                    {
-                        return DXGI_FORMAT_R8G8_UNORM; // D3DX10/11 writes this out as DX10 extension
-                    }
+                default:
+                    return DXGI_FORMAT_UNKNOWN;
                 }
             }
             else if (ddpf.flags & DDS_ALPHA)
@@ -747,16 +826,9 @@ namespace DirectX
             }
             else if (ddpf.flags & DDS_BUMPDUDV)
             {
-                if (16 == ddpf.RGBBitCount)
+                switch (ddpf.RGBBitCount)
                 {
-                    if (ISBITMASK(0x00ff, 0xff00, 0, 0))
-                    {
-                        return DXGI_FORMAT_R8G8_SNORM; // D3DX10/11 writes this out as DX10 extension
-                    }
-                }
-
-                if (32 == ddpf.RGBBitCount)
-                {
+                case 32:
                     if (ISBITMASK(0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000))
                     {
                         return DXGI_FORMAT_R8G8B8A8_SNORM; // D3DX10/11 writes this out as DX10 extension
@@ -767,6 +839,17 @@ namespace DirectX
                     }
 
                     // No DXGI format maps to ISBITMASK(0x3ff00000, 0x000ffc00, 0x000003ff, 0xc0000000) aka D3DFMT_A2W10V10U10
+                    break;
+
+                case 16:
+                    if (ISBITMASK(0x00ff, 0xff00, 0, 0))
+                    {
+                        return DXGI_FORMAT_R8G8_SNORM; // D3DX10/11 writes this out as DX10 extension
+                    }
+                    break;
+
+                default:
+                    return DXGI_FORMAT_UNKNOWN;
                 }
 
                 // No DXGI format maps to DDPF_BUMPLUMINANCE aka D3DFMT_L6V5U5, D3DFMT_X8L8V8U8
@@ -842,31 +925,34 @@ namespace DirectX
                 // Check for D3DFORMAT enums being set here
                 switch (ddpf.fourCC)
                 {
-                    case 36: // D3DFMT_A16B16G16R16
-                        return DXGI_FORMAT_R16G16B16A16_UNORM;
+                case 36: // D3DFMT_A16B16G16R16
+                    return DXGI_FORMAT_R16G16B16A16_UNORM;
 
-                    case 110: // D3DFMT_Q16W16V16U16
-                        return DXGI_FORMAT_R16G16B16A16_SNORM;
+                case 110: // D3DFMT_Q16W16V16U16
+                    return DXGI_FORMAT_R16G16B16A16_SNORM;
 
-                    case 111: // D3DFMT_R16F
-                        return DXGI_FORMAT_R16_FLOAT;
+                case 111: // D3DFMT_R16F
+                    return DXGI_FORMAT_R16_FLOAT;
 
-                    case 112: // D3DFMT_G16R16F
-                        return DXGI_FORMAT_R16G16_FLOAT;
+                case 112: // D3DFMT_G16R16F
+                    return DXGI_FORMAT_R16G16_FLOAT;
 
-                    case 113: // D3DFMT_A16B16G16R16F
-                        return DXGI_FORMAT_R16G16B16A16_FLOAT;
+                case 113: // D3DFMT_A16B16G16R16F
+                    return DXGI_FORMAT_R16G16B16A16_FLOAT;
 
-                    case 114: // D3DFMT_R32F
-                        return DXGI_FORMAT_R32_FLOAT;
+                case 114: // D3DFMT_R32F
+                    return DXGI_FORMAT_R32_FLOAT;
 
-                    case 115: // D3DFMT_G32R32F
-                        return DXGI_FORMAT_R32G32_FLOAT;
+                case 115: // D3DFMT_G32R32F
+                    return DXGI_FORMAT_R32G32_FLOAT;
 
-                    case 116: // D3DFMT_A32B32G32R32F
-                        return DXGI_FORMAT_R32G32B32A32_FLOAT;
+                case 116: // D3DFMT_A32B32G32R32F
+                    return DXGI_FORMAT_R32G32B32A32_FLOAT;
 
-                    // No DXGI format maps to D3DFMT_CxV8U8
+                // No DXGI format maps to D3DFMT_CxV8U8
+
+                default:
+                    return DXGI_FORMAT_UNKNOWN;
                 }
             }
 
@@ -883,22 +969,22 @@ namespace DirectX
                 if (MAKEFOURCC('D', 'X', '1', '0') == header->ddspf.fourCC)
                 {
                     auto d3d10ext = reinterpret_cast<const DDS_HEADER_DXT10*>(reinterpret_cast<const uint8_t*>(header) + sizeof(DDS_HEADER));
-                    auto mode = static_cast<DDS_ALPHA_MODE>(d3d10ext->miscFlags2 & DDS_MISC_FLAGS2_ALPHA_MODE_MASK);
+                    const auto mode = static_cast<DDS_ALPHA_MODE>(d3d10ext->miscFlags2 & DDS_MISC_FLAGS2_ALPHA_MODE_MASK);
                     switch (mode)
                     {
-                        case DDS_ALPHA_MODE_STRAIGHT:
-                        case DDS_ALPHA_MODE_PREMULTIPLIED:
-                        case DDS_ALPHA_MODE_OPAQUE:
-                        case DDS_ALPHA_MODE_CUSTOM:
-                            return mode;
+                    case DDS_ALPHA_MODE_STRAIGHT:
+                    case DDS_ALPHA_MODE_PREMULTIPLIED:
+                    case DDS_ALPHA_MODE_OPAQUE:
+                    case DDS_ALPHA_MODE_CUSTOM:
+                        return mode;
 
-                        case DDS_ALPHA_MODE_UNKNOWN:
-                        default:
-                            break;
+                    case DDS_ALPHA_MODE_UNKNOWN:
+                    default:
+                        break;
                     }
                 }
                 else if ((MAKEFOURCC('D', 'X', 'T', '2') == header->ddspf.fourCC)
-                         || (MAKEFOURCC('D', 'X', 'T', '4') == header->ddspf.fourCC))
+                    || (MAKEFOURCC('D', 'X', 'T', '4') == header->ddspf.fourCC))
                 {
                     return DDS_ALPHA_MODE_PREMULTIPLIED;
                 }
@@ -925,7 +1011,7 @@ namespace DirectX
                 {
                     FILE_DISPOSITION_INFO info = {};
                     info.DeleteFile = TRUE;
-                    (void)SetFileInformationByHandle(m_handle, FileDispositionInfo, &info, sizeof(info));
+                    std::ignore = SetFileInformationByHandle(m_handle, FileDispositionInfo, &info, sizeof(info));
                 }
             }
 
@@ -977,9 +1063,9 @@ namespace DirectX
             return count;
         }
 
-        inline void FitPowerOf2(UINT origx, UINT origy, UINT& targetx, UINT& targety, size_t maxsize)
+        inline void FitPowerOf2(UINT origx, UINT origy, _Inout_ UINT& targetx, _Inout_ UINT& targety, size_t maxsize)
         {
-            float origAR = float(origx) / float(origy);
+            const float origAR = float(origx) / float(origy);
 
             if (origx > origy)
             {
@@ -990,7 +1076,7 @@ namespace DirectX
                 float bestScore = FLT_MAX;
                 for (size_t y = maxsize; y > 0; y >>= 1)
                 {
-                    float score = fabsf((float(x) / float(y)) - origAR);
+                    const float score = fabsf((float(x) / float(y)) - origAR);
                     if (score < bestScore)
                     {
                         bestScore = score;
@@ -1007,7 +1093,7 @@ namespace DirectX
                 float bestScore = FLT_MAX;
                 for (size_t x = maxsize; x > 0; x >>= 1)
                 {
-                    float score = fabsf((float(x) / float(y)) - origAR);
+                    const float score = fabsf((float(x) / float(y)) - origAR);
                     if (score < bestScore)
                     {
                         bestScore = score;

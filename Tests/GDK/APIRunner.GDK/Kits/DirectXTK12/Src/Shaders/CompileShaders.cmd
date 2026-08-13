@@ -1,9 +1,11 @@
 @echo off
-rem Copyright (c) Microsoft Corporation. All rights reserved.
+rem Copyright (c) Microsoft Corporation.
 rem Licensed under the MIT License.
 
 setlocal
 set error=0
+
+if %PROCESSOR_ARCHITECTURE%.==ARM64. (set FXCARCH=arm64) else (if %PROCESSOR_ARCHITECTURE%.==AMD64. (set FXCARCH=x64) else (set FXCARCH=x86))
 
 set FXCOPTS=/nologo /WX /Ges /Zi /Zpc /Qstrip_reflect /Qstrip_debug
 
@@ -11,12 +13,12 @@ if %1.==xbox. goto continuexbox
 if %1.==dxil. goto continuedxil
 if %1.==gxdk. goto continuegxdk
 if %1.==. goto continuepc
-echo usage: CompileShaders [xbox]
+echo usage: CompileShaders [xbox | dxil | gxdk]
 exit /b
 
 :continuexbox
 set XBOXPREFIX=XboxOne
-set XBOXOPTS=/D__XBOX_DISABLE_SHADER_NAME_EMPLACEMENT
+set XBOXOPTS=/D__XBOX_DISABLE_SHADER_NAME_EMPLACEMENT /D__XBOX_PER_THREAD_SCRATCH_SIZE_LIMIT_IN_BYTES=0
 if NOT %2.==noprecompile. goto skipnoprecompile
 set XBOXOPTS=%XBOXOPTS% /D__XBOX_DISABLE_PRECOMPILE=1
 :skipnoprecompile
@@ -32,6 +34,7 @@ if not exist %XBOXFXC% goto needxdk
 goto continue
 
 :continuegxdk
+set XBOXOPTS=-HV 2021 /D__XBOX_PER_THREAD_SCRATCH_SIZE_LIMIT_IN_BYTES=0
 if %2.==scarlett. (
 set XBOXPREFIX=XboxGamingScarlett
 set XBOXDXC="%GameDKLatest%\GXDK\bin\Scarlett\DXC.exe"
@@ -46,28 +49,57 @@ if not exist %XBOXDXC% goto needgxdk
 goto continue
 
 :continuedxil
-set PCDXC="%WindowsSdkVerBinPath%x86\dxc.exe"
-if exist %PCDXC% goto continue
-set PCDXC="%WindowsSdkBinPath%%WindowsSDKVersion%\x86\dxc.exe"
-if exist %PCDXC% goto continue
+set DXILOPTS=-HV 2021
+if defined DirectXShaderCompiler goto dxcviaenv
+set PCDXC="%WindowsSdkVerBinPath%%FXCARCH%\dxc.exe"
+if exist %PCDXC% goto dxilver
+set PCDXC="%WindowsSdkBinPath%%WindowsSDKVersion%\%FXCARCH%\dxc.exe"
+if exist %PCDXC% goto dxilver
 
 set PCDXC=dxc.exe
 goto continue
 
-:continuepc
-set PCOPTS=
+:dxilver
+if not defined WindowsSDKVersion goto continue
+REM known DXC.EXE versions that don't support -HV 2021
+if not "x%WindowsSDKVersion:10.0.19041.0=%"=="x%WindowsSDKVersion%" set DXILOPTS=%DXILOPTS:-HV 2021=%
+if not "x%WindowsSDKVersion:10.0.20348.0=%"=="x%WindowsSDKVersion%" set DXILOPTS=%DXILOPTS:-HV 2021=%
+if not "x%WindowsSDKVersion:10.0.22000.0=%"=="x%WindowsSDKVersion%" set DXILOPTS=%DXILOPTS:-HV 2021=%
+goto continue
 
-set PCFXC="%WindowsSdkVerBinPath%x86\fxc.exe"
+:dxcviaenv
+set PCDXC="%DirectXShaderCompiler%"
+if not exist %PCDXC% goto needdxil
+
+if not "x%DirectXShaderCompiler:10.0.19041.0=%"=="x%DirectXShaderCompiler%" set DXILOPTS=%DXILOPTS:-HV 2021=%
+if not "x%DirectXShaderCompiler:10.0.20348.0=%"=="x%DirectXShaderCompiler%" set DXILOPTS=%DXILOPTS:-HV 2021=%
+if not "x%DirectXShaderCompiler:10.0.22000.0=%"=="x%DirectXShaderCompiler%" set DXILOPTS=%DXILOPTS:-HV 2021=%
+goto continue
+
+:continuepc
+
+if defined LegacyShaderCompiler goto fxcviaenv
+set PCFXC="%WindowsSdkVerBinPath%%FXCARCH%\fxc.exe"
 if exist %PCFXC% goto continue
-set PCFXC="%WindowsSdkBinPath%%WindowsSDKVersion%\x86\fxc.exe"
+set PCFXC="%WindowsSdkBinPath%%WindowsSDKVersion%\%FXCARCH%\fxc.exe"
 if exist %PCFXC% goto continue
-set PCFXC="%WindowsSdkDir%bin\%WindowsSDKVersion%\x86\fxc.exe"
+set PCFXC="%WindowsSdkDir%bin\%WindowsSDKVersion%\%FXCARCH%\fxc.exe"
 if exist %PCFXC% goto continue
 
 set PCFXC=fxc.exe
+goto continue
+
+:fxcviaenv
+set PCFXC="%LegacyShaderCompiler%"
+if not exist %PCFXC% goto needfxc
+goto continue
 
 :continue
-@if not exist Compiled mkdir Compiled
+if not defined CompileShadersOutput set CompileShadersOutput=Compiled
+set StrTrim=%CompileShadersOutput%##
+set StrTrim=%StrTrim: ##=%
+set CompileShadersOutput=%StrTrim:##=%
+@if not exist "%CompileShadersOutput%" mkdir "%CompileShadersOutput%"
 call :CompileShader%1 AlphaTestEffect vs VSAlphaTest
 call :CompileShader%1 AlphaTestEffect vs VSAlphaTestNoFog
 call :CompileShader%1 AlphaTestEffect vs VSAlphaTestVc
@@ -172,15 +204,34 @@ call :CompileShader%1 NormalMapEffect vs VSNormalPixelLightingTxNoSpecBn
 call :CompileShader%1 NormalMapEffect vs VSNormalPixelLightingTxVcNoSpec
 call :CompileShader%1 NormalMapEffect vs VSNormalPixelLightingTxVcNoSpecBn
 
+call :CompileShader%1 NormalMapEffect vs VSNormalPixelLightingTxInst
+call :CompileShader%1 NormalMapEffect vs VSNormalPixelLightingTxBnInst
+call :CompileShader%1 NormalMapEffect vs VSNormalPixelLightingTxVcInst
+call :CompileShader%1 NormalMapEffect vs VSNormalPixelLightingTxVcBnInst
+
+call :CompileShader%1 NormalMapEffect vs VSNormalPixelLightingTxNoSpecInst
+call :CompileShader%1 NormalMapEffect vs VSNormalPixelLightingTxNoSpecBnInst
+call :CompileShader%1 NormalMapEffect vs VSNormalPixelLightingTxVcNoSpecInst
+call :CompileShader%1 NormalMapEffect vs VSNormalPixelLightingTxVcNoSpecBnInst
+
+call :CompileShader%1 NormalMapEffect vs VSSkinnedPixelLightingTx
+call :CompileShader%1 NormalMapEffect vs VSSkinnedPixelLightingTxBn
+call :CompileShader%1 NormalMapEffect vs VSSkinnedPixelLightingTxNoSpec
+call :CompileShader%1 NormalMapEffect vs VSSkinnedPixelLightingTxNoSpecBn
+
 call :CompileShader%1 NormalMapEffect ps PSNormalPixelLightingTx
 call :CompileShader%1 NormalMapEffect ps PSNormalPixelLightingTxNoFog
 call :CompileShader%1 NormalMapEffect ps PSNormalPixelLightingTxNoSpec
 call :CompileShader%1 NormalMapEffect ps PSNormalPixelLightingTxNoFogSpec
 
 call :CompileShader%1 PBREffect vs VSConstant
+call :CompileShader%1 PBREffect vs VSConstantInst
 call :CompileShader%1 PBREffect vs VSConstantVelocity
 call :CompileShader%1 PBREffect vs VSConstantBn
+call :CompileShader%1 PBREffect vs VSConstantBnInst
 call :CompileShader%1 PBREffect vs VSConstantVelocityBn
+call :CompileShader%1 PBREffect vs VSSkinned
+call :CompileShader%1 PBREffect vs VSSkinnedBn
 
 call :CompileShader%1 PBREffect ps PSConstant
 call :CompileShader%1 PBREffect ps PSTextured
@@ -192,6 +243,11 @@ call :CompileShader%1 DebugEffect vs VSDebug
 call :CompileShader%1 DebugEffect vs VSDebugBn
 call :CompileShader%1 DebugEffect vs VSDebugVc
 call :CompileShader%1 DebugEffect vs VSDebugVcBn
+
+call :CompileShader%1 DebugEffect vs VSDebugInst
+call :CompileShader%1 DebugEffect vs VSDebugBnInst
+call :CompileShader%1 DebugEffect vs VSDebugVcInst
+call :CompileShader%1 DebugEffect vs VSDebugVcBnInst
 
 call :CompileShader%1 DebugEffect ps PSHemiAmbient
 call :CompileShader%1 DebugEffect ps PSRGBNormals
@@ -249,62 +305,63 @@ if %error% == 0 (
     echo Shaders compiled ok
 ) else (
     echo There were shader compilation errors!
+    exit /b 1
 )
 
 endlocal
-exit /b
+exit /b 0
 
 :CompileShader
-set fxc=%PCFXC% %1.fx %FXCOPTS% /T%2_5_1 %PCOPTS% /E%3 /FhCompiled\%1_%3.inc /FdCompiled\%1_%3.pdb /Vn%1_%3
+set fxc=%PCFXC% "%1.fx" %FXCOPTS% /T%2_5_1 /E%3 "/Fh%CompileShadersOutput%\%1_%3.inc" "/Fd%CompileShadersOutput%\%1_%3.pdb" /Vn%1_%3
 echo.
 echo %fxc%
 %fxc% || set error=1
 exit /b
 
 :CompileComputeShader
-set fxc=%PCFXC% %1.hlsl %FXCOPTS% /Tcs_5_1 %PCOPTS% /E%2 /FhCompiled\%1_%2.inc /FdCompiled\%1_%2.pdb /Vn%1_%2
+set fxc=%PCFXC% "%1.hlsl" %FXCOPTS% /Tcs_5_1 /E%2 "/Fh%CompileShadersOutput%\%1_%2.inc" "/Fd%CompileShadersOutput%\%1_%2.pdb" /Vn%1_%2
 echo.
 echo %fxc%
 %fxc% || set error=1
 exit /b
 
 :CompileShaderdxil
-set dxc=%PCDXC% %1.fx %FXCOPTS% /T%2_6_0 /E%3 /FhCompiled\%1_%3.inc /FdCompiled\%1_%3.pdb /Vn%1_%3
+set dxc=%PCDXC% "%1.fx" %FXCOPTS% /T%2_6_0 %DXILOPTS% /E%3 "/Fh%CompileShadersOutput%\%1_%3.inc" "/Fd%CompileShadersOutput%\%1_%3.pdb" /Vn%1_%3
 echo.
 echo %dxc%
 %dxc% || set error=1
 exit /b
 
 :CompileComputeShaderdxil
-set dxc=%PCDXC% %1.hlsl %FXCOPTS% /Tcs_6_0 /E%2 /FhCompiled\%1_%2.inc /FdCompiled\%1_%2.pdb /Vn%1_%2
+set dxc=%PCDXC% "%1.hlsl" %FXCOPTS% /Tcs_6_0 %DXILOPTS% /E%2 "/Fh%CompileShadersOutput%\%1_%2.inc" "/Fd%CompileShadersOutput%\%1_%2.pdb" /Vn%1_%2
 echo.
 echo %dxc%
 %dxc% || set error=1
 exit /b
 
 :CompileShaderxbox
-set fxc=%XBOXFXC% %1.fx %FXCOPTS% /T%2_5_1 %XBOXOPTS% /E%3 /FhCompiled\%XBOXPREFIX%%1_%3.inc /FdCompiled\%XBOXPREFIX%%1_%3.pdb /Vn%1_%3
+set fxc=%XBOXFXC% "%1.fx" %FXCOPTS% /T%2_5_1 %XBOXOPTS% /E%3 "/Fh%CompileShadersOutput%\%XBOXPREFIX%%1_%3.inc" "/Fd%CompileShadersOutput%\%XBOXPREFIX%%1_%3.pdb" /Vn%1_%3
 echo.
 echo %fxc%
 %fxc% || set error=1
 exit /b
 
 :CompileComputeShaderxbox
-set fxc==%XBOXFXC% %1.hlsl %FXCOPTS% /Tcs_5_1 %XBOXOPTS% /E%2 /FhCompiled\%XBOXPREFIX%%1_%2.inc /FdCompiled\%XBOXPREFIX%%1_%2.pdb /Vn%1_%2
+set fxc==%XBOXFXC% "%1.hlsl" %FXCOPTS% /Tcs_5_1 %XBOXOPTS% /E%2 "/Fh%CompileShadersOutput%\%XBOXPREFIX%%1_%2.inc" "/Fd%CompileShadersOutput%\%XBOXPREFIX%%1_%2.pdb" /Vn%1_%2
 echo.
 echo %fxc%
 %fxc% || set error=1
 exit /b
 
 :CompileShadergxdk
-set dxc=%XBOXDXC% %1.fx %FXCOPTS% /T%2_6_0 /E%3 /FhCompiled\%XBOXPREFIX%%1_%3.inc /FdCompiled\%XBOXPREFIX%%1_%3.pdb /Vn%1_%3
+set dxc=%XBOXDXC% "%1.fx" %FXCOPTS% /T%2_6_0 %XBOXOPTS% /E%3 "/Fh%CompileShadersOutput%\%XBOXPREFIX%%1_%3.inc" "/Fd%CompileShadersOutput%\%XBOXPREFIX%%1_%3.pdb" /Vn%1_%3
 echo.
 echo %dxc%
 %dxc% || set error=1
 exit /b
 
 :CompileComputeShadergxdk
-set dxc=%XBOXDXC% %1.hlsl %FXCOPTS% /Tcs_6_0 /E%2 /FhCompiled\%XBOXPREFIX%%1_%2.inc /FdCompiled\%XBOXPREFIX%%1_%2.pdb /Vn%1_%2
+set dxc=%XBOXDXC% "%1.hlsl" %FXCOPTS% /Tcs_6_0 %XBOXOPTS% /E%2 "/Fh%CompileShadersOutput%\%XBOXPREFIX%%1_%2.inc" "/Fd%CompileShadersOutput%\%XBOXPREFIX%%1_%2.pdb" /Vn%1_%2
 echo.
 echo %dxc%
 %dxc% || set error=1
@@ -313,9 +370,17 @@ exit /b
 :needxdk
 echo ERROR: CompileShaders xbox requires the Microsoft Xbox One XDK
 echo        (try re-running from the XDK Command Prompt)
-exit /b
+exit /b 1
 
 :needgxdk
 echo ERROR: CompileShaders gxdk requires the Microsoft Gaming SDK
-echo        (try re-running from the Gaming GXDK Command Prompt)
-exit /b
+echo        (try re-running from the Microsoft GDKX Gaming Command Prompt)
+exit /b 1
+
+:needfxc
+echo ERROR: CompileShaders requires FXC.EXE
+exit /b 1
+
+:needdxil
+echo ERROR: CompileShaders dxil requires DXC.EXE
+exit /b 1

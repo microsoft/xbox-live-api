@@ -23,6 +23,10 @@ end
 
 function OnXblPrivacyBatchCheckPermissionAsync()
     print("OnXblPrivacyBatchCheckPermissionAsync")
+    XblPrivacyAddMuteListChangedHandler()
+    XblPrivacyRemoveMuteListChangedHandler()
+    XblPrivacyAddBlockListChangedHandler()
+    XblPrivacyRemoveBlockListChangedHandler()
     test.stopTest();
 end
 

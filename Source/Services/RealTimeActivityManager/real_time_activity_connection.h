@@ -96,8 +96,7 @@ private:
     Map<uint32_t, std::shared_ptr<ServiceSubscription>> m_subsByServiceId; // needed to handle subscription events
 
     uint32_t m_nextSubId{ 1 };
-
-    mutable std::mutex m_lock;
+    mutable DefaultUnnamedMutex m_lock;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_RTA_CPP_END

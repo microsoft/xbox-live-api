@@ -17,6 +17,29 @@
 #define PRESENCE_POLL_INTERVAL_MS (30 * 1000)
 #endif
 
+// Watchdog for the initial/refresh followed-users fetch. The retry for this call is otherwise scheduled
+// only from its completion callback (the Failed branch), so a request that never delivers a completion -
+// e.g. a lost WinHttp async callback on a network transition, or a hang in the pre-request auth/token
+// phase - is never retried and the social graph never initializes, leaving the friends list permanently
+// empty until the 20-min refresh, an RTA resync, or a reboot (AB#63099583). This completion-independent
+// watchdog re-issues the fetch if it does not complete in time.
+//
+// The timeout must comfortably exceed the maximum time a HEALTHY call can take to succeed or return a
+// terminal failure, otherwise the watchdog could discard a legitimately-slow success and re-issue it. A
+// healthy call is bounded by the pre-request auth/token phase plus the HTTP attempt, and the HTTP attempt
+// is bounded by the configurable HTTP timeout window (XblContextSettingsSetHttpTimeoutWindow, default
+// DEFAULT_HTTP_RETRY_WINDOW_SECONDS). The prod watchdog is therefore derived at runtime from the actual
+// configured window plus a fixed margin for the auth phase and scheduling, so a title that raises the
+// window is never preempted. With the default 20s window this yields 60s, cutting the user-visible outage
+// from ~20 min (or a reboot) down to ~1 min. Unit-test builds use a short fixed interval to keep tests fast.
+#ifdef XSAPI_UNIT_TESTS
+#define FOLLOWED_USERS_WATCHDOG_TIMEOUT_MS (2 * 1000)
+#else
+// Time beyond the configured HTTP timeout window allowed for the auth/token phase and scheduling before
+// the followed-users watchdog treats the call as hung.
+#define FOLLOWED_USERS_WATCHDOG_AUTH_MARGIN_SECONDS (40)
+#endif
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
 // Helper class to manage batching, retrying, and throttling of service calls needed by SocialGraph.
@@ -77,7 +100,7 @@ private:
 
     std::shared_ptr<presence::PresenceService> m_presenceService;
     std::shared_ptr<PeoplehubService> m_peoplehubService;
-    std::mutex m_mutex;
+    DefaultUnnamedMutex m_mutex;
 };
 
 /// -----------------------------------------------------------------------------------------------
@@ -848,14 +871,57 @@ HRESULT ServiceCallManager::PollPeopleHub(const Vector<uint64_t>& xuids) noexcep
 
 HRESULT ServiceCallManager::PeopleHubGetFollowedUsers(PeopleHubResultHandler handler) const noexcept
 {
-    return m_peoplehubService->GetSocialGraph(m_localUserXuid, m_peoplehubDetailLevel, { m_queue,
+    // Guard shared between the service completion and the watchdog so that whichever fires first
+    // handles the result exactly once. Without the watchdog, a lost/never-delivered completion for
+    // this call is never retried and the social graph never initializes (AB#63099583).
+    auto settled = MakeShared<std::atomic<bool>>(false);
+
+    // Size the watchdog so it never preempts a healthy call under the currently configured HTTP timeout
+    // window; unit-test builds use a short fixed interval to keep tests fast (see the #define above).
+#ifdef XSAPI_UNIT_TESTS
+    const uint32_t watchdogTimeoutMs{ FOLLOWED_USERS_WATCHDOG_TIMEOUT_MS };
+#else
+    // The HTTP timeout window is title-configurable (XblContextSettingsSetHttpTimeoutWindow) and unclamped,
+    // so compute in 64-bit and saturate to uint32_t. This prevents an extreme window from overflowing the
+    // millisecond product and wrapping to a tiny delay that would preempt a healthy in-flight fetch - the
+    // exact failure this watchdog derivation exists to avoid (RunWork takes a uint32_t delay).
+    const uint64_t watchdogTimeoutMs64{
+        (static_cast<uint64_t>(m_peoplehubService->HttpTimeoutWindowInSeconds())
+            + FOLLOWED_USERS_WATCHDOG_AUTH_MARGIN_SECONDS) * 1000ull };
+    const uint32_t watchdogTimeoutMs{
+        watchdogTimeoutMs64 > UINT32_MAX ? UINT32_MAX : static_cast<uint32_t>(watchdogTimeoutMs64) };
+#endif
+
+    // Completion-independent watchdog: if the request has not completed within the timeout, treat it
+    // like a failure and retry with a fresh call. A late completion of the original request is then
+    // ignored (settled already set), so the handler runs and retries are scheduled at most once.
+    m_queue.RunWork([weakThis = std::weak_ptr<ServiceCallManager const>{ shared_from_this() }, this, handler, settled]
+    {
+        if (settled->exchange(true))
+        {
+            return; // The service completion already handled this request.
+        }
+
+        if (auto sharedThis{ weakThis.lock() })
+        {
+            PeopleHubGetFollowedUsers(handler);
+        }
+    }, watchdogTimeoutMs);
+
+    HRESULT hr = m_peoplehubService->GetSocialGraph(m_localUserXuid, m_peoplehubDetailLevel, { m_queue,
         [
             weakThis = std::weak_ptr<ServiceCallManager const>{ shared_from_this() },
             this,
-            handler{ std::move(handler) }
+            handler,
+            settled
         ]
     (Result<Vector<XblSocialManagerUser>> result)
     {
+        if (settled->exchange(true))
+        {
+            return; // The watchdog already re-issued the request; ignore this (late) completion.
+        }
+
         if (Failed(result))
         {
             m_queue.RunWork([weakThis, this, handler]
@@ -872,10 +938,28 @@ HRESULT ServiceCallManager::PeopleHubGetFollowedUsers(PeopleHubResultHandler han
         }
     }
     });
+
+    // A synchronous failure (e.g. the request could not be built before the async Perform stage) means
+    // the completion above never runs, so it neither settles the request nor schedules the failure retry.
+    // Honor this method's "service failures are retried automatically" contract by settling the request
+    // here and scheduling the same fast retry, rather than degrading to the far-later watchdog timeout.
+    if (FAILED(hr) && !settled->exchange(true))
+    {
+        m_queue.RunWork([weakThis = std::weak_ptr<ServiceCallManager const>{ shared_from_this() }, this, handler]
+        {
+            if (auto sharedThis{ weakThis.lock() })
+            {
+                PeopleHubGetFollowedUsers(handler);
+            }
+        }, c_failureRetryIntervalMs);
+    }
+
+    return hr;
 }
 
 HRESULT ServiceCallManager::PollPresenceServiceCall(std::unique_lock<std::mutex> lock) noexcept
 {
+    (void)lock;
     assert(lock.owns_lock());
     if (m_usersPendingPresence.empty())
     {
@@ -939,6 +1023,7 @@ HRESULT ServiceCallManager::PollPresenceServiceCall(std::unique_lock<std::mutex>
 
 HRESULT ServiceCallManager::PollPeopleHubServiceCall(std::unique_lock<std::mutex> lock) noexcept
 {
+    (void)lock;
     assert(lock.owns_lock());
     if (m_usersPendingPeoplehub.empty())
     {

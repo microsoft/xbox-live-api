@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: CommonStates.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -144,6 +144,50 @@ const D3D12_DEPTH_STENCIL_DESC CommonStates::DepthRead =
     TRUE, // DepthEnable
     D3D12_DEPTH_WRITE_MASK_ZERO,
     D3D12_COMPARISON_FUNC_LESS_EQUAL, // DepthFunc
+    FALSE, // StencilEnable
+    D3D12_DEFAULT_STENCIL_READ_MASK,
+    D3D12_DEFAULT_STENCIL_WRITE_MASK,
+    {
+        D3D12_STENCIL_OP_KEEP, // StencilFailOp
+        D3D12_STENCIL_OP_KEEP, // StencilDepthFailOp
+        D3D12_STENCIL_OP_KEEP, // StencilPassOp
+        D3D12_COMPARISON_FUNC_ALWAYS // StencilFunc
+    }, // FrontFace
+    {
+        D3D12_STENCIL_OP_KEEP, // StencilFailOp
+        D3D12_STENCIL_OP_KEEP, // StencilDepthFailOp
+        D3D12_STENCIL_OP_KEEP, // StencilPassOp
+        D3D12_COMPARISON_FUNC_ALWAYS // StencilFunc
+    } // BackFace
+};
+
+const D3D12_DEPTH_STENCIL_DESC CommonStates::DepthReverseZ =
+{
+    TRUE, // DepthEnable
+    D3D12_DEPTH_WRITE_MASK_ALL,
+    D3D12_COMPARISON_FUNC_GREATER_EQUAL, // DepthFunc
+    FALSE, // StencilEnable
+    D3D12_DEFAULT_STENCIL_READ_MASK,
+    D3D12_DEFAULT_STENCIL_WRITE_MASK,
+    {
+        D3D12_STENCIL_OP_KEEP, // StencilFailOp
+        D3D12_STENCIL_OP_KEEP, // StencilDepthFailOp
+        D3D12_STENCIL_OP_KEEP, // StencilPassOp
+        D3D12_COMPARISON_FUNC_ALWAYS // StencilFunc
+    }, // FrontFace
+    {
+        D3D12_STENCIL_OP_KEEP, // StencilFailOp
+        D3D12_STENCIL_OP_KEEP, // StencilDepthFailOp
+        D3D12_STENCIL_OP_KEEP, // StencilPassOp
+        D3D12_COMPARISON_FUNC_ALWAYS // StencilFunc
+    } // BackFace
+};
+
+const D3D12_DEPTH_STENCIL_DESC CommonStates::DepthReadReverseZ =
+{
+    TRUE, // DepthEnable
+    D3D12_DEPTH_WRITE_MASK_ZERO,
+    D3D12_COMPARISON_FUNC_GREATER_EQUAL, // DepthFunc
     FALSE, // StencilEnable
     D3D12_DEFAULT_STENCIL_READ_MASK,
     D3D12_DEFAULT_STENCIL_WRITE_MASK,
@@ -409,7 +453,7 @@ public:
 
     static const D3D12_SAMPLER_DESC SamplerDescs[static_cast<int>(SamplerIndex::Count)];
 
-    Impl(_In_ ID3D12Device* device)
+    explicit Impl(_In_ ID3D12Device* device)
         : mDescriptors(device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, static_cast<size_t>(SamplerIndex::Count))
     {
         SetDebugObjectName(mDescriptors.Heap(), L"CommonStates");
@@ -419,6 +463,12 @@ public:
             device->CreateSampler(&SamplerDescs[i], mDescriptors.GetCpuHandle(i));
         }
     }
+
+    Impl(const Impl&) = delete;
+    Impl& operator=(const Impl&) = delete;
+
+    Impl(Impl&&) = default;
+    Impl& operator=(Impl&&) = default;
 
     D3D12_GPU_DESCRIPTOR_HANDLE Get(SamplerIndex i) const
     {
@@ -518,23 +568,14 @@ const D3D12_SAMPLER_DESC CommonStates::Impl::SamplerDescs[] =
 
 
 _Use_decl_annotations_
-CommonStates::CommonStates(ID3D12Device* device)
-{
-    pImpl = std::make_unique<Impl>(device);
-}
+CommonStates::CommonStates(ID3D12Device* device) :
+    pImpl(std::make_unique<Impl>(device))
+{}
 
-CommonStates::CommonStates(CommonStates&& moveFrom) noexcept
-    : pImpl(std::move(moveFrom.pImpl))
-{
-}
+CommonStates::CommonStates(CommonStates&&) noexcept = default;
+CommonStates& CommonStates::operator = (CommonStates&&) noexcept = default;
+CommonStates::~CommonStates() = default;
 
-CommonStates::~CommonStates() {}
-
-CommonStates& CommonStates::operator = (CommonStates&& moveFrom) noexcept
-{
-    pImpl = std::move(moveFrom.pImpl);
-    return *this;
-}
 
 D3D12_GPU_DESCRIPTOR_HANDLE CommonStates::PointWrap() const { return pImpl->Get(SamplerIndex::PointWrap); }
 D3D12_GPU_DESCRIPTOR_HANDLE CommonStates::PointClamp() const { return pImpl->Get(SamplerIndex::PointClamp); }

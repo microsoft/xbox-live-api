@@ -304,6 +304,7 @@ HRESULT AchievementsService::WriteOfflineUpdateAchievement(
 #else // aka XSAPI_UNIT_TESTS
     HRESULT hr = E_FAIL; 
     UNREFERENCED_PARAMETER(propertiesStrUtf8);
+    UNREFERENCED_PARAMETER(xboxLiveContextImpl);
 #endif
     return hr;
 }

@@ -354,7 +354,7 @@ size_t Connection::SubscriptionCount() const noexcept
 
 JsonDocument Connection::AssembleSubscribeMessage(std::shared_ptr<ServiceSubscription> sub) const noexcept
 {
-    // Payload format [<API_ID>, <SEQUENCE_N>, “<RESOURCE_URI>”]
+    // Payload format [<API_ID>, <SEQUENCE_N>, ï¿½<RESOURCE_URI>ï¿½]
 
     sub->status = ServiceSubscription::Status::Subscribing;
 
@@ -630,14 +630,22 @@ void Connection::EventHandler(_In_ const JsonValue& message) const noexcept
 
     auto serviceId = message[1].GetInt();
     const auto& data = message[2];
-
+    
     auto subIter{ m_subsByServiceId.find(serviceId) };
-    assert(subIter != m_subsByServiceId.end());
+    if (subIter == m_subsByServiceId.end())
+    {
+        LOGS_DEBUG << "RTA Event for unknown serviceId=" << serviceId << " (likely race after unsubscribe/disconnect)";
+        return;
+    }
     auto serviceSub = subIter->second;
+
+    // Copy clientSubscriptions before releasing the lock so that handlers can safely
+    // call RemoveSubscription (which modifies the set) without invalidating our iterator.
+    List<std::shared_ptr<Subscription>> clientSubs{ serviceSub->clientSubscriptions.begin(), serviceSub->clientSubscriptions.end() };
 
     lock.unlock();
 
-    for (auto& clientSub : serviceSub->clientSubscriptions)
+    for (auto& clientSub : clientSubs)
     {
         clientSub->OnEvent(data);
     }

@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: LinearAllocator.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -31,17 +31,16 @@ LinearAllocatorPage::LinearAllocatorPage() noexcept
     , mOffset(0)
     , mSize(0)
     , mRefCount(1)
-{
-}
+{}
 
 size_t LinearAllocatorPage::Suballocate(_In_ size_t size, _In_ size_t alignment)
 {
-    size_t offset = AlignUp(mOffset, alignment);
+    const size_t offset = AlignUp(mOffset, alignment);
     if (offset + size > mSize)
     {
         // Use of suballocate should be limited to pages with free space,
         // so really shouldn't happen.
-        throw std::exception("LinearAllocatorPage::Suballocate");
+        throw std::runtime_error("LinearAllocatorPage::Suballocate");
     }
     mOffset = offset + size;
     return offset;
@@ -49,7 +48,7 @@ size_t LinearAllocatorPage::Suballocate(_In_ size_t size, _In_ size_t alignment)
 
 void LinearAllocatorPage::Release() noexcept
 {
-    assert(mRefCount > 0); 
+    assert(mRefCount > 0);
 
     if (mRefCount.fetch_sub(1) == 1)
     {
@@ -78,7 +77,7 @@ LinearAllocator::LinearAllocator(
     m_debugName = L"LinearAllocator";
 #endif
 
-    size_t preallocatePageCount = ((preallocateBytes + pageSize - 1) / pageSize);
+    const size_t preallocatePageCount = ((preallocateBytes + pageSize - 1) / pageSize);
     for (size_t preallocatePages = 0; preallocateBytes != 0 && preallocatePages < preallocatePageCount; ++preallocatePages)
     {
         if (GetNewPage() == nullptr)
@@ -123,7 +122,7 @@ LinearAllocatorPage* LinearAllocator::FindPageForAlloc(_In_ size_t size, _In_ si
     if (alignment > m_increment)
         throw std::out_of_range("Alignment must be less or equal to the allocator's increment");
     if (size == 0)
-        throw std::exception("Cannot honor zero size allocation request.");
+        throw std::invalid_argument("Cannot honor zero size allocation request.");
 #endif
 
     auto page = GetPageForAlloc(size, alignment);
@@ -195,7 +194,7 @@ void LinearAllocator::FenceCommittedPages(_In_ ID3D12CommandQueue* commandQueue)
 // (immediately before or after Present-time)
 void LinearAllocator::RetirePendingPages() noexcept
 {
-    uint64_t fenceValue = m_fence->GetCompletedValue();
+    const uint64_t fenceValue = m_fence->GetCompletedValue();
 
     // For each page that we know has a fence pending, check it. If the fence has passed,
     // we can mark the page for re-use.
@@ -276,7 +275,7 @@ LinearAllocatorPage* LinearAllocator::FindPageForAlloc(
 {
     for (auto page = list; page != nullptr; page = page->pNextPage)
     {
-        size_t offset = AlignUp(page->mOffset, alignment);
+        const size_t offset = AlignUp(page->mOffset, alignment);
         if (offset + sizeBytes <= m_increment)
             return page;
     }
@@ -285,8 +284,8 @@ LinearAllocatorPage* LinearAllocator::FindPageForAlloc(
 
 LinearAllocatorPage* LinearAllocator::GetNewPage()
 {
-    CD3DX12_HEAP_PROPERTIES uploadHeapProperties(D3D12_HEAP_TYPE_UPLOAD);
-    CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(m_increment);
+    const CD3DX12_HEAP_PROPERTIES uploadHeapProperties(D3D12_HEAP_TYPE_UPLOAD);
+    const CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(m_increment);
 
     // Allocate the upload heap
     ComPtr<ID3D12Resource> spResource;
@@ -453,7 +452,7 @@ void LinearAllocator::ValidateList(LinearAllocatorPage* list)
     {
         if (page->pPrevPage != lastPage)
         {
-            throw std::exception("Broken link to previous");
+            throw std::runtime_error("Broken link to previous");
         }
     }
 }
@@ -470,7 +469,7 @@ void LinearAllocator::ValidatePageLists()
 void LinearAllocator::SetDebugName(const char* name)
 {
     wchar_t wname[MAX_PATH] = {};
-    int result = MultiByteToWideChar(CP_UTF8, 0, name, static_cast<int>(strlen(name)), wname, MAX_PATH);
+    const int result = MultiByteToWideChar(CP_UTF8, 0, name, static_cast<int>(strlen(name)), wname, MAX_PATH);
     if (result > 0)
     {
         SetDebugName(wname);
@@ -496,4 +495,3 @@ void LinearAllocator::SetPageDebugName(LinearAllocatorPage* list) noexcept
     }
 }
 #endif
-

@@ -29,6 +29,11 @@ public:
         _In_ AsyncContext<Result<Vector<XblSocialManagerUser>>> async
     ) const noexcept;
 
+    // The configured HTTP timeout window (XblContextSettingsSetHttpTimeoutWindow) that bounds each HTTP
+    // attempt made by this service. Used to size the followed-users watchdog relative to how long a
+    // healthy call may legitimately take.
+    uint32_t HttpTimeoutWindowInSeconds() const noexcept;
+
 private:
     enum class RelationshipType
     {

@@ -69,8 +69,7 @@ private:
         int64_t AverageTime{ 0 };
         std::chrono::time_point<std::chrono::high_resolution_clock> StartTime{};
     };
-
-    mutable std::mutex m_mutex;
+    mutable DefaultUnnamedMutex m_mutex;
     std::map<std::string, Stats> m_stats;
 };
 

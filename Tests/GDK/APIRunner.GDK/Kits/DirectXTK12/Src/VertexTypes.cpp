@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: VertexTypes.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -86,6 +86,11 @@ const D3D12_INPUT_ELEMENT_DESC VertexPositionNormal::InputElements[] =
 
 static_assert(sizeof(VertexPositionNormal) == 24, "Vertex struct/layout mismatch");
 
+const D3D12_INPUT_LAYOUT_DESC VertexPositionNormal::InputLayout =
+{
+    VertexPositionNormal::InputElements,
+    VertexPositionNormal::InputElementCount
+};
 
 //--------------------------------------------------------------------------------------
 // Vertex struct holding position, color, and texture mapping information.

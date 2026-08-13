@@ -772,7 +772,7 @@ public:
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
         uint32_t subCount{ 0 };
-        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string /*uri*/)
         {
             mockRtaService.CompleteSubscribeHandshake(n, defaultPresenceResponse);
             subCount++;

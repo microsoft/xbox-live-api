@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugSuffix|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugSuffix|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6AA78AA9-78A5-40C0-828F-5933AF847111}</ProjectGuid>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <XsapiLibBuildFromSource>true</XsapiLibBuildFromSource>
+    <LibHttpClientBuildFromSource>true</LibHttpClientBuildFromSource>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='ARM64'">
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Condition="'$(Platform)'!='x64'" Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), xsapi.gdk.bwoi.props))\xsapi.gdk.bwoi.props" />
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(xsapi.gdk.props))" />
+  <Import Project="$(XsapiSourceRoot)\xsapi.staticlib.props" />
+  <ItemGroup>
+    <ClCompile Include="dll\dllmain.cpp" />
+    <ClCompile Include="dll\pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dll\Microsoft.Xbox.Services.GDK.C.Thunks.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dll\pch.h" />
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>%(XboxExtensionsDependencies)Appnotify.lib;crypt32.lib;xgameruntime.lib;WINHTTP.LIB;RUNTIMEOBJECT.LIB;ADVAPI32.LIB;ole32.lib;</AdditionalDependencies>
+      <ModuleDefinitionFile>$(ProjectDir)dll\Microsoft.Xbox.Services.GDK.C.Thunks.def</ModuleDefinitionFile>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/profile /opt:ref /opt:icf /guard:cf /DYNAMICBASE /CETCOMPAT %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">/profile /opt:ref /opt:icf /guard:cf /DYNAMICBASE %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugSuffix|x64'">/profile /opt:ref /opt:icf /guard:cf /DYNAMICBASE /CETCOMPAT %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugSuffix|ARM64'">/profile /opt:ref /opt:icf /guard:cf /DYNAMICBASE %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/profile /opt:ref /opt:icf /guard:cf /DYNAMICBASE /CETCOMPAT %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">/profile /opt:ref /opt:icf /guard:cf /DYNAMICBASE %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/Zi /guard:cf /Qspectre /ZH:SHA_256 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">/Zi /guard:cf /Qspectre /ZH:SHA_256 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugSuffix|x64'">/Zi /guard:cf /Qspectre /ZH:SHA_256 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugSuffix|ARM64'">/Zi /guard:cf /Qspectre /ZH:SHA_256 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/Zi /guard:cf /Qspectre /ZH:SHA_256 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">/Zi /guard:cf /Qspectre /ZH:SHA_256 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ItemGroup>
+    <ResourceCompile Include=".\MicrosoftXboxServicesGDKThunks.rc" />
+  </ItemGroup>
+  <Target Name="StripAutoGeneratedVersionInfo" BeforeTargets="ResourceCompile">
+    <!-- Recent GDK toolchains auto-inject a generated versioninfo.rc. It conflicts with our curated
+         MicrosoftXboxServicesGDKThunks.rc (updated by the pipeline) and causes CVT1100 duplicate
+         resource failures. Drop any auto-generated versioninfo.rc entries before the ResourceCompile
+         target runs so we retain the single curated VERSIONINFO block. -->
+    <ItemGroup>
+      <ResourceCompile Remove="@(ResourceCompile)" Condition="'%(ResourceCompile.Filename)'=='versioninfo' and '%(ResourceCompile.Extension)'=='.rc'" />
+    </ItemGroup>
+  </Target>
+</Project>

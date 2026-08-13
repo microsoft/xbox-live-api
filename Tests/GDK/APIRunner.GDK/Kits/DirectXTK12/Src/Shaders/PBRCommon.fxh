@@ -1,10 +1,9 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248926
 // http://go.microsoft.com/fwlink/?LinkId=248929
 // http://go.microsoft.com/fwlink/?LinkID=615561
-// http://create.msdn.com/en-US/education/catalog/sample/stock_effects
 
 
 struct CommonVSOutputPixelLighting
@@ -70,7 +69,7 @@ float G_Shlick_Smith_Hable(float alpha, float LdotH)
 //
 // alpha:           This is roughness * roughness as in the "Disney" PBR model by Burley et al.
 //
-// specularColor:   The F0 reflectance value - 0.04 for non-metals, or RGB for metals. This follows model 
+// specularColor:   The F0 reflectance value - 0.04 for non-metals, or RGB for metals. This follows model
 //                  used by Unreal Engine 4.
 //
 // NdotV, NdotL, LdotH, NdotH: vector relationships between,
@@ -98,8 +97,8 @@ float3 Diffuse_IBL(in float3 N)
     return IrradianceTexture.Sample(IBLSampler, N);
 }
 
-// Approximate specular image based lighting by sampling radiance map at lower mips 
-// according to roughness, then modulating by Fresnel term. 
+// Approximate specular image based lighting by sampling radiance map at lower mips
+// according to roughness, then modulating by Fresnel term.
 float3 Specular_IBL(in float3 N, in float3 V, in float lodBias)
 {
     float mip = lodBias * NumRadianceMipLevels;
@@ -127,14 +126,14 @@ float3 LightSurface(
     const float NdotV = saturate(dot(N, V));
 
     // Burley roughness bias
-    const float alpha = roughness * roughness;    
+    const float alpha = roughness * roughness;
 
     // Blend base colors
     const float3 c_diff = lerp(albedo, float3(0, 0, 0), metallic)       * ambientOcclusion;
     const float3 c_spec = lerp(kSpecularCoefficient, albedo, metallic)  * ambientOcclusion;
 
     // Output color
-    float3 acc_color = 0;                         
+    float3 acc_color = 0;
 
     // Accumulate light values
     for (int i = 0; i < numLights; i++)
@@ -152,7 +151,7 @@ float3 LightSurface(
 
         // Diffuse & specular factors
         float diffuse_factor = Diffuse_Burley(NdotL, NdotV, LdotH, roughness);
-        float3 specular      = Specular_BRDF(alpha, c_spec, NdotV, NdotL, LdotH, NdotH);
+        float3 specular = Specular_BRDF(alpha, c_spec, NdotV, NdotL, LdotH, NdotH);
 
         // Directional light
         acc_color += NdotL * lightColor[i] * (((c_diff * diffuse_factor) + specular));
@@ -162,7 +161,7 @@ float3 LightSurface(
     float3 diffuse_env = Diffuse_IBL(N);
     acc_color += c_diff * diffuse_env;
 
-    // Add specular radiance 
+    // Add specular radiance
     float3 specular_env = Specular_IBL(N, V, roughness);
     acc_color += c_spec * specular_env;
 

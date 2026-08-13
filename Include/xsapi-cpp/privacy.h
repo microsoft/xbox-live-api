@@ -258,12 +258,49 @@ public:
     /// </remarks>
     inline pplx::task<xbox_live_result<std::vector<string_t>>> get_avoid_or_mute_list(_In_ const string_t& subPathName);
 
+    /// <summary>
+    /// Registers an event handler for notifications when the user's mute list changes.
+    /// </summary>
+    /// <param name="handler">The callback function that receives notifications.</param>
+    /// <returns>A function_context used to remove the handler.</returns>
+    inline function_context add_mute_list_changed_handler(
+        _In_ std::function<void(XblPrivacyMuteListChangeEventArgs)> handler
+    );
+
+    /// <summary>
+    /// Removes a mute list change handler.
+    /// </summary>
+    /// <param name="context">The function_context returned by add_mute_list_changed_handler.</param>
+    inline void remove_mute_list_changed_handler(
+        _In_ function_context context
+    );
+
+    /// <summary>
+    /// Registers an event handler for notifications when the user's block list changes.
+    /// </summary>
+    /// <param name="handler">The callback function that receives notifications.</param>
+    /// <returns>A function_context used to remove the handler.</returns>
+    inline function_context add_block_list_changed_handler(
+        _In_ std::function<void(XblPrivacyBlockListChangeEventArgs)> handler
+    );
+
+    /// <summary>
+    /// Removes a block list change handler.
+    /// </summary>
+    /// <param name="context">The function_context returned by add_block_list_changed_handler.</param>
+    inline void remove_block_list_changed_handler(
+        _In_ function_context context
+    );
+
     inline privacy_service(const privacy_service& other);
     inline privacy_service& operator=(privacy_service other);
     inline ~privacy_service();
 
 private:
     inline privacy_service(_In_ XblContextHandle contextHandle);
+
+    struct MuteListHandlerContext;
+    struct BlockListHandlerContext;
 
     XblContextHandle m_xblContext;
 

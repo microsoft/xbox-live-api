@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248926
@@ -8,12 +8,12 @@
 
 float3 BiasX2(float3 x)
 {
-   return 2.0f * x - 1.0f;
+    return 2.0f * x - 1.0f;
 }
 
 float3 BiasD2(float3 x)
 {
-   return 0.5f * x + 0.5f;
+    return 0.5f * x + 0.5f;
 }
 
 
@@ -47,7 +47,7 @@ float3 TwoChannelNormalX2(float2 normal)
 }
 
 
-// sRGB 
+// sRGB
 // https://en.wikipedia.org/wiki/SRGB
 
 // Apply the (approximate) sRGB curve to linear values
@@ -66,15 +66,6 @@ float3 SRGBToLinearEst(float3 srgb)
 
 // HDR10 Media Profile
 // https://en.wikipedia.org/wiki/High-dynamic-range_video#HDR10
-
-
-// Color rotation matrix to rotate Rec.709 color primaries into Rec.2020
-static const float3x3 from709to2020 =
-{
-    { 0.6274040f, 0.3292820f, 0.0433136f },
-    { 0.0690970f, 0.9195400f, 0.0113612f },
-    { 0.0163916f, 0.0880132f, 0.8955950f }
-};
 
 
 // Apply the ST.2084 curve to normalized linear values and outputs normalized non-linear values
@@ -110,4 +101,23 @@ float3 ToneMapACESFilmic(float3 x)
     float d = 0.59f;
     float e = 0.14f;
     return saturate((x*(a*x+b))/(x*(c*x+d)+e));
+}
+
+
+// Instancing
+struct CommonInstancing
+{
+    float4 Position;
+    float3 Normal;
+};
+
+
+CommonInstancing ComputeCommonInstancing(float4 position, float3 normal, float4x3 itransform)
+{
+    CommonInstancing vout;
+
+    vout.Position = float4(mul(position, itransform), position.w);
+    vout.Normal = mul(normal, (float3x3)itransform);
+
+    return vout;
 }

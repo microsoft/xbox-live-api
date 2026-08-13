@@ -165,7 +165,11 @@ xsapi_internal_string MatchmakingService::ConvertPreserveSessionModeToString(
         xsapi_internal_string ticketId;
         RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "ticketId", ticketId, true));
         memset(&result, 0, sizeof(XblCreateMatchTicketResponse));
-        utils::strcpy(result.matchTicketId, ticketId.size() + 1, ticketId.c_str());
+        if (ticketId.size() >= sizeof(result.matchTicketId))
+        {
+            return WEB_E_INVALID_JSON_STRING;
+        }
+        utils::strcpy(result.matchTicketId, sizeof(result.matchTicketId), ticketId.c_str());
         int waitTime = 0;
         RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonInt(json, "waitTime", waitTime));
         result.estimatedWaitTime = waitTime;

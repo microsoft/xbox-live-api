@@ -303,8 +303,7 @@ private:
     XblFunctionContext m_nextToken{ 1 };
     Map<XblFunctionContext, SessionChangedHandler> m_sessionChangedHandlers;
     Map<XblFunctionContext, ConnectionIdChangedHandler> m_connectionIdChangedHandlers;
-
-    std::mutex m_mutexMultiplayerSubscription;
+    DefaultUnnamedMutex m_mutexMultiplayerSubscription;
 };
 
 class MultiplayerActivityQueryPostRequest
@@ -539,8 +538,7 @@ private:
     // Since MPSA RTA subscription can be used both to get session changed events and to enable
     // automatic session member removal, we allow titles to force enable the RTA subscription
     bool m_forceEnableRtaSubscription{ false };
-
-    std::mutex m_mutexMultiplayerService;
+    DefaultUnnamedMutex m_mutexMultiplayerService;
 };
 
 class RoleTypes

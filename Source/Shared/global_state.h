@@ -101,7 +101,7 @@ public:
     XblApiType ApiType{ XblApiType::XblCApi };
 
 #if TRACK_ASYNC
-    std::mutex asyncBlocksMutex{};
+    DefaultUnnamedMutex asyncBlocksMutex{};
     UnorderedMap<XAsyncBlock*, const char*> asyncBlocks{};
 #endif
 
@@ -111,8 +111,7 @@ private:
     GlobalState& operator=(const GlobalState&) = delete;
 
     static void CALLBACK HCCleanupComplete(XAsyncBlock* async) noexcept;
-
-    mutable std::mutex m_mutex;
+    mutable DefaultUnnamedMutex m_mutex;
     TaskQueue m_taskQueue{ nullptr };
     std::shared_ptr<achievements::manager::AchievementsManager> m_achievementsManager;
     std::shared_ptr<multiplayer::manager::MultiplayerManager> m_multiplayerManager;

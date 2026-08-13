@@ -7,7 +7,7 @@
 // a full-featured DDS file reader, writer, and texture processing pipeline see
 // the 'Texconv' sample and the 'DirectXTex' library.
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -47,11 +47,11 @@ namespace
         case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
         case DXGI_FORMAT_D16_UNORM:
 
-#if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
+        #if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
         case DXGI_FORMAT_D16_UNORM_S8_UINT:
         case DXGI_FORMAT_R16_UNORM_X8_TYPELESS:
         case DXGI_FORMAT_X16_TYPELESS_G8_UINT:
-#endif
+        #endif
             return true;
 
         default:
@@ -72,11 +72,11 @@ namespace
         case DXGI_FORMAT_P010:
         case DXGI_FORMAT_P016:
 
-#if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
+        #if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
         case DXGI_FORMAT_D16_UNORM_S8_UINT:
         case DXGI_FORMAT_R16_UNORM_X8_TYPELESS:
         case DXGI_FORMAT_X16_TYPELESS_G8_UINT:
-#endif
+        #endif
             if (!slicePlane)
             {
                 // Plane 0
@@ -218,7 +218,7 @@ namespace
 
     //--------------------------------------------------------------------------------------
     HRESULT CreateTextureResource(
-        _In_ ID3D12Device* d3dDevice,
+        _In_ ID3D12Device* device,
         D3D12_RESOURCE_DIMENSION resDim,
         size_t width,
         size_t height,
@@ -230,7 +230,7 @@ namespace
         DDS_LOADER_FLAGS loadFlags,
         _Outptr_ ID3D12Resource** texture) noexcept
     {
-        if (!d3dDevice)
+        if (!device)
             return E_POINTER;
 
         HRESULT hr = E_FAIL;
@@ -238,6 +238,10 @@ namespace
         if (loadFlags & DDS_LOADER_FORCE_SRGB)
         {
             format = MakeSRGB(format);
+        }
+        else if (loadFlags & DDS_LOADER_IGNORE_SRGB)
+        {
+            format = MakeLinear(format);
         }
 
         D3D12_RESOURCE_DESC desc = {};
@@ -251,13 +255,13 @@ namespace
         desc.SampleDesc.Quality = 0;
         desc.Dimension = resDim;
 
-        CD3DX12_HEAP_PROPERTIES defaultHeapProperties(D3D12_HEAP_TYPE_DEFAULT);
+        const CD3DX12_HEAP_PROPERTIES defaultHeapProperties(D3D12_HEAP_TYPE_DEFAULT);
 
-        hr = d3dDevice->CreateCommittedResource(
+        hr = device->CreateCommittedResource(
             &defaultHeapProperties,
             D3D12_HEAP_FLAG_NONE,
             &desc,
-            D3D12_RESOURCE_STATE_COPY_DEST,
+            c_initialCopyTargetState,
             nullptr,
             IID_GRAPHICS_PPV_ARGS(texture));
         if (SUCCEEDED(hr))
@@ -272,7 +276,7 @@ namespace
     }
 
     //--------------------------------------------------------------------------------------
-    HRESULT CreateTextureFromDDS(_In_ ID3D12Device* d3dDevice,
+    HRESULT CreateTextureFromDDS(_In_ ID3D12Device* device,
         _In_ const DDS_HEADER* header,
         _In_reads_bytes_(bitSize) const uint8_t* bitData,
         size_t bitSize,
@@ -285,7 +289,7 @@ namespace
     {
         HRESULT hr = S_OK;
 
-        UINT width = header->width;
+        const UINT width = header->width;
         UINT height = header->height;
         UINT depth = header->depth;
 
@@ -295,7 +299,7 @@ namespace
         bool isCubeMap = false;
 
         size_t mipCount = header->mipMapCount;
-        if (0 == mipCount)
+        if ((0 == mipCount) || (loadFlags & DDS_LOADER_IGNORE_MIPS))
         {
             mipCount = 1;
         }
@@ -313,12 +317,52 @@ namespace
 
             switch (d3d10ext->dxgiFormat)
             {
+            case DXGI_FORMAT_NV12:
+            case DXGI_FORMAT_P010:
+            case DXGI_FORMAT_P016:
+            case DXGI_FORMAT_420_OPAQUE:
+                if ((d3d10ext->resourceDimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
+                    || (width % 2) != 0 || (height % 2) != 0)
+                {
+                    DebugTrace("ERROR: Video texture does not meet width/height requirements.\n");
+                    return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+                }
+                break;
+
+            case DXGI_FORMAT_YUY2:
+            case DXGI_FORMAT_Y210:
+            case DXGI_FORMAT_Y216:
+            case DXGI_FORMAT_P208:
+                if ((width % 2) != 0)
+                {
+                    DebugTrace("ERROR: Video texture does not meet width requirements.\n");
+                    return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+                }
+                break;
+
+            case DXGI_FORMAT_NV11:
+                if ((width % 4) != 0)
+                {
+                    DebugTrace("ERROR: Video texture does not meet width requirements.\n");
+                    return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+                }
+                break;
+
             case DXGI_FORMAT_AI44:
             case DXGI_FORMAT_IA44:
             case DXGI_FORMAT_P8:
             case DXGI_FORMAT_A8P8:
-                DebugTrace("ERROR: DDSTextureLoader does not support video textures. Consider using DirectXTex instead.\n");
+                DebugTrace("ERROR: Legacy stream video texture formats are not supported by Direct3D.\n");
                 return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+
+            case DXGI_FORMAT_V208:
+                if ((d3d10ext->resourceDimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D)
+                    || (height % 2) != 0)
+                {
+                    DebugTrace("ERROR: Video texture does not meet height requirements.\n");
+                    return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+                }
+                break;
 
             default:
                 if (BitsPerPixel(d3d10ext->dxgiFormat) == 0)
@@ -473,7 +517,7 @@ namespace
             return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
         }
 
-        UINT numberOfPlanes = D3D12GetFormatPlaneCount(d3dDevice, format);
+        const UINT numberOfPlanes = D3D12GetFormatPlaneCount(device, format);
         if (!numberOfPlanes)
             return E_INVALIDARG;
 
@@ -517,7 +561,7 @@ namespace
                     LoaderHelpers::CountMips(width, height));
             }
 
-            hr = CreateTextureResource(d3dDevice, resDim, twidth, theight, tdepth, reservedMips - skipMip, arraySize,
+            hr = CreateTextureResource(device, resDim, twidth, theight, tdepth, reservedMips - skipMip, arraySize,
                 format, resFlags, loadFlags, texture);
 
             if (FAILED(hr) && !maxsize && (mipCount > 1))
@@ -535,7 +579,7 @@ namespace
                     twidth, theight, tdepth, skipMip, subresources);
                 if (SUCCEEDED(hr))
                 {
-                    hr = CreateTextureResource(d3dDevice, resDim, twidth, theight, tdepth, mipCount - skipMip, arraySize,
+                    hr = CreateTextureResource(device, resDim, twidth, theight, tdepth, mipCount - skipMip, arraySize,
                         format, resFlags, loadFlags, texture);
                 }
             }
@@ -552,27 +596,23 @@ namespace
     //--------------------------------------------------------------------------------------
     void SetDebugTextureInfo(
         _In_z_ const wchar_t* fileName,
-        _In_ ID3D12Resource** texture) noexcept
+        _In_ ID3D12Resource* texture) noexcept
     {
-#if !defined(NO_D3D12_DEBUG_NAME) && ( defined(_DEBUG) || defined(PROFILE) )
-        if (texture && *texture)
+    #if !defined(NO_D3D12_DEBUG_NAME) && ( defined(_DEBUG) || defined(PROFILE) )
+        const wchar_t* pstrName = wcsrchr(fileName, '\\');
+        if (!pstrName)
         {
-            const wchar_t* pstrName = wcsrchr(fileName, '\\');
-            if (!pstrName)
-            {
-                pstrName = fileName;
-            }
-            else
-            {
-                pstrName++;
-            }
-
-            (*texture)->SetName(pstrName);
+            pstrName = fileName;
         }
-#else
+        else
+        {
+            pstrName++;
+        }
+        texture->SetName(pstrName);
+    #else
         UNREFERENCED_PARAMETER(fileName);
         UNREFERENCED_PARAMETER(texture);
-#endif
+    #endif
     }
 
     //--------------------------------------------------------------------------------------
@@ -593,7 +633,7 @@ namespace
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
 HRESULT DirectX::LoadDDSTextureFromMemory(
-    ID3D12Device* d3dDevice,
+    ID3D12Device* device,
     const uint8_t* ddsData,
     size_t ddsDataSize,
     ID3D12Resource** texture,
@@ -603,7 +643,7 @@ HRESULT DirectX::LoadDDSTextureFromMemory(
     bool* isCubeMap)
 {
     return LoadDDSTextureFromMemoryEx(
-        d3dDevice,
+        device,
         ddsData,
         ddsDataSize,
         maxsize,
@@ -618,7 +658,7 @@ HRESULT DirectX::LoadDDSTextureFromMemory(
 
 _Use_decl_annotations_
 HRESULT DirectX::LoadDDSTextureFromMemoryEx(
-    ID3D12Device* d3dDevice,
+    ID3D12Device* device,
     const uint8_t* ddsData,
     size_t ddsDataSize,
     size_t maxsize,
@@ -642,7 +682,7 @@ HRESULT DirectX::LoadDDSTextureFromMemoryEx(
         *isCubeMap = false;
     }
 
-    if (!d3dDevice || !ddsData || !texture)
+    if (!device || !ddsData || !texture)
     {
         return E_INVALIDARG;
     }
@@ -663,16 +703,13 @@ HRESULT DirectX::LoadDDSTextureFromMemoryEx(
         return hr;
     }
 
-    hr = CreateTextureFromDDS(d3dDevice,
+    hr = CreateTextureFromDDS(device,
         header, bitData, bitSize, maxsize,
         resFlags, loadFlags,
         texture, subresources, isCubeMap);
     if (SUCCEEDED(hr))
     {
-        if (texture && *texture)
-        {
-            SetDebugObjectName(*texture, L"DDSTextureLoader");
-        }
+        SetDebugObjectName(*texture, L"DDSTextureLoader");
 
         if (alphaMode)
             *alphaMode = GetAlphaMode(header);
@@ -685,7 +722,7 @@ HRESULT DirectX::LoadDDSTextureFromMemoryEx(
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
 HRESULT DirectX::LoadDDSTextureFromFile(
-    ID3D12Device* d3dDevice,
+    ID3D12Device* device,
     const wchar_t* fileName,
     ID3D12Resource** texture,
     std::unique_ptr<uint8_t[]>& ddsData,
@@ -695,7 +732,7 @@ HRESULT DirectX::LoadDDSTextureFromFile(
     bool* isCubeMap)
 {
     return LoadDDSTextureFromFileEx(
-        d3dDevice,
+        device,
         fileName,
         maxsize,
         D3D12_RESOURCE_FLAG_NONE,
@@ -709,7 +746,7 @@ HRESULT DirectX::LoadDDSTextureFromFile(
 
 _Use_decl_annotations_
 HRESULT DirectX::LoadDDSTextureFromFileEx(
-    ID3D12Device* d3dDevice,
+    ID3D12Device* device,
     const wchar_t* fileName,
     size_t maxsize,
     D3D12_RESOURCE_FLAGS resFlags,
@@ -733,7 +770,7 @@ HRESULT DirectX::LoadDDSTextureFromFileEx(
         *isCubeMap = false;
     }
 
-    if (!d3dDevice || !fileName || !texture)
+    if (!device || !fileName || !texture)
     {
         return E_INVALIDARG;
     }
@@ -753,14 +790,14 @@ HRESULT DirectX::LoadDDSTextureFromFileEx(
         return hr;
     }
 
-    hr = CreateTextureFromDDS(d3dDevice,
+    hr = CreateTextureFromDDS(device,
         header, bitData, bitSize, maxsize,
         resFlags, loadFlags,
         texture, subresources, isCubeMap);
 
     if (SUCCEEDED(hr))
     {
-        SetDebugTextureInfo(fileName, texture);
+        SetDebugTextureInfo(fileName, *texture);
 
         if (alphaMode)
             *alphaMode = GetAlphaMode(header);
@@ -772,7 +809,7 @@ HRESULT DirectX::LoadDDSTextureFromFileEx(
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
 HRESULT DirectX::CreateDDSTextureFromMemory(
-    ID3D12Device* d3dDevice,
+    ID3D12Device* device,
     ResourceUploadBatch& resourceUpload,
     const uint8_t* ddsData,
     size_t ddsDataSize,
@@ -783,7 +820,7 @@ HRESULT DirectX::CreateDDSTextureFromMemory(
     bool* isCubeMap)
 {
     return CreateDDSTextureFromMemoryEx(
-        d3dDevice,
+        device,
         resourceUpload,
         ddsData,
         ddsDataSize,
@@ -798,7 +835,7 @@ HRESULT DirectX::CreateDDSTextureFromMemory(
 
 _Use_decl_annotations_
 HRESULT DirectX::CreateDDSTextureFromMemoryEx(
-    ID3D12Device* d3dDevice,
+    ID3D12Device* device,
     ResourceUploadBatch& resourceUpload,
     const uint8_t* ddsData,
     size_t ddsDataSize,
@@ -822,7 +859,7 @@ HRESULT DirectX::CreateDDSTextureFromMemoryEx(
         *isCubeMap = false;
     }
 
-    if (!d3dDevice || !ddsData || !texture)
+    if (!device || !ddsData || !texture)
     {
         return E_INVALIDARG;
     }
@@ -845,7 +882,7 @@ HRESULT DirectX::CreateDDSTextureFromMemoryEx(
 
     if (loadFlags & DDS_LOADER_MIP_AUTOGEN)
     {
-        DXGI_FORMAT fmt = GetPixelFormat(header);
+        const DXGI_FORMAT fmt = GetPixelFormat(header);
         if (!resourceUpload.IsSupportedForGenerateMips(fmt))
         {
             DebugTrace("WARNING: Autogen of mips ignored (device doesn't support this format (%d) or trying to use a copy queue)\n", static_cast<int>(fmt));
@@ -854,17 +891,14 @@ HRESULT DirectX::CreateDDSTextureFromMemoryEx(
     }
 
     std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-    hr = CreateTextureFromDDS(d3dDevice,
+    hr = CreateTextureFromDDS(device,
         header, bitData, bitSize, maxsize,
         resFlags, loadFlags,
         texture, subresources, isCubeMap);
 
     if (SUCCEEDED(hr))
     {
-        if (texture && *texture)
-        {
-            SetDebugObjectName(*texture, L"DDSTextureLoader");
-        }
+        SetDebugObjectName(*texture, L"DDSTextureLoader");
 
         if (alphaMode)
             *alphaMode = GetAlphaMode(header);
@@ -881,7 +915,14 @@ HRESULT DirectX::CreateDDSTextureFromMemoryEx(
             D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
         // If it's missing mips, let's generate them
-        if ((loadFlags & DDS_LOADER_MIP_AUTOGEN) && subresources.size() != (*texture)->GetDesc().MipLevels)
+    #if defined(_MSC_VER) || !defined(_WIN32)
+        const size_t mipLevels = (*texture)->GetDesc().MipLevels;
+    #else
+        D3D12_RESOURCE_DESC tmpDesc;
+        const size_t mipLevels = (*texture)->GetDesc(&tmpDesc)->MipLevels;
+    #endif
+
+        if ((loadFlags & DDS_LOADER_MIP_AUTOGEN) && subresources.size() != mipLevels)
         {
             resourceUpload.GenerateMips(*texture);
         }
@@ -894,7 +935,7 @@ HRESULT DirectX::CreateDDSTextureFromMemoryEx(
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
 HRESULT DirectX::CreateDDSTextureFromFile(
-    ID3D12Device* d3dDevice,
+    ID3D12Device* device,
     ResourceUploadBatch& resourceUpload,
     const wchar_t* fileName,
     ID3D12Resource** texture,
@@ -904,7 +945,7 @@ HRESULT DirectX::CreateDDSTextureFromFile(
     bool* isCubeMap)
 {
     return CreateDDSTextureFromFileEx(
-        d3dDevice,
+        device,
         resourceUpload,
         fileName,
         maxsize,
@@ -917,7 +958,7 @@ HRESULT DirectX::CreateDDSTextureFromFile(
 
 _Use_decl_annotations_
 HRESULT DirectX::CreateDDSTextureFromFileEx(
-    ID3D12Device* d3dDevice,
+    ID3D12Device* device,
     ResourceUploadBatch& resourceUpload,
     const wchar_t* fileName,
     size_t maxsize,
@@ -940,7 +981,7 @@ HRESULT DirectX::CreateDDSTextureFromFileEx(
         *isCubeMap = false;
     }
 
-    if (!d3dDevice || !fileName || !texture)
+    if (!device || !fileName || !texture)
     {
         return E_INVALIDARG;
     }
@@ -963,7 +1004,7 @@ HRESULT DirectX::CreateDDSTextureFromFileEx(
 
     if (loadFlags & DDS_LOADER_MIP_AUTOGEN)
     {
-        DXGI_FORMAT fmt = GetPixelFormat(header);
+        const DXGI_FORMAT fmt = GetPixelFormat(header);
         if (!resourceUpload.IsSupportedForGenerateMips(fmt))
         {
             DebugTrace("WARNING: Autogen of mips ignored (device doesn't support this format (%d) or trying to use a copy queue)\n", static_cast<int>(fmt));
@@ -972,14 +1013,14 @@ HRESULT DirectX::CreateDDSTextureFromFileEx(
     }
 
     std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-    hr = CreateTextureFromDDS(d3dDevice,
+    hr = CreateTextureFromDDS(device,
         header, bitData, bitSize, maxsize,
         resFlags, loadFlags,
         texture, subresources, isCubeMap);
 
     if (SUCCEEDED(hr))
     {
-        SetDebugTextureInfo(fileName, texture);
+        SetDebugTextureInfo(fileName, *texture);
 
         if (alphaMode)
             *alphaMode = GetAlphaMode(header);
@@ -996,7 +1037,14 @@ HRESULT DirectX::CreateDDSTextureFromFileEx(
             D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
         // If it's missing mips, let's generate them
-        if ((loadFlags & DDS_LOADER_MIP_AUTOGEN) && subresources.size() != (*texture)->GetDesc().MipLevels)
+    #if defined(_MSC_VER) || !defined(_WIN32)
+        const size_t mipLevels = (*texture)->GetDesc().MipLevels;
+    #else
+        D3D12_RESOURCE_DESC tmpDesc;
+        const size_t mipLevels = (*texture)->GetDesc(&tmpDesc)->MipLevels;
+    #endif
+
+        if ((loadFlags & DDS_LOADER_MIP_AUTOGEN) && subresources.size() != mipLevels)
         {
             resourceUpload.GenerateMips(*texture);
         }
@@ -1004,3 +1052,77 @@ HRESULT DirectX::CreateDDSTextureFromFileEx(
 
     return hr;
 }
+
+
+//--------------------------------------------------------------------------------------
+// Adapters for /Zc:wchar_t- clients
+
+#if defined(_MSC_VER) && !defined(_NATIVE_WCHAR_T_DEFINED)
+
+namespace DirectX
+{
+    HRESULT __cdecl LoadDDSTextureFromFile(
+        _In_ ID3D12Device* device,
+        _In_z_ const __wchar_t* szFileName,
+        _Outptr_ ID3D12Resource** texture,
+        std::unique_ptr<uint8_t[]>& ddsData,
+        std::vector<D3D12_SUBRESOURCE_DATA>& subresources,
+        size_t maxsize,
+        _Out_opt_ DDS_ALPHA_MODE* alphaMode,
+        _Out_opt_ bool* isCubeMap)
+    {
+        return LoadDDSTextureFromFile(device,
+            reinterpret_cast<const unsigned short*>(szFileName),
+            texture, ddsData, subresources, maxsize, alphaMode, isCubeMap);
+    }
+
+    HRESULT __cdecl CreateDDSTextureFromFile(
+        _In_ ID3D12Device* device,
+        ResourceUploadBatch& resourceUpload,
+        _In_z_ const __wchar_t* szFileName,
+        _Outptr_ ID3D12Resource** texture,
+        bool generateMipsIfMissing,
+        size_t maxsize,
+        _Out_opt_ DDS_ALPHA_MODE* alphaMode,
+        _Out_opt_ bool* isCubeMap)
+    {
+        return CreateDDSTextureFromFile(device, resourceUpload,
+            reinterpret_cast<const unsigned short*>(szFileName),
+            texture, generateMipsIfMissing, maxsize, alphaMode, isCubeMap);
+    }
+
+    HRESULT __cdecl LoadDDSTextureFromFileEx(
+        _In_ ID3D12Device* device,
+        _In_z_ const __wchar_t* szFileName,
+        size_t maxsize,
+        D3D12_RESOURCE_FLAGS resFlags,
+        DDS_LOADER_FLAGS loadFlags,
+        _Outptr_ ID3D12Resource** texture,
+        std::unique_ptr<uint8_t[]>& ddsData,
+        std::vector<D3D12_SUBRESOURCE_DATA>& subresources,
+        _Out_opt_ DDS_ALPHA_MODE* alphaMode,
+        _Out_opt_ bool* isCubeMap)
+    {
+        return LoadDDSTextureFromFileEx(device,
+            reinterpret_cast<const unsigned short*>(szFileName),
+            maxsize, resFlags, loadFlags, texture, ddsData, subresources, alphaMode, isCubeMap);
+    }
+
+    HRESULT __cdecl CreateDDSTextureFromFileEx(
+        _In_ ID3D12Device* device,
+        ResourceUploadBatch& resourceUpload,
+        _In_z_ const __wchar_t* szFileName,
+        size_t maxsize,
+        D3D12_RESOURCE_FLAGS resFlags,
+        DDS_LOADER_FLAGS loadFlags,
+        _Outptr_ ID3D12Resource** texture,
+        _Out_opt_ DDS_ALPHA_MODE* alphaMode,
+        _Out_opt_ bool* isCubeMap)
+    {
+        return CreateDDSTextureFromFileEx(device, resourceUpload,
+            reinterpret_cast<const unsigned short*>(szFileName),
+            maxsize, resFlags, loadFlags, texture, alphaMode, isCubeMap);
+    }
+}
+
+#endif // !_NATIVE_WCHAR_T_DEFINED

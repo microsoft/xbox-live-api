@@ -50,7 +50,9 @@
 #define CPPREST_NOEXCEPT noexcept
 
 #include <assert.h>
+#ifndef _ASSERTE
 #define _ASSERTE(x) assert(x)
+#endif
 
 // No SAL on non Windows platforms
 #include "cpprest/details/nosal.h"

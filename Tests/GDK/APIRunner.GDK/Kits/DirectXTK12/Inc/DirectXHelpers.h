@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: DirectXHelpers.h
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -13,40 +13,66 @@
 #include <d3d12_xs.h>
 #elif (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
 #include <d3d12_x.h>
+#elif defined(USING_DIRECTX_HEADERS)
+#include <directx/d3d12.h>
+#include <dxguids/dxguids.h>
 #else
 #include <d3d12.h>
 #endif
 
-#include <DirectXMath.h>
-
+#include <cassert>
+#include <cstddef>
 #include <initializer_list>
 #include <utility>
 #include <vector>
 
-#include <assert.h>
-
 #include <wrl/client.h>
 
-#ifndef _GAMING_XBOX
+#include <DirectXMath.h>
+
+#if !defined(_GAMING_XBOX) && defined(_MSC_VER)
 #pragma comment(lib,"dxguid.lib")
 #endif
 
-#ifndef IID_GRAPHICS_PPV_ARGS
-#define IID_GRAPHICS_PPV_ARGS(x) IID_PPV_ARGS(x)
+#ifndef DIRECTX_TOOLKIT_API
+#ifdef DIRECTX_TOOLKIT_EXPORT
+#ifdef __GNUC__
+#define DIRECTX_TOOLKIT_API __attribute__ ((dllexport))
+#else
+#define DIRECTX_TOOLKIT_API __declspec(dllexport)
 #endif
+#elif defined(DIRECTX_TOOLKIT_IMPORT)
+#ifdef __GNUC__
+#define DIRECTX_TOOLKIT_API __attribute__ ((dllimport))
+#else
+#define DIRECTX_TOOLKIT_API __declspec(dllimport)
+#endif
+#else
+#define DIRECTX_TOOLKIT_API
+#endif
+#endif
+
+#if defined(DIRECTX_TOOLKIT_IMPORT) && defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
+
 
 //
 // The d3dx12.h header includes the following helper C++ classes and functions
 //  CD3DX12_RECT
+//  CD3DX12_VIEWPORT
 //  CD3DX12_BOX
-//  CD3DX12_DEPTH_STENCIL_DESC
+//  CD3DX12_DEPTH_STENCIL_DESC / CD3DX12_DEPTH_STENCIL_DESC1 / CD3DX12_DEPTH_STENCIL_DESC2
 //  CD3DX12_BLEND_DESC
-//  CD3DX12_RASTERIZER_DESC
+//  CD3DX12_RASTERIZER_DESC / CD3DX12_RASTERIZER_DESC1
 //  CD3DX12_RESOURCE_ALLOCATION_INFO
 //  CD3DX12_HEAP_PROPERTIES
 //  CD3DX12_HEAP_DESC
 //  CD3DX12_CLEAR_VALUE
 //  CD3DX12_RANGE
+//  CD3DX12_RANGE_UINT64
+//  CD3DX12_SUBRESOURCE_RANGE_UINT64
 //  CD3DX12_SHADER_BYTECODE
 //  CD3DX12_TILED_RESOURCE_COORDINATE
 //  CD3DX12_TILE_REGION_SIZE
@@ -56,16 +82,23 @@
 //  CD3DX12_PACKED_MIP_INFO
 //  CD3DX12_SUBRESOURCE_FOOTPRINT
 //  CD3DX12_TEXTURE_COPY_LOCATION
-//  CD3DX12_DESCRIPTOR_RANGE
-//  CD3DX12_ROOT_DESCRIPTOR_TABLE
+//  CD3DX12_DESCRIPTOR_RANGE / CD3DX12_DESCRIPTOR_RANGE1
+//  CD3DX12_ROOT_DESCRIPTOR_TABLE / CD3DX12_ROOT_DESCRIPTOR_TABLE1
 //  CD3DX12_ROOT_CONSTANTS
-//  CD3DX12_ROOT_DESCRIPTOR
-//  CD3DX12_ROOT_PARAMETER
+//  CD3DX12_ROOT_DESCRIPTOR / CD3DX12_ROOT_DESCRIPTOR1
+//  CD3DX12_ROOT_PARAMETER / CD3DX12_ROOT_PARAMETER1
 //  CD3DX12_STATIC_SAMPLER_DESC
 //  CD3DX12_ROOT_SIGNATURE_DESC
+//  CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC
 //  CD3DX12_CPU_DESCRIPTOR_HANDLE
 //  CD3DX12_GPU_DESCRIPTOR_HANDLE
-//  CD3DX12_RESOURCE_DESC
+//  CD3DX12_RESOURCE_DESC / CD3DX12_RESOURCE_DESC1
+//  CD3DX12_VIEW_INSTANCING_DESC
+//  CD3DX12_RT_FORMAT_ARRAY
+//  CD3DX12_MESH_SHADER_PIPELINE_STATE_DESC
+//  CD3DX12_PIPELINE_STATE_STREAM - CD3DX12_PIPELINE_STATE_STREAM4
+//  CD3DX12_PIPELINE_MESH_STATE_STREAM
+//  CD3DX12_PIPELINE_STATE_STREAM_PARSE_HELPER - CD3DX12_PIPELINE_STATE_STREAM4_PARSE_HELPER
 //  D3D12CalcSubresource
 //  D3D12DecomposeSubresource
 //  D3D12GetFormatPlaneCount
@@ -74,25 +107,99 @@
 //  UpdateSubresources
 //  D3D12IsLayoutOpaque
 //  CommandListCast
-// 
+//  D3DX12SerializeVersionedRootSignature
+//  D3DX12GetBaseSubobjectType
+//  D3DX12ParsePipelineStream
+//
+//  CD3DX12_STATE_OBJECT_DESC
+//  CD3DX12_DXIL_LIBRARY_SUBOBJECT
+//  CD3DX12_EXISTING_COLLECTION_SUBOBJECT
+//  CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT
+//  CD3DX12_DXIL_SUBOBJECT_TO_EXPORTS_ASSOCIATION
+//  CD3DX12_HIT_GROUP_SUBOBJECT
+//  CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT
+//  CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT // CD3DX12_RAYTRACING_PIPELINE_CONFIG1_SUBOBJECT
+//  CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT
+//  CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT
+//  CD3DX12_STATE_OBJECT_CONFIG_SUBOBJECT
+//  CD3DX12_NODE_MASK_SUBOBJECT
+//
+//  CD3DX12_BARRIER_SUBRESOURCE_RANGE
+//  CD3DX12_GLOBAL_BARRIER
+//  CD3DX12_BUFFER_BARRIER
+//  CD3DX12_TEXTURE_BARRIER
+//  CD3DX12_BARRIER_GROUP
+//
+//  CD3DX12FeatureSupport
+//
 
+#ifndef IID_GRAPHICS_PPV_ARGS
+#define IID_GRAPHICS_PPV_ARGS(x) IID_PPV_ARGS(x)
+#endif
 
 namespace DirectX
 {
+#if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
+    constexpr D3D12_RESOURCE_STATES c_initialCopyTargetState = D3D12_RESOURCE_STATE_COPY_DEST;
+    constexpr D3D12_RESOURCE_STATES c_initialReadTargetState = D3D12_RESOURCE_STATE_GENERIC_READ;
+    constexpr D3D12_RESOURCE_STATES c_initialUAVTargetState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+#else
+    constexpr D3D12_RESOURCE_STATES c_initialCopyTargetState = D3D12_RESOURCE_STATE_COMMON;
+    constexpr D3D12_RESOURCE_STATES c_initialReadTargetState = D3D12_RESOURCE_STATE_COMMON;
+    constexpr D3D12_RESOURCE_STATES c_initialUAVTargetState = D3D12_RESOURCE_STATE_COMMON;
+#endif
+
     constexpr D3D12_CPU_DESCRIPTOR_HANDLE D3D12_CPU_DESCRIPTOR_HANDLE_ZERO = {};
 
     // Creates a shader resource view from an arbitrary resource
-    void __cdecl CreateShaderResourceView(
-        _In_ ID3D12Device* device,
-        _In_ ID3D12Resource* tex,
-        D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor,
-        bool isCubeMap = false);
+    DIRECTX_TOOLKIT_API
+        void __cdecl CreateShaderResourceView(
+            _In_ ID3D12Device* device,
+            _In_ ID3D12Resource* tex,
+            D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor,
+            bool isCubeMap = false);
 
-    // Shorthand for creating a root signature
-    inline HRESULT CreateRootSignature(
-        _In_ ID3D12Device* device,
-        _In_ const D3D12_ROOT_SIGNATURE_DESC* rootSignatureDesc,
-        _Out_ ID3D12RootSignature** rootSignature) noexcept
+        // Creates an unordered access view from an arbitrary resource
+    DIRECTX_TOOLKIT_API
+        void __cdecl CreateUnorderedAccessView(
+            _In_ ID3D12Device* device,
+            _In_ ID3D12Resource* tex,
+            D3D12_CPU_DESCRIPTOR_HANDLE uavDescriptor,
+            uint32_t mipLevel = 0);
+
+        // Creates an render target view from an arbitrary resource
+    DIRECTX_TOOLKIT_API
+        void __cdecl CreateRenderTargetView(
+            _In_ ID3D12Device* device,
+            _In_ ID3D12Resource* tex,
+            D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptor,
+            uint32_t mipLevel = 0);
+
+        // Creates a shader resource view from a buffer resource
+    DIRECTX_TOOLKIT_API
+        void __cdecl CreateBufferShaderResourceView(
+            _In_ ID3D12Device* device,
+            _In_ ID3D12Resource* buffer,
+            D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor,
+            uint32_t stride = 0);
+
+        // Creates a unordered access view from a buffer resource
+    DIRECTX_TOOLKIT_API
+        void __cdecl CreateBufferUnorderedAccessView(
+            _In_ ID3D12Device* device,
+            _In_ ID3D12Resource* buffer,
+            D3D12_CPU_DESCRIPTOR_HANDLE uavDescriptor,
+            uint32_t stride,
+            D3D12_BUFFER_UAV_FLAGS flag = D3D12_BUFFER_UAV_FLAG_NONE,
+            uint32_t counterOffset = 0,
+            _In_opt_ ID3D12Resource* counterResource = nullptr);
+
+        // Shorthand for creating a root signature
+    DIRECTX_TOOLKIT_API
+        inline HRESULT CreateRootSignature(
+            _In_ ID3D12Device* device,
+            _In_ const D3D12_ROOT_SIGNATURE_DESC* rootSignatureDesc,
+            _Out_ ID3D12RootSignature** rootSignature) noexcept
     {
         Microsoft::WRL::ComPtr<ID3DBlob> pSignature;
         Microsoft::WRL::ComPtr<ID3DBlob> pError;
@@ -101,15 +208,21 @@ namespace DirectX
         {
             hr = device->CreateRootSignature(0, pSignature->GetBufferPointer(), pSignature->GetBufferSize(),
                 IID_GRAPHICS_PPV_ARGS(rootSignature)
-                );
+            );
         }
         return hr;
     }
 
     // Helper for obtaining texture size
-    inline XMUINT2 GetTextureSize(_In_ ID3D12Resource* tex) noexcept
+    DIRECTX_TOOLKIT_API
+        inline XMUINT2 GetTextureSize(_In_ ID3D12Resource* tex) noexcept
     {
+    #if defined(_MSC_VER) || !defined(_WIN32)
         const auto desc = tex->GetDesc();
+    #else
+        D3D12_RESOURCE_DESC tmpDesc;
+        const auto& desc = *tex->GetDesc(&tmpDesc);
+    #endif
         return XMUINT2(static_cast<uint32_t>(desc.Width), static_cast<uint32_t>(desc.Height));
     }
 
@@ -134,46 +247,47 @@ namespace DirectX
 #endif
 
     // Helper sets a D3D resource name string (used by PIX and debug layer leak reporting).
+#if !defined(NO_D3D12_DEBUG_NAME) && (defined(_DEBUG) || defined(PROFILE))
     template<UINT TNameLength>
     inline void SetDebugObjectName(_In_ ID3D12DeviceChild* resource, _In_z_ const char(&name)[TNameLength]) noexcept
     {
-    #if !defined(NO_D3D12_DEBUG_NAME) && (defined(_DEBUG) || defined(PROFILE))
         wchar_t wname[MAX_PATH];
         int result = MultiByteToWideChar(CP_UTF8, 0, name, TNameLength, wname, MAX_PATH);
         if (result > 0)
         {
             resource->SetName(wname);
         }
-    #else
-        UNREFERENCED_PARAMETER(resource);
-        UNREFERENCED_PARAMETER(name);
-    #endif
     }
 
     template<UINT TNameLength>
     inline void SetDebugObjectName(_In_ ID3D12DeviceChild* resource, _In_z_ const wchar_t(&name)[TNameLength]) noexcept
     {
-    #if !defined(NO_D3D12_DEBUG_NAME) && (defined(_DEBUG) || defined(PROFILE))
         resource->SetName(name);
-    #else
-        UNREFERENCED_PARAMETER(resource);
-        UNREFERENCED_PARAMETER(name);
-    #endif
     }
+#else
+    template<UINT TNameLength>
+    inline void SetDebugObjectName(_In_ ID3D12DeviceChild*, _In_z_ const char(&)[TNameLength]) noexcept
+    {}
 
-    // Helper for resource barrier.
-    inline void TransitionResource(
-        _In_ ID3D12GraphicsCommandList* commandList,
-        _In_ ID3D12Resource* resource,
-        D3D12_RESOURCE_STATES stateBefore,
-        D3D12_RESOURCE_STATES stateAfter) noexcept
+    template<UINT TNameLength>
+    inline void SetDebugObjectName(_In_ ID3D12DeviceChild*, _In_z_ const wchar_t(&)[TNameLength]) noexcept
+    {}
+#endif
+
+// Helper for resource barrier.
+    DIRECTX_TOOLKIT_API
+        inline void TransitionResource(
+            _In_ ID3D12GraphicsCommandList* commandList,
+            _In_ ID3D12Resource* resource,
+            D3D12_RESOURCE_STATES stateBefore,
+            D3D12_RESOURCE_STATES stateAfter) noexcept
     {
         assert(commandList != nullptr);
         assert(resource != nullptr);
 
         if (stateBefore == stateAfter)
             return;
-        
+
         D3D12_RESOURCE_BARRIER desc = {};
         desc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         desc.Transition.pResource = resource;
@@ -185,7 +299,7 @@ namespace DirectX
     }
 
     // Helper which applies one or more resources barriers and then reverses them on destruction.
-    class ScopedBarrier
+    class DIRECTX_TOOLKIT_API ScopedBarrier
     {
     public:
         ScopedBarrier(
@@ -195,6 +309,32 @@ namespace DirectX
             mBarriers(barriers)
         {
             assert(mBarriers.size() <= UINT32_MAX);
+
+            // Set barriers
+            mCommandList->ResourceBarrier(static_cast<UINT>(mBarriers.size()), mBarriers.data());
+        }
+
+        ScopedBarrier(
+            _In_ ID3D12GraphicsCommandList* commandList,
+            _In_reads_(count) const D3D12_RESOURCE_BARRIER *barriers,
+            size_t count) noexcept(false)
+            : mCommandList(commandList),
+            mBarriers(barriers, barriers + count)
+        {
+            assert(count <= UINT32_MAX);
+
+            // Set barriers
+            mCommandList->ResourceBarrier(static_cast<UINT>(mBarriers.size()), mBarriers.data());
+        }
+
+        template<size_t TBarrierLength>
+        ScopedBarrier(
+            _In_ ID3D12GraphicsCommandList* commandList,
+            const D3D12_RESOURCE_BARRIER(&barriers)[TBarrierLength]) noexcept(false)
+            : mCommandList(commandList),
+            mBarriers(barriers, barriers + TBarrierLength)
+        {
+            assert(TBarrierLength <= UINT32_MAX);
 
             // Set barriers
             mCommandList->ResourceBarrier(static_cast<UINT>(mBarriers.size()), mBarriers.data());
@@ -223,32 +363,39 @@ namespace DirectX
         std::vector<D3D12_RESOURCE_BARRIER> mBarriers;
     };
 
-    // Helper to check for power-of-2
-    template<typename T>
-    constexpr bool IsPowerOf2(T x) noexcept { return ((x != 0) && !(x & (x - 1))); }
-
-    // Helpers for aligning values by a power of 2
-    template<typename T>
-    inline T AlignDown(T size, size_t alignment) noexcept
+    inline namespace DX12
     {
-        if (alignment > 0)
-        {
-            assert(((alignment - 1) & alignment) == 0);
-            auto mask = static_cast<T>(alignment - 1);
-            return size & ~mask;
-        }
-        return size;
-    }
+        // Helper to check for power-of-2
+        template<typename T>
+        constexpr bool IsPowerOf2(T x) noexcept { return ((x != 0) && !(x & (x - 1))); }
 
-    template<typename T>
-    inline T AlignUp(T size, size_t alignment) noexcept
-    {
-        if (alignment > 0)
+        // Helpers for aligning values by a power of 2
+        template<typename T>
+        inline T AlignDown(T size, size_t alignment) noexcept
         {
-            assert(((alignment - 1) & alignment) == 0);
-            auto mask = static_cast<T>(alignment - 1);
-            return (size + mask) & ~mask;
+            if (alignment > 0)
+            {
+                assert(((alignment - 1) & alignment) == 0);
+                auto mask = static_cast<T>(alignment - 1);
+                return size & ~mask;
+            }
+            return size;
         }
-        return size;
+
+        template<typename T>
+        inline T AlignUp(T size, size_t alignment) noexcept
+        {
+            if (alignment > 0)
+            {
+                assert(((alignment - 1) & alignment) == 0);
+                auto mask = static_cast<T>(alignment - 1);
+                return (size + mask) & ~mask;
+            }
+            return size;
+        }
     }
 }
+
+#if defined(DIRECTX_TOOLKIT_IMPORT) && defined(_MSC_VER)
+#pragma warning(pop)
+#endif

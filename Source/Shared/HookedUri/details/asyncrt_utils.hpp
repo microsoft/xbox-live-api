@@ -976,8 +976,7 @@ datetime datetime::from_string(const utility::string_t& dateString, date_format 
     // [1] http://linux.die.net/man/3/timegm
     // [2] http://www.gnu.org/software/libc/manual/html_node/Broken_002ddown-Time.html
     time_t time;
-
-    static std::mutex env_var_lock;
+    static DefaultUnnamedMutex env_var_lock;
     {
         std::lock_guard<std::mutex> lock(env_var_lock);
         std::string prev_env;

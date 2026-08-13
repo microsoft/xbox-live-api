@@ -301,7 +301,8 @@ typedef struct XblSocialRelationshipResult* XblSocialRelationshipResultHandle;
 /// <param name="socialRelationshipFilter">Controls how the list is filtered.</param>
 /// <param name="startIndex">Controls the starting index of the results list.</param>
 /// <param name="maxItems">The maximum number of items that the results list can contain.  
-/// Pass 0 to attempt to retrieve all items.</param>
+/// Pass 0 to attempt to retrieve all items.  
+/// The service may provide a default value if maxItems is 0, and may return fewer than maxItems, even if the last page of results has not yet been returned</param>
 /// <param name="async">Caller allocated <see cref="XAsyncBlock"/>.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
@@ -386,7 +387,9 @@ STDAPI XblSocialRelationshipResultGetTotalCount(
 /// </summary>
 /// <param name="xboxLiveContext">An xbox live context handle created with XblContextCreateHandle.</param>
 /// <param name="resultHandle">Social relationship result handle from a previous call to XblSocialGetSocialRelationshipsAsync.</param>
-/// <param name="maxItems">Controls the number of XblSocialRelationship objects to get. 0 will return as many as possible.</param>
+/// <param name="maxItems">Controls the number of XblSocialRelationship objects to get.  
+/// Pass 0 to attempt to retrieve all items.  
+/// The service may provide a default value if maxItems is 0, and may return fewer than maxItems, even if the last page of results has not yet been returned</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>

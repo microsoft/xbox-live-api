@@ -48,7 +48,7 @@ extern "C"
 /// <summary>
 /// Handle to the underlying user used to create an Xbox Live context.
 /// </summary>
-#if HC_PLATFORM == HC_PLATFORM_GDK
+#if HC_PLATFORM == HC_PLATFORM_GDK || defined(XAL_XGAMERUNTIME_IMPL)
 typedef XUserHandle XblUserHandle;
 #else
 typedef XalUserHandle XblUserHandle;

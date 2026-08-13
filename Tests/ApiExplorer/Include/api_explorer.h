@@ -136,6 +136,14 @@ struct ApiExplorerData
     function_context socialRelationshipChangedHandlerContext;
 #endif
 
+    // Privacy RTA Data
+    XblFunctionContext muteListChangedHandlerToken{ 0 };
+    XblFunctionContext blockListChangedHandlerToken{ 0 };
+#if CPP_TESTS_ENABLED
+    function_context muteListChangedHandlerContext;
+    function_context blockListChangedHandlerContext;
+#endif
+
     // Matchmaking Data
     XblCreateMatchTicketResponse* matchTicketResponse;
 #if CPP_TESTS_ENABLED

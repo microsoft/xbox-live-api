@@ -334,7 +334,7 @@ std::shared_ptr<GlobalState> GlobalState::AccessHelper(
     _In_opt_ std::shared_ptr<GlobalState> state
 ) noexcept
 {
-    static std::mutex s_mutex;
+    static DefaultUnnamedMutex s_mutex;
     static std::shared_ptr<GlobalState> s_state{ nullptr };
 
     std::lock_guard<std::mutex> lock{ s_mutex };

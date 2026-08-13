@@ -3,7 +3,7 @@
 //
 // Functions for loading WAV audio files
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
@@ -32,6 +32,10 @@ namespace
     constexpr uint32_t FOURCC_XWMA_DPDS = MAKEFOURCC('d', 'p', 'd', 's');
     constexpr uint32_t FOURCC_XMA_SEEK = MAKEFOURCC('s', 'e', 'e', 'k');
 
+    constexpr size_t SIZEOF_XMA2WAVEFORMATEX = 52;
+
+    constexpr uint16_t MSADPCM_FORMAT_EXTRA_BYTES = 32;
+
 #pragma pack(push,1)
     struct RIFFChunk
     {
@@ -48,8 +52,8 @@ namespace
 
     struct DLSLoop
     {
-        static const uint32_t LOOP_TYPE_FORWARD = 0x00000000;
-        static const uint32_t LOOP_TYPE_RELEASE = 0x00000001;
+        static constexpr uint32_t LOOP_TYPE_FORWARD = 0x00000000;
+        static constexpr uint32_t LOOP_TYPE_RELEASE = 0x00000001;
 
         uint32_t size;
         uint32_t loopType;
@@ -59,8 +63,8 @@ namespace
 
     struct RIFFDLSSample
     {
-        static const uint32_t OPTIONS_NOTRUNCATION = 0x00000001;
-        static const uint32_t OPTIONS_NOCOMPRESSION = 0x00000002;
+        static constexpr uint32_t OPTIONS_NOTRUNCATION = 0x00000001;
+        static constexpr uint32_t OPTIONS_NOCOMPRESSION = 0x00000002;
 
         uint32_t    size;
         uint16_t    unityNote;
@@ -72,9 +76,9 @@ namespace
 
     struct MIDILoop
     {
-        static const uint32_t LOOP_TYPE_FORWARD = 0x00000000;
-        static const uint32_t LOOP_TYPE_ALTERNATING = 0x00000001;
-        static const uint32_t LOOP_TYPE_BACKWARD = 0x00000002;
+        static constexpr uint32_t LOOP_TYPE_FORWARD = 0x00000000;
+        static constexpr uint32_t LOOP_TYPE_ALTERNATING = 0x00000001;
+        static constexpr uint32_t LOOP_TYPE_BACKWARD = 0x00000002;
 
         uint32_t cuePointId;
         uint32_t type;
@@ -109,22 +113,41 @@ namespace
     const RIFFChunk* FindChunk(
         _In_reads_bytes_(sizeBytes) const uint8_t* data,
         _In_ size_t sizeBytes,
+        _In_ const uint8_t* upperBound,
         _In_ uint32_t tag) noexcept
     {
-        if (!data)
+        if (!data || !upperBound)
+            return nullptr;
+
+        if (sizeBytes < sizeof(RIFFChunk))
             return nullptr;
 
         const uint8_t* ptr = data;
         const uint8_t* end = data + sizeBytes;
 
+        if (end > upperBound)
+            return nullptr;
+
+        uint64_t current = 0;
+
         while (end > (ptr + sizeof(RIFFChunk)))
         {
+            if ((current + sizeof(RIFFChunk)) >= sizeBytes)
+                return nullptr;
+
             auto header = reinterpret_cast<const RIFFChunk*>(ptr);
             if (header->tag == tag)
                 return header;
 
-            auto offset = header->size + sizeof(RIFFChunk);
-            ptr += offset;
+            const uint64_t offset = static_cast<const uint64_t>(header->size) + sizeof(RIFFChunk);
+            current += offset;
+            if (current >= sizeBytes)
+                return nullptr;
+
+            ptr += static_cast<size_t>(offset);
+
+            if (ptr >= upperBound)
+                return nullptr;
         }
 
         return nullptr;
@@ -154,10 +177,15 @@ namespace
         const uint8_t* wavEnd = wavData + wavDataSize;
 
         // Locate RIFF 'WAVE'
-        auto riffChunk = FindChunk(wavData, wavDataSize, FOURCC_RIFF_TAG);
+        auto riffChunk = FindChunk(wavData, wavDataSize, wavEnd, FOURCC_RIFF_TAG);
         if (!riffChunk || riffChunk->size < 4)
         {
             return E_FAIL;
+        }
+
+        if ((reinterpret_cast<const uint8_t*>(riffChunk) + sizeof(RIFFChunkHeader)) > wavEnd)
+        {
+            return HRESULT_FROM_WIN32(ERROR_HANDLE_EOF);
         }
 
         auto riffHeader = reinterpret_cast<const RIFFChunkHeader*>(riffChunk);
@@ -168,15 +196,16 @@ namespace
 
         // Locate 'fmt '
         auto ptr = reinterpret_cast<const uint8_t*>(riffHeader) + sizeof(RIFFChunkHeader);
-        if ((ptr + sizeof(RIFFChunk)) > wavEnd)
-        {
-            return HRESULT_FROM_WIN32(ERROR_HANDLE_EOF);
-        }
 
-        auto fmtChunk = FindChunk(ptr, riffHeader->size, FOURCC_FORMAT_TAG);
+        auto fmtChunk = FindChunk(ptr, riffChunk->size - 4, wavEnd, FOURCC_FORMAT_TAG);
         if (!fmtChunk || fmtChunk->size < sizeof(PCMWAVEFORMAT))
         {
             return E_FAIL;
+        }
+
+        if ((reinterpret_cast<const uint8_t*>(fmtChunk) + sizeof(RIFFChunk) + sizeof(PCMWAVEFORMAT)) > wavEnd)
+        {
+            return HRESULT_FROM_WIN32(ERROR_HANDLE_EOF);
         }
 
         ptr = reinterpret_cast<const uint8_t*>(fmtChunk) + sizeof(RIFFChunk);
@@ -190,17 +219,22 @@ namespace
         // Validate WAVEFORMAT (focused on chunk size and format tag, not other data that XAUDIO2 will validate)
         switch (wf->wFormatTag)
         {
-            case WAVE_FORMAT_PCM:
-            case WAVE_FORMAT_IEEE_FLOAT:
-                // Can be a PCMWAVEFORMAT (16 bytes) or WAVEFORMATEX (18 bytes)
-                // We validiated chunk as at least sizeof(PCMWAVEFORMAT) above
-                break;
+        case WAVE_FORMAT_PCM:
+        case WAVE_FORMAT_IEEE_FLOAT:
+            // Can be a PCMWAVEFORMAT (16 bytes) or WAVEFORMATEX (18 bytes)
+            // We validiated chunk as at least sizeof(PCMWAVEFORMAT) above
+            break;
 
-            default:
+        default:
             {
                 if (fmtChunk->size < sizeof(WAVEFORMATEX))
                 {
                     return E_FAIL;
+                }
+
+                if ((ptr + sizeof(WAVEFORMATEX)) > wavEnd)
+                {
+                    return HRESULT_FROM_WIN32(ERROR_HANDLE_EOF);
                 }
 
                 auto wfx = reinterpret_cast<const WAVEFORMATEX*>(ptr);
@@ -210,67 +244,88 @@ namespace
                     return E_FAIL;
                 }
 
+                if ((ptr + (sizeof(WAVEFORMATEX) + wfx->cbSize)) > wavEnd)
+                {
+                    return HRESULT_FROM_WIN32(ERROR_HANDLE_EOF);
+                }
+
                 switch (wfx->wFormatTag)
                 {
-                    case WAVE_FORMAT_WMAUDIO2:
-                    case WAVE_FORMAT_WMAUDIO3:
-                        dpds = true;
-                        break;
+                case WAVE_FORMAT_WMAUDIO2:
+                case WAVE_FORMAT_WMAUDIO3:
+                    dpds = true;
+                    break;
 
-                    case  0x166 /*WAVE_FORMAT_XMA2*/: // XMA2 is supported by Xbox One
-                        if ((fmtChunk->size < 52 /*sizeof(XMA2WAVEFORMATEX)*/) || (wfx->cbSize < 34 /*( sizeof(XMA2WAVEFORMATEX) - sizeof(WAVEFORMATEX) )*/))
+                case  0x166 /*WAVE_FORMAT_XMA2*/: // XMA2 is supported by Xbox One & Xbox Series X|S
+                    if ((fmtChunk->size < SIZEOF_XMA2WAVEFORMATEX) || (wfx->cbSize < (SIZEOF_XMA2WAVEFORMATEX - sizeof(WAVEFORMATEX))))
+                    {
+                        return E_FAIL;
+                    }
+
+                    if ((ptr + SIZEOF_XMA2WAVEFORMATEX) > wavEnd)
+                    {
+                        return HRESULT_FROM_WIN32(ERROR_HANDLE_EOF);
+                    }
+
+                    seek = true;
+                    break;
+
+                case WAVE_FORMAT_ADPCM:
+                    if ((fmtChunk->size < (sizeof(WAVEFORMATEX) + MSADPCM_FORMAT_EXTRA_BYTES)) || (wfx->cbSize < MSADPCM_FORMAT_EXTRA_BYTES))
+                    {
+                        return E_FAIL;
+                    }
+
+                    if ((ptr + sizeof(WAVEFORMATEX) + MSADPCM_FORMAT_EXTRA_BYTES) > wavEnd)
+                    {
+                        return HRESULT_FROM_WIN32(ERROR_HANDLE_EOF);
+                    }
+                    break;
+
+                case WAVE_FORMAT_EXTENSIBLE:
+                    if ((fmtChunk->size < sizeof(WAVEFORMATEXTENSIBLE)) || (wfx->cbSize < (sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX))))
+                    {
+                        return E_FAIL;
+                    }
+                    else
+                    {
+                        static const GUID s_wfexBase = { 0x00000000, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 } };
+
+                        if ((ptr + sizeof(WAVEFORMATEXTENSIBLE)) > wavEnd)
                         {
-                            return E_FAIL;
+                            return HRESULT_FROM_WIN32(ERROR_HANDLE_EOF);
                         }
-                        seek = true;
-                        break;
 
-                    case WAVE_FORMAT_ADPCM:
-                        if ((fmtChunk->size < (sizeof(WAVEFORMATEX) + 32)) || (wfx->cbSize < 32 /*MSADPCM_FORMAT_EXTRA_BYTES*/))
+                        auto wfex = reinterpret_cast<const WAVEFORMATEXTENSIBLE*>(ptr);
+
+                        if (memcmp(reinterpret_cast<const BYTE*>(&wfex->SubFormat) + sizeof(DWORD),
+                            reinterpret_cast<const BYTE*>(&s_wfexBase) + sizeof(DWORD), sizeof(GUID) - sizeof(DWORD)) != 0)
                         {
-                            return E_FAIL;
+                            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
                         }
-                        break;
 
-                    case WAVE_FORMAT_EXTENSIBLE:
-                        if ((fmtChunk->size < sizeof(WAVEFORMATEXTENSIBLE)) || (wfx->cbSize < (sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX))))
+                        switch (wfex->SubFormat.Data1)
                         {
-                            return E_FAIL;
+                        case WAVE_FORMAT_PCM:
+                        case WAVE_FORMAT_IEEE_FLOAT:
+                            break;
+
+                        // MS-ADPCM and XMA2 are not supported as WAVEFORMATEXTENSIBLE
+
+                        case WAVE_FORMAT_WMAUDIO2:
+                        case WAVE_FORMAT_WMAUDIO3:
+                            dpds = true;
+                            break;
+
+                        default:
+                            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
                         }
-                        else
-                        {
-                            static const GUID s_wfexBase = { 0x00000000, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 } };
 
-                            auto wfex = reinterpret_cast<const WAVEFORMATEXTENSIBLE*>(ptr);
+                    }
+                    break;
 
-                            if (memcmp(reinterpret_cast<const BYTE*>(&wfex->SubFormat) + sizeof(DWORD),
-                                reinterpret_cast<const BYTE*>(&s_wfexBase) + sizeof(DWORD), sizeof(GUID) - sizeof(DWORD)) != 0)
-                            {
-                                return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
-                            }
-
-                            switch (wfex->SubFormat.Data1)
-                            {
-                                case WAVE_FORMAT_PCM:
-                                case WAVE_FORMAT_IEEE_FLOAT:
-                                    break;
-
-                                // MS-ADPCM and XMA2 are not supported as WAVEFORMATEXTENSIBLE
-
-                                case WAVE_FORMAT_WMAUDIO2:
-                                case WAVE_FORMAT_WMAUDIO3:
-                                    dpds = true;
-                                    break;
-
-                                default:
-                                    return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
-                            }
-
-                        }
-                        break;
-
-                    default:
-                        return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+                default:
+                    return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
                 }
             }
         }
@@ -282,7 +337,7 @@ namespace
             return HRESULT_FROM_WIN32(ERROR_HANDLE_EOF);
         }
 
-        auto dataChunk = FindChunk(ptr, riffChunk->size, FOURCC_DATA_TAG);
+        auto dataChunk = FindChunk(ptr, riffChunk->size - 4, wavEnd, FOURCC_DATA_TAG);
         if (!dataChunk || !dataChunk->size)
         {
             return HRESULT_FROM_WIN32(ERROR_INVALID_DATA);
@@ -322,7 +377,7 @@ namespace
         const uint8_t* wavEnd = wavData + wavDataSize;
 
         // Locate RIFF 'WAVE'
-        auto riffChunk = FindChunk(wavData, wavDataSize, FOURCC_RIFF_TAG);
+        auto riffChunk = FindChunk(wavData, wavDataSize, wavEnd, FOURCC_RIFF_TAG);
         if (!riffChunk || riffChunk->size < 4)
         {
             return E_FAIL;
@@ -347,7 +402,7 @@ namespace
             return HRESULT_FROM_WIN32(ERROR_HANDLE_EOF);
         }
 
-        auto dlsChunk = FindChunk(ptr, riffChunk->size, FOURCC_DLS_SAMPLE);
+        auto dlsChunk = FindChunk(ptr, riffChunk->size - 4, wavEnd, FOURCC_DLS_SAMPLE);
         if (dlsChunk)
         {
             ptr = reinterpret_cast<const uint8_t*>(dlsChunk) + sizeof(RIFFChunk);
@@ -378,7 +433,7 @@ namespace
         }
 
         // Locate 'smpl' (Sample Chunk)
-        auto midiChunk = FindChunk(ptr, riffChunk->size, FOURCC_MIDI_SAMPLE);
+        auto midiChunk = FindChunk(ptr, riffChunk->size - 4, wavEnd, FOURCC_MIDI_SAMPLE);
         if (midiChunk)
         {
             ptr = reinterpret_cast<const uint8_t*>(midiChunk) + sizeof(RIFFChunk);
@@ -400,7 +455,7 @@ namespace
                         {
                             // Return 'forward' loop
                             *pLoopStart = loops[j].start;
-                            *pLoopLength = loops[j].end + loops[j].start + 1;
+                            *pLoopLength = loops[j].end - loops[j].start + 1;
                             return S_OK;
                         }
                     }
@@ -434,7 +489,7 @@ namespace
         const uint8_t* wavEnd = wavData + wavDataSize;
 
         // Locate RIFF 'WAVE'
-        auto riffChunk = FindChunk(wavData, wavDataSize, FOURCC_RIFF_TAG);
+        auto riffChunk = FindChunk(wavData, wavDataSize, wavEnd, FOURCC_RIFF_TAG);
         if (!riffChunk || riffChunk->size < 4)
         {
             return E_FAIL;
@@ -453,7 +508,7 @@ namespace
             return HRESULT_FROM_WIN32(ERROR_HANDLE_EOF);
         }
 
-        auto tableChunk = FindChunk(ptr, riffChunk->size, tag);
+        auto tableChunk = FindChunk(ptr, riffChunk->size - 4, wavEnd, tag);
         if (tableChunk)
         {
             ptr = reinterpret_cast<const uint8_t*>(tableChunk) + sizeof(RIFFChunk);
@@ -485,22 +540,10 @@ namespace
             return E_INVALIDARG;
 
         // open the file
-    #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-        ScopedHandle hFile(safe_handle(CreateFile2(szFileName,
-            GENERIC_READ,
-            FILE_SHARE_READ,
-            OPEN_EXISTING,
+        ScopedHandle hFile(safe_handle(CreateFile2(
+            szFileName,
+            GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING,
             nullptr)));
-    #else
-        ScopedHandle hFile(safe_handle(CreateFileW(szFileName,
-            GENERIC_READ,
-            FILE_SHARE_READ,
-            nullptr,
-            OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL,
-            nullptr)));
-    #endif
-
         if (!hFile)
         {
             return HRESULT_FROM_WIN32(GetLastError());
@@ -538,7 +581,7 @@ namespace
             fileInfo.EndOfFile.LowPart,
             bytesRead,
             nullptr
-            ))
+        ))
         {
             return HRESULT_FROM_WIN32(GetLastError());
         }
@@ -697,4 +740,3 @@ HRESULT DirectX::LoadWAVAudioFromFileEx(
 
     return S_OK;
 }
-

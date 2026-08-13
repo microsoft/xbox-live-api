@@ -5148,7 +5148,7 @@ public:
         auto mpmInstance = GlobalState::Get()->MultiplayerManager();
 
         Event sessionEvent;
-        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> result)
+        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> /*result*/)
         {
             sessionEvent.Set();
         };
@@ -5217,7 +5217,7 @@ public:
         mock->SetResponseBody(getResponses[0]);
         mock->SetResponseHttpStatus(getStatuses[0]);
         mock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        mock->SetMockMatchedCallback([getResponses, getStatuses, &mockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        mock->SetMockMatchedCallback([getResponses, getStatuses, &mockCount](class HttpMock* matchedMock, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/)
         {
             if (mockCount < getResponses.size())
             {
@@ -5298,7 +5298,7 @@ public:
 
     void TestMultipleWriteSessionWithTapsHelper(
         std::vector<const char*> writeResponses,
-        std::vector<const char*> getResponses,
+        std::vector<const char*> /*getResponses*/,
         uint64_t maxChangeNumber,
         xsapi_internal_string handleId = xsapi_internal_string()
         )
@@ -5318,7 +5318,7 @@ public:
         auto mpmInstance = GlobalState::Get()->MultiplayerManager();
 
         Event sessionEvent;
-        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> result)
+        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> /*result*/)
         {
             sessionEvent.Set();
         };
@@ -5393,7 +5393,7 @@ public:
         auto mock = std::make_shared<HttpMock>(POST, defaultMpsdUri, 201);
         mock->SetResponseBody(writeResponses[0]);
         mock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        mock->SetMockMatchedCallback([writeResponses, &mockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        mock->SetMockMatchedCallback([writeResponses, &mockCount](class HttpMock* matchedMock, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/)
         {
             if (mockCount < writeResponses.size())
             {
@@ -5403,7 +5403,7 @@ public:
         });
 
         Event sessionEvent;
-        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> result)
+        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> /*result*/)
         {
             sessionEvent.Set();
         };
@@ -5550,7 +5550,7 @@ public:
         auto sessionWriter = GetSessionWriter(false);
 
         Event sessionEvent;
-        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> joinResult)
+        auto callback = [&sessionEvent](Result<std::shared_ptr<XblMultiplayerSession>> /*joinResult*/)
         {
             sessionEvent.Set();
         };
@@ -6016,7 +6016,7 @@ public:
         auto lobbyMock = std::make_shared<HttpMock>(GET, defaultMpsdUri, 200);
         lobbyMock->SetResponseBody(lobbyResponses[0]);
         lobbyMock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -6029,7 +6029,7 @@ public:
         auto gameMock = std::make_shared<HttpMock>(GET, defaultGameUri, 200);
         gameMock->SetResponseBody(gameResponses[0]);
         gameMock->SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/)
         {
             if (gameMockCount < gameResponses.size())
             {
@@ -6196,7 +6196,7 @@ public:
         auto lobbyMock = std::make_shared<HttpMock>(GET, defaultMpsdUri, 200);
         lobbyMock->SetResponseBody(lobbyResponses[0]);
         lobbyMock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -6209,7 +6209,7 @@ public:
         auto gameMock = std::make_shared<HttpMock>(GET, defaultGameUri, 200);
         gameMock->SetResponseBody(gameResponses[0]);
         gameMock->SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/)
         {
             if (gameMockCount < gameResponses.size())
             {
@@ -6414,7 +6414,7 @@ public:
         uint32_t lobbyMockCount{ 0 };
         auto lobbyMock = std::make_shared<HttpMock>(GET, defaultMpsdUri, 200);
         lobbyMock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -6426,7 +6426,7 @@ public:
         uint32_t gameMockCount{ 0 };
         auto gameMock = std::make_shared<HttpMock>(GET, defaultGameUri, 200);
         gameMock->SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/)
         {
             if (gameMockCount < gameResponses.size())
             {
@@ -6568,7 +6568,7 @@ public:
         auto lobbyMock = std::make_shared<HttpMock>(GET, defaultMpsdUri, 200);
         lobbyMock->SetResponseBody(lobbyResponses[0]);
         lobbyMock->SetResponseHeaders(defaultLobbyHttpResponseHeaders);
-        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        lobbyMock->SetMockMatchedCallback([lobbyResponses, &lobbyMockCount](class HttpMock* matchedMock, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/)
         {
             if (lobbyMockCount < lobbyResponses.size())
             {
@@ -6581,7 +6581,7 @@ public:
         auto gameMock = std::make_shared<HttpMock>(GET, defaultGameUri, 200);
         gameMock->SetResponseBody(gameResponses[0]);
         gameMock->SetResponseHeaders(defaultGameHttpResponseHeaders);
-        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string actualRequestUrl, xsapi_internal_string requestBody)
+        gameMock->SetMockMatchedCallback([gameResponses, &gameMockCount](class HttpMock* matchedMock, xsapi_internal_string /*actualRequestUrl*/, xsapi_internal_string /*requestBody*/)
         {
             if (gameMockCount < gameResponses.size())
             {

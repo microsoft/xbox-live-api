@@ -327,8 +327,8 @@ HRESULT XalAddUserWithUiAsync(
 }
 #endif
 
-#if HC_PLATFORM == HC_PLATFORM_GDK
-#include <Xal/xal_gsdk_impl.h>
+#if HC_PLATFORM == HC_PLATFORM_GDK || XAL_XGAMERUNTIME_IMPL
+#include <Xal/xal_xgameruntime_impl.h>
 #elif HC_PLATFORM == HC_PLATFORM_XDK
 #include <Xal/xal_xdk_ext.h>
 #endif

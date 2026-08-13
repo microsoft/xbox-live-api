@@ -435,6 +435,12 @@
     <None Include="$(MSBuildThisFileDirectory)Tests\privacy\privacy.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\privacy\privacy_mute_list_changed.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Tests\privacy\privacy_block_list_changed.lua">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Tests\profile\GetUserProfile-cpp.lua">
       <DeploymentContent>true</DeploymentContent>
     </None>

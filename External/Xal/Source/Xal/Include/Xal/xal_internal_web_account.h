@@ -9,6 +9,7 @@
 
 #include <httpClient/async.h>
 #include <Xal/xal_types.h>
+#include <Xal/xal_internal_types.h>
 
 extern "C"
 {
@@ -160,6 +161,49 @@ STDAPI XalUserGetWebAccountTokenWithUiResult(
     _In_ XAsyncBlock* async,
     _In_ size_t bufferSize,
     _Out_writes_z_(bufferSize) char* result
+) noexcept;
+
+//------------------------------------------------------------------------------
+// Age verification
+
+/// <summary>
+/// Gets the current age verification status for the user.
+/// </summary>
+/// <param name="user">The user the token is for.</param>
+/// <param name="async">The AsyncBlock for this operation.</param>
+STDAPI XalUserGetAgeVerificationStatusSilentlyAsync(
+    _In_ XalUserHandle user,
+    _In_ XAsyncBlock* async
+) noexcept;
+
+/// <summary>
+/// Gets the results of a XalUserGetAgeVerificationStatusSilentlyAsync operation.
+/// </summary>
+/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="result">The status.</param>
+STDAPI XalUserGetAgeVerificationStatusSilentlyResult(
+    _In_ XAsyncBlock* async,
+    _Out_ XalAgeVerificationStatus* result
+) noexcept;
+
+/// <summary>
+/// Performs age verification for the user if necessary.
+/// </summary>
+/// <param name="user">The user the token is for.</param>
+/// <param name="async">The AsyncBlock for this operation.</param>
+STDAPI XalUserDoAgeVerificationWithUiAsync(
+    _In_ XalUserHandle user,
+    _In_ XAsyncBlock* async
+) noexcept;
+
+/// <summary>
+/// Gets the results of a XalUserDoAgeVerificationWithUiAsync operation.
+/// </summary>
+/// <param name="async">The AsyncBlock for this operation.</param>
+/// <param name="result">The status.</param>
+STDAPI XalUserDoAgeVerificationWithUiResult(
+    _In_ XAsyncBlock* async,
+    _Out_ XalAgeVerificationStatus* result
 ) noexcept;
 
 }

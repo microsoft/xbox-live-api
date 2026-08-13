@@ -71,7 +71,7 @@ private:
     Map<XblFunctionContext, SocialRelationshipChangedHandler> m_handlers;
     Map<XblFunctionContext, FriendRequestCountChangedHandler> m_friendRequestCountChangedHandlers;
     XblFunctionContext m_nextHandlerToken{ 1 };
-    mutable std::mutex m_lock;
+    mutable DefaultUnnamedMutex m_lock;
 };
 
 class SocialService : public std::enable_shared_from_this<SocialService>
@@ -115,7 +115,7 @@ private:
     std::shared_ptr<real_time_activity::RealTimeActivityManager> m_rtaManager;
 
     std::shared_ptr<SocialRelationshipChangeSubscription> m_socialRelationshipChangedSubscription;
-    mutable std::mutex m_lock;
+    mutable DefaultUnnamedMutex m_lock;
 };
 
 class ReputationFeedbackRequest

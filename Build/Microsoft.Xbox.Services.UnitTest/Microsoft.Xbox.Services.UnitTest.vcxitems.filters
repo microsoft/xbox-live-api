@@ -1,0 +1,209 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{b509d749-fbb5-4905-9b9a-3a0660777cab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests">
+      <UniqueIdentifier>{24db2b7c-17b8-464a-b51a-1e811e70e5f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{a58832d4-5ba4-48ba-bc80-6c303a25bd9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\xsapi-cpp">
+      <UniqueIdentifier>{9595cd9f-dad0-473b-ba5a-4931985b7434}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{ec454d5e-d6cd-4eb0-ad98-295d42ebf55b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\System">
+      <UniqueIdentifier>{938b4cc9-3c59-405e-8596-41d07c20ab7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\System\Win32">
+      <UniqueIdentifier>{c15ddfec-cb2f-4b14-9909-5dded3f3966a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Shared">
+      <UniqueIdentifier>{37d46419-ea5b-42dd-b3dd-2b575345f5b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Shared\WinRT">
+      <UniqueIdentifier>{1cc3e80a-1278-490c-82cf-eadc50658ab0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests\Mocks">
+      <UniqueIdentifier>{9ea7416b-4e0d-4dd6-8b56-f4e8bb31ece2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests\Support">
+      <UniqueIdentifier>{4dca0cf5-37ce-4a95-a52e-ab5d74a8a4d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests\Tests">
+      <UniqueIdentifier>{4bb0d4e9-9793-4d20-b610-b6e481591d02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests\Tests\Services">
+      <UniqueIdentifier>{0bd0b6b8-1490-4032-ab1d-4131ae98f647}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests\Tests\Shared">
+      <UniqueIdentifier>{39289cbc-aba9-44a4-ba31-553c37a6d87e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests\Tests\Services\TestResponses">
+      <UniqueIdentifier>{28053890-fd3a-4582-920a-fd9aee8ac427}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\events.h">
+      <Filter>Include\xsapi-cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Include\xsapi-cpp\title_callable_ui.h">
+      <Filter>Include\xsapi-cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\http_mock.h">
+      <Filter>Tests\UnitTests\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\mock_rta_service.h">
+      <Filter>Tests\UnitTests\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\mock_web_socket.h">
+      <Filter>Tests\UnitTests\Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\DefineTestMacros.h">
+      <Filter>Tests\UnitTests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\event.h">
+      <Filter>Tests\UnitTests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\iso8601.h">
+      <Filter>Tests\UnitTests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\unit_test_helpers.h">
+      <Filter>Tests\UnitTests\Support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\UnitTestIncludes.h">
+      <Filter>Tests\UnitTests\Support</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\platform_api.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\System\Win32\local_storage_win32.cpp">
+      <Filter>Source\System\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\http_mock.cpp">
+      <Filter>Tests\UnitTests\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\mock_rta_service.cpp">
+      <Filter>Tests\UnitTests\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\mock_user.cpp">
+      <Filter>Tests\UnitTests\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\mock_web_socket.cpp">
+      <Filter>Tests\UnitTests\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Mocks\xal_mocks.cpp">
+      <Filter>Tests\UnitTests\Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\event.cpp">
+      <Filter>Tests\UnitTests\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\iso8601.cpp">
+      <Filter>Tests\UnitTests\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Support\unit_test_helpers.cpp">
+      <Filter>Tests\UnitTests\Support</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\GlobalTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\HttpCallSettingsTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\HttpCallTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\LogTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\PlatformTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\XboxLiveCallbackTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Shared\XboxLiveContextTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\AchievementsManagerTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\AchievementsTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\ErrorTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\LeaderboardTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\MatchmakingTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\MultiplayerActivityTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\MultiplayerManagerTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\MultiplayerTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\PeoplehubTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\PresenceTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\PrivacyTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\ProfileTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\RealTimeActivityManagerTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\ReputationTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\SocialManagerTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\SocialTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\StatsTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\StringVerifyTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TitleManagedStatsTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TitleStorageTests.cpp">
+      <Filter>Tests\UnitTests\Tests\Services</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TestResponses\Clubs.json">
+      <Filter>Tests\UnitTests\Tests\Services\TestResponses</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TestResponses\Matchmaking.json">
+      <Filter>Tests\UnitTests\Tests\Services\TestResponses</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TestResponses\Multiplayer.json">
+      <Filter>Tests\UnitTests\Tests\Services\TestResponses</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\Tests\UnitTests\Tests\Services\TestResponses\MultiplayerManager.json">
+      <Filter>Tests\UnitTests\Tests\Services\TestResponses</Filter>
+    </None>
+  </ItemGroup>
+</Project>

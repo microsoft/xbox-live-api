@@ -224,10 +224,96 @@ int XblPrivacyBatchCheckPermissionAsync_Lua(lua_State* L)
     return LuaReturnHR(L, hr);
 }
 
+int XblPrivacyAddMuteListChangedHandler_Lua(lua_State* L)
+{
+    // CODE SNIPPET START: XblPrivacyAddMuteListChangedHandler
+    Data()->muteListChangedHandlerToken = XblPrivacyAddMuteListChangedHandler(
+        Data()->xboxLiveContext,
+        [](const XblPrivacyMuteListChangeEventArgs* args, void* context)
+        {
+            UNREFERENCED_PARAMETER(context);
+            LogToFile("Mute list changed:");
+            std::stringstream ss;
+            for (size_t i = 0; i < args->xuidsCount; ++i)
+            {
+                if (i > 0)
+                {
+                    ss << ", ";
+                }
+                ss << args->xuids[i];
+            }
+            LogToFile("changeType = %u, affectedXuids = %s", args->changeType, ss.str().data());
+            CallLuaFunction("OnMuteListChanged"); // CODE SNIP SKIP
+        },
+        nullptr
+    );
+    // CODE SNIPPET END
+
+    LogToFile("XblPrivacyAddMuteListChangedHandler");
+    return LuaReturnHR(L, S_OK);
+}
+
+int XblPrivacyRemoveMuteListChangedHandler_Lua(lua_State* L)
+{
+    // CODE SNIPPET START: XblPrivacyRemoveMuteListChangedHandler
+    HRESULT hr = XblPrivacyRemoveMuteListChangedHandler(Data()->xboxLiveContext, Data()->muteListChangedHandlerToken);
+
+    Data()->muteListChangedHandlerToken = 0;
+    // CODE SNIPPET END
+
+    LogToFile("XblPrivacyRemoveMuteListChangedHandler: hr=%s", ConvertHR(hr).data());
+    return LuaReturnHR(L, hr);
+}
+
+int XblPrivacyAddBlockListChangedHandler_Lua(lua_State* L)
+{
+    // CODE SNIPPET START: XblPrivacyAddBlockListChangedHandler
+    Data()->blockListChangedHandlerToken = XblPrivacyAddBlockListChangedHandler(
+        Data()->xboxLiveContext,
+        [](const XblPrivacyBlockListChangeEventArgs* args, void* context)
+        {
+            UNREFERENCED_PARAMETER(context);
+            LogToFile("Block list changed:");
+            std::stringstream ss;
+            for (size_t i = 0; i < args->xuidsCount; ++i)
+            {
+                if (i > 0)
+                {
+                    ss << ", ";
+                }
+                ss << args->xuids[i];
+            }
+            LogToFile("changeType = %u, affectedXuids = %s", args->changeType, ss.str().data());
+            CallLuaFunction("OnBlockListChanged"); // CODE SNIP SKIP
+        },
+        nullptr
+    );
+    // CODE SNIPPET END
+
+    LogToFile("XblPrivacyAddBlockListChangedHandler");
+    return LuaReturnHR(L, S_OK);
+}
+
+int XblPrivacyRemoveBlockListChangedHandler_Lua(lua_State* L)
+{
+    // CODE SNIPPET START: XblPrivacyRemoveBlockListChangedHandler
+    HRESULT hr = XblPrivacyRemoveBlockListChangedHandler(Data()->xboxLiveContext, Data()->blockListChangedHandlerToken);
+
+    Data()->blockListChangedHandlerToken = 0;
+    // CODE SNIPPET END
+
+    LogToFile("XblPrivacyRemoveBlockListChangedHandler: hr=%s", ConvertHR(hr).data());
+    return LuaReturnHR(L, hr);
+}
+
 void SetupAPIs_XblPrivacy()
 {
     lua_register(Data()->L, "XblPrivacyGetAvoidListAsync", XblPrivacyGetAvoidListAsync_Lua);
     lua_register(Data()->L, "XblPrivacyCheckPermissionAsync", XblPrivacyCheckPermissionAsync_Lua);
     lua_register(Data()->L, "XblPrivacyCheckPermissionForAnonymousUserAsync", XblPrivacyCheckPermissionForAnonymousUserAsync_Lua);
     lua_register(Data()->L, "XblPrivacyBatchCheckPermissionAsync", XblPrivacyBatchCheckPermissionAsync_Lua);
+    lua_register(Data()->L, "XblPrivacyAddMuteListChangedHandler", XblPrivacyAddMuteListChangedHandler_Lua);
+    lua_register(Data()->L, "XblPrivacyRemoveMuteListChangedHandler", XblPrivacyRemoveMuteListChangedHandler_Lua);
+    lua_register(Data()->L, "XblPrivacyAddBlockListChangedHandler", XblPrivacyAddBlockListChangedHandler_Lua);
+    lua_register(Data()->L, "XblPrivacyRemoveBlockListChangedHandler", XblPrivacyRemoveBlockListChangedHandler_Lua);
 }

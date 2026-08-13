@@ -36,6 +36,11 @@ HRESULT PeoplehubService::GetSocialUsers(
 {
     return MakeServiceCall(xuid, decorations, RelationshipType::Batch, xuids, async);
 }
+
+uint32_t PeoplehubService::HttpTimeoutWindowInSeconds() const noexcept
+{
+    return m_httpSettings->HttpTimeoutWindow();
+}
     
 HRESULT PeoplehubService::MakeServiceCall(
     _In_ uint64_t xuid,
@@ -181,7 +186,7 @@ Result<XblSocialManagerUser> PeoplehubService::DeserializeUser(
     // isFavorite should reflect both isFavorite && isFriend from the service response
     user.isFavorite = user.isFavorite && user.isFriend;
     // Shim isFollowingUser and isFollowedByCaller to be true if isFriend is true
-    // This is purely for compatibility purposes and doesn’t reflect a follower/following relationship
+    // This is purely for compatibility purposes and doesnï¿½t reflect a follower/following relationship
     user.isFollowedByCaller = user.isFriend;
     user.isFollowingUser = user.isFriend;
 
@@ -284,17 +289,21 @@ Result<XblSocialManagerPresenceTitleRecord> PeoplehubService::DeserializePresenc
     record.titleId = utils::internal_string_to_uint32(titleId);
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonBool(json, "IsPrimary", record.isPrimary));
 
-    //get titleName from Presence string: format should be "Title - Rich Presence Text"
-    for (int i = 0; i < XBL_TITLE_NAME_CHAR_SIZE; i++)
+    //get titleName from Presence string: format should be "Title - Rich Presence Text".
+    //The title and rich presence text are separated by " - " (space-hyphen-space). A bare
+    //hyphen can legitimately appear inside a title (e.g. "Gears of War: E-Day"), so match the
+    //full delimiter rather than the first '-'. If no delimiter is present, the whole presence
+    //string is the title name.
+    const char* delimiter = strstr(record.presenceText, " - ");
+    size_t titleNameLength = (delimiter != nullptr)
+        ? static_cast<size_t>(delimiter - record.presenceText)
+        : strlen(record.presenceText);
+    if (titleNameLength >= sizeof(record.titleName))
     {
-        char c = record.presenceText[i];
-        if (c == '-' || c == '\0')
-        {
-            record.titleName[i] = '\0';
-            break;
-        }
-        record.titleName[i] = c;
+        titleNameLength = sizeof(record.titleName) - 1;
     }
+    memcpy(record.titleName, record.presenceText, titleNameLength);
+    record.titleName[titleNameLength] = '\0';
 
     return Result<XblSocialManagerPresenceTitleRecord>{ record };
 }

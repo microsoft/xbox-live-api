@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: AudioEngine.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
@@ -32,7 +32,7 @@ namespace
             mCriticalError.reset(CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE));
             if (!mCriticalError)
             {
-                throw std::exception("CreateEvent");
+                throw std::system_error(std::error_code(static_cast<int>(GetLastError()), std::system_category()), "CreateEventEx");
             }
         }
 
@@ -66,7 +66,7 @@ namespace
             mBufferEnd.reset(CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE));
             if (!mBufferEnd)
             {
-                throw std::exception("CreateEvent");
+                throw std::system_error(std::error_code(static_cast<int>(GetLastError()), std::system_category()), "CreateEventEx");
             }
         }
 
@@ -77,8 +77,7 @@ namespace
         VoiceCallback& operator=(const VoiceCallback&) = delete;
 
         virtual ~VoiceCallback()
-        {
-        }
+        {}
 
         STDMETHOD_(void, OnVoiceProcessingPassStart) (UINT32) override {}
         STDMETHOD_(void, OnVoiceProcessingPassEnd)() override {}
@@ -136,6 +135,8 @@ namespace
         XAUDIO2FX_I3DL2_PRESET_PLATE,               // Reverb_Plate
     };
 
+    constexpr uint32_t c_XAudio3DCalculateDefault = X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_LPF_DIRECT;
+
     inline unsigned int makeVoiceKey(_In_ const WAVEFORMATEX* wfx) noexcept
     {
         assert(IsValid(wfx));
@@ -190,65 +191,67 @@ namespace
                 return 0;
         }
 
-        uint32_t tag = GetFormatTag(wfx);
+        const uint32_t tag = GetFormatTag(wfx);
         switch (tag)
         {
-            case WAVE_FORMAT_PCM:
-                static_assert(WAVE_FORMAT_PCM < 0x1ff, "KeyGen tag is too small");
-                result.pcm.tag = WAVE_FORMAT_PCM;
-                result.pcm.channels = wfx->nChannels;
-                result.pcm.bitsPerSample = wfx->wBitsPerSample;
-                break;
+        case WAVE_FORMAT_PCM:
+            static_assert(WAVE_FORMAT_PCM < 0x1ff, "KeyGen tag is too small");
+            result.pcm.tag = WAVE_FORMAT_PCM;
+            result.pcm.channels = wfx->nChannels;
+            result.pcm.bitsPerSample = wfx->wBitsPerSample;
+            break;
 
-            case WAVE_FORMAT_IEEE_FLOAT:
-                static_assert(WAVE_FORMAT_IEEE_FLOAT < 0x1ff, "KeyGen tag is too small");
+        case WAVE_FORMAT_IEEE_FLOAT:
+            static_assert(WAVE_FORMAT_IEEE_FLOAT < 0x1ff, "KeyGen tag is too small");
 
-                if (wfx->wBitsPerSample != 32)
+            if (wfx->wBitsPerSample != 32)
+                return 0;
+
+            result.pcm.tag = WAVE_FORMAT_IEEE_FLOAT;
+            result.pcm.channels = wfx->nChannels;
+            result.pcm.bitsPerSample = 32;
+            break;
+
+        case WAVE_FORMAT_ADPCM:
+            static_assert(WAVE_FORMAT_ADPCM < 0x1ff, "KeyGen tag is too small");
+            result.adpcm.tag = WAVE_FORMAT_ADPCM;
+            result.adpcm.channels = wfx->nChannels;
+
+            {
+                auto wfadpcm = reinterpret_cast<const ADPCMWAVEFORMAT*>(wfx);
+                result.adpcm.samplesPerBlock = wfadpcm->wSamplesPerBlock;
+            }
+            break;
+
+        #ifdef DIRECTX_ENABLE_XMA2
+        case WAVE_FORMAT_XMA2:
+            static_assert(WAVE_FORMAT_XMA2 < 0x1ff, "KeyGen tag is too small");
+            result.xma.tag = WAVE_FORMAT_XMA2;
+            result.xma.channels = wfx->nChannels;
+
+            {
+                auto xmaFmt = reinterpret_cast<const XMA2WAVEFORMATEX*>(wfx);
+
+                if ((xmaFmt->LoopBegin > 0)
+                    || (xmaFmt->PlayBegin > 0))
                     return 0;
 
-                result.pcm.tag = WAVE_FORMAT_IEEE_FLOAT;
-                result.pcm.channels = wfx->nChannels;
-                result.pcm.bitsPerSample = 32;
-                break;
+                result.xma.encoderVersion = xmaFmt->EncoderVersion;
+            }
+            break;
+        #endif
 
-            case WAVE_FORMAT_ADPCM:
-                static_assert(WAVE_FORMAT_ADPCM < 0x1ff, "KeyGen tag is too small");
-                result.adpcm.tag = WAVE_FORMAT_ADPCM;
-                result.adpcm.channels = wfx->nChannels;
-
-                {
-                    auto wfadpcm = reinterpret_cast<const ADPCMWAVEFORMAT*>(wfx);
-                    result.adpcm.samplesPerBlock = wfadpcm->wSamplesPerBlock;
-                }
-                break;
-
-            #ifdef DIRECTX_ENABLE_XMA2
-            case WAVE_FORMAT_XMA2:
-                static_assert(WAVE_FORMAT_XMA2 < 0x1ff, "KeyGen tag is too small");
-                result.xma.tag = WAVE_FORMAT_XMA2;
-                result.xma.channels = wfx->nChannels;
-
-                {
-                    auto xmaFmt = reinterpret_cast<const XMA2WAVEFORMATEX*>(wfx);
-
-                    if ((xmaFmt->LoopBegin > 0)
-                        || (xmaFmt->PlayBegin > 0))
-                        return 0;
-
-                    result.xma.encoderVersion = xmaFmt->EncoderVersion;
-                }
-                break;
-            #endif
-
-            default:
-                return 0;
+        default:
+            return 0;
         }
 
         return result.key;
     }
+
+    void GetDeviceOutputFormat(const wchar_t* deviceId, WAVEFORMATEX& wfx);
 }
 
-static_assert(_countof(gReverbPresets) == Reverb_MAX, "AUDIO_ENGINE_REVERB enum mismatch");
+static_assert(static_cast<unsigned int>(std::size(gReverbPresets)) == Reverb_MAX, "AUDIO_ENGINE_REVERB enum mismatch");
 
 
 //======================================================================================
@@ -256,6 +259,10 @@ static_assert(_countof(gReverbPresets) == Reverb_MAX, "AUDIO_ENGINE_REVERB enum 
 //======================================================================================
 
 #define SAFE_DESTROY_VOICE(voice) if ( voice ) { voice->DestroyVoice(); voice = nullptr; }
+
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wextra-semi-stmt"
+#endif
 
 // Internal object implementation class.
 class AudioEngine::Impl
@@ -272,13 +279,14 @@ public:
         maxVoiceInstances(SIZE_MAX),
         mMasterVolume(1.f),
         mX3DAudio{},
+        mX3DCalcFlags(c_XAudio3DCalculateDefault),
         mCriticalError(false),
         mReverbEnabled(false),
         mEngineFlags(AudioEngine_Default),
+        mOutputFormat{},
         mCategory(AudioCategory_GameEffects),
         mVoiceInstances(0)
-    {
-    }
+    {}
 
     ~Impl() = default;
 
@@ -331,11 +339,13 @@ public:
     float                               mMasterVolume;
 
     X3DAUDIO_HANDLE                     mX3DAudio;
+    uint32_t                            mX3DCalcFlags;
 
     bool                                mCriticalError;
     bool                                mReverbEnabled;
 
     AUDIO_ENGINE_FLAGS                  mEngineFlags;
+    WAVEFORMATEX                        mOutputFormat;
 
 private:
     using notifylist_t = std::set<IVoiceNotify*>;
@@ -391,8 +401,10 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
     assert(mReverbVoice == nullptr);
 
     masterChannelMask = masterChannels = masterRate = 0;
+    mOutputFormat = {};
 
     memset(&mX3DAudio, 0, X3DAUDIO_HANDLE_BYTESIZE);
+    mX3DCalcFlags = c_XAudio3DCalculateDefault;
 
     mCriticalError = false;
     mReverbEnabled = false;
@@ -416,8 +428,8 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
             // To see the trace output, you need to view ETW logs for this application:
             //    Go to Control Panel, Administrative Tools, Event Viewer.
             //    View->Show Analytic and Debug Logs.
-            //    Applications and Services Logs / Microsoft / Windows / XAudio2. 
-            //    Right click on Microsoft Windows XAudio2 debug logging, Properties, then Enable Logging, and hit OK 
+            //    Applications and Services Logs / Microsoft / Windows / XAudio2.
+            //    Right click on Microsoft Windows XAudio2 debug logging, Properties, then Enable Logging, and hit OK
         DebugTrace("INFO: XAudio 2.8 debugging enabled\n");
     #endif
     }
@@ -451,7 +463,7 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
     hr = mMasterVoice->GetChannelMask(&dwChannelMask);
     if (FAILED(hr))
     {
-        SAFE_DESTROY_VOICE(mMasterVoice)
+        SAFE_DESTROY_VOICE(mMasterVoice);
         xaudio2.Reset();
         return hr;
     }
@@ -471,11 +483,17 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
         hr = mMasterVoice->SetVolume(mMasterVolume);
         if (FAILED(hr))
         {
-            SAFE_DESTROY_VOICE(mMasterVoice)
+            SAFE_DESTROY_VOICE(mMasterVoice);
             xaudio2.Reset();
             return hr;
         }
     }
+
+    mOutputFormat.wFormatTag = WAVE_FORMAT_PCM;
+    mOutputFormat.nChannels = static_cast<WORD>(details.InputChannels);
+    mOutputFormat.nSamplesPerSec = details.InputSampleRate;
+    mOutputFormat.wBitsPerSample = 16;
+    GetDeviceOutputFormat(deviceId, mOutputFormat);
 
     //
     // Setup mastering volume limiter (optional)
@@ -489,7 +507,7 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
         hr = CreateFX(__uuidof(FXMasteringLimiter), mVolumeLimiter.ReleaseAndGetAddressOf(), &params, sizeof(params));
         if (FAILED(hr))
         {
-            SAFE_DESTROY_VOICE(mMasterVoice)
+            SAFE_DESTROY_VOICE(mMasterVoice);
             xaudio2.Reset();
             return hr;
         }
@@ -503,7 +521,7 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
         hr = mMasterVoice->SetEffectChain(&chain);
         if (FAILED(hr))
         {
-            SAFE_DESTROY_VOICE(mMasterVoice)
+            SAFE_DESTROY_VOICE(mMasterVoice);
             mVolumeLimiter.Reset();
             xaudio2.Reset();
             return hr;
@@ -520,7 +538,7 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
         hr = XAudio2CreateReverb(mReverbEffect.ReleaseAndGetAddressOf(), 0u);
         if (FAILED(hr))
         {
-            SAFE_DESTROY_VOICE(mMasterVoice)
+            SAFE_DESTROY_VOICE(mMasterVoice);
             mVolumeLimiter.Reset();
             xaudio2.Reset();
             return hr;
@@ -536,7 +554,7 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
             nullptr, &effectChain);
         if (FAILED(hr))
         {
-            SAFE_DESTROY_VOICE(mMasterVoice)
+            SAFE_DESTROY_VOICE(mMasterVoice);
             mReverbEffect.Reset();
             mVolumeLimiter.Reset();
             xaudio2.Reset();
@@ -548,8 +566,8 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
         hr = mReverbVoice->SetEffectParameters(0, &native, sizeof(XAUDIO2FX_REVERB_PARAMETERS));
         if (FAILED(hr))
         {
-            SAFE_DESTROY_VOICE(mReverbVoice)
-            SAFE_DESTROY_VOICE(mMasterVoice)
+            SAFE_DESTROY_VOICE(mReverbVoice);
+            SAFE_DESTROY_VOICE(mMasterVoice);
             mReverbEffect.Reset();
             mVolumeLimiter.Reset();
             xaudio2.Reset();
@@ -557,6 +575,8 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
         }
 
         DebugTrace("INFO: I3DL2 reverb effect enabled for 3D positional audio\n");
+
+        mX3DCalcFlags |= X3DAUDIO_CALCULATE_LPF_REVERB | X3DAUDIO_CALCULATE_REVERB;
     }
 
     //
@@ -567,21 +587,37 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
     hr = X3DAudioInitialize(masterChannelMask, SPEEDOFSOUND, mX3DAudio);
     if (FAILED(hr))
     {
-        SAFE_DESTROY_VOICE(mReverbVoice)
-        SAFE_DESTROY_VOICE(mMasterVoice)
+        SAFE_DESTROY_VOICE(mReverbVoice);
+        SAFE_DESTROY_VOICE(mMasterVoice);
         mReverbEffect.Reset();
         mVolumeLimiter.Reset();
         xaudio2.Reset();
         return hr;
     }
 
+    if ((masterChannelMask & SPEAKER_LOW_FREQUENCY) && !(mEngineFlags & AudioEngine_DisableLFERedirect))
+    {
+        // On devices with an LFE channel, allow the mono source data to be routed to the LFE destination channel.
+        mX3DCalcFlags |= X3DAUDIO_CALCULATE_REDIRECT_TO_LFE;
+    }
+
+    if (!(mEngineFlags & AudioEngine_DisableDopplerEffect))
+    {
+        mX3DCalcFlags |= X3DAUDIO_CALCULATE_DOPPLER;
+    }
+
+    if (mEngineFlags & AudioEngine_ZeroCenter3D)
+    {
+        mX3DCalcFlags |= X3DAUDIO_CALCULATE_ZEROCENTER;
+    }
+
     //
     // Inform any notify objects we are ready to go again
     //
-    for (auto it = mNotifyObjects.begin(); it != mNotifyObjects.end(); ++it)
+    for (auto it : mNotifyObjects)
     {
-        assert(*it != nullptr);
-        (*it)->OnReset();
+        assert(it != nullptr);
+        it->OnReset();
     }
 
     return S_OK;
@@ -590,30 +626,30 @@ HRESULT AudioEngine::Impl::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceI
 
 void AudioEngine::Impl::SetSilentMode()
 {
-    for (auto it = mNotifyObjects.begin(); it != mNotifyObjects.end(); ++it)
+    for (auto it : mNotifyObjects)
     {
-        assert(*it != nullptr);
-        (*it)->OnCriticalError();
+        assert(it != nullptr);
+        it->OnCriticalError();
     }
 
-    for (auto it = mOneShots.begin(); it != mOneShots.end(); ++it)
+    for (auto& it : mOneShots)
     {
-        assert(it->second != nullptr);
-        it->second->DestroyVoice();
+        assert(it.second != nullptr);
+        it.second->DestroyVoice();
     }
     mOneShots.clear();
 
-    for (auto it = mVoicePool.begin(); it != mVoicePool.end(); ++it)
+    for (auto& it : mVoicePool)
     {
-        assert(it->second != nullptr);
-        it->second->DestroyVoice();
+        assert(it.second != nullptr);
+        it.second->DestroyVoice();
     }
     mVoicePool.clear();
 
     mVoiceInstances = 0;
 
-    SAFE_DESTROY_VOICE(mReverbVoice)
-    SAFE_DESTROY_VOICE(mMasterVoice)
+    SAFE_DESTROY_VOICE(mReverbVoice);
+    SAFE_DESTROY_VOICE(mMasterVoice);
 
     mReverbEffect.Reset();
     mVolumeLimiter.Reset();
@@ -623,10 +659,10 @@ void AudioEngine::Impl::SetSilentMode()
 
 void AudioEngine::Impl::Shutdown() noexcept
 {
-    for (auto it = mNotifyObjects.begin(); it != mNotifyObjects.end(); ++it)
+    for (auto it : mNotifyObjects)
     {
-        assert(*it != nullptr);
-        (*it)->OnDestroyEngine();
+        assert(it != nullptr);
+        it->OnDestroyEngine();
     }
 
     if (xaudio2)
@@ -635,30 +671,31 @@ void AudioEngine::Impl::Shutdown() noexcept
 
         xaudio2->StopEngine();
 
-        for (auto it = mOneShots.begin(); it != mOneShots.end(); ++it)
+        for (auto& it : mOneShots)
         {
-            assert(it->second != nullptr);
-            it->second->DestroyVoice();
+            assert(it.second != nullptr);
+            it.second->DestroyVoice();
         }
         mOneShots.clear();
 
-        for (auto it = mVoicePool.begin(); it != mVoicePool.end(); ++it)
+        for (auto& it : mVoicePool)
         {
-            assert(it->second != nullptr);
-            it->second->DestroyVoice();
+            assert(it.second != nullptr);
+            it.second->DestroyVoice();
         }
         mVoicePool.clear();
 
         mVoiceInstances = 0;
 
-        SAFE_DESTROY_VOICE(mReverbVoice)
-        SAFE_DESTROY_VOICE(mMasterVoice)
+        SAFE_DESTROY_VOICE(mReverbVoice);
+        SAFE_DESTROY_VOICE(mMasterVoice);
 
         mReverbEffect.Reset();
         mVolumeLimiter.Reset();
         xaudio2.Reset();
 
         masterChannelMask = masterChannels = masterRate = 0;
+        mOutputFormat = {};
 
         mCriticalError = false;
         mReverbEnabled = false;
@@ -674,65 +711,65 @@ bool AudioEngine::Impl::Update()
         return false;
 
     HANDLE events[2] = { mEngineCallback.mCriticalError.get(), mVoiceCallback.mBufferEnd.get() };
-    switch (WaitForMultipleObjectsEx(_countof(events), events, FALSE, 0, FALSE))
+    switch (WaitForMultipleObjectsEx(static_cast<DWORD>(std::size(events)), events, FALSE, 0, FALSE))
     {
-        default:
-        case WAIT_TIMEOUT:
-            break;
+    default:
+    case WAIT_TIMEOUT:
+        break;
 
-        case WAIT_OBJECT_0:     // OnCritialError
-            mCriticalError = true;
+    case WAIT_OBJECT_0:     // OnCritialError
+        mCriticalError = true;
 
-            SetSilentMode();
-            return false;
+        SetSilentMode();
+        return false;
 
-        case WAIT_OBJECT_0 + 1: // OnBufferEnd
-            // Scan for completed one-shot voices
-            for (auto it = mOneShots.begin(); it != mOneShots.end(); )
+    case WAIT_OBJECT_0 + 1: // OnBufferEnd
+        // Scan for completed one-shot voices
+        for (auto it = mOneShots.begin(); it != mOneShots.end(); )
+        {
+            assert(it->second != nullptr);
+
+            XAUDIO2_VOICE_STATE xstate;
+            it->second->GetState(&xstate, XAUDIO2_VOICE_NOSAMPLESPLAYED);
+
+            if (!xstate.BuffersQueued)
             {
-                assert(it->second != nullptr);
-
-                XAUDIO2_VOICE_STATE xstate;
-                it->second->GetState(&xstate, XAUDIO2_VOICE_NOSAMPLESPLAYED);
-
-                if (!xstate.BuffersQueued)
+                std::ignore = it->second->Stop(0);
+                if (it->first)
                 {
-                    (void)it->second->Stop(0);
-                    if (it->first)
-                    {
-                        // Put voice back into voice pool for reuse since it has a non-zero voiceKey
-                    #ifdef VERBOSE_TRACE
-                        DebugTrace("INFO: One-shot voice being saved for reuse (%08X)\n", it->first);
-                    #endif
-                        voicepool_t::value_type v(it->first, it->second);
-                        mVoicePool.emplace(v);
-                    }
-                    else
-                    {
-                        // Voice is to be destroyed rather than reused
-                    #ifdef VERBOSE_TRACE
-                        DebugTrace("INFO: Destroying one-shot voice\n");
-                    #endif
-                        it->second->DestroyVoice();
-                    }
-                    it = mOneShots.erase(it);
+                    // Put voice back into voice pool for reuse since it has a non-zero voiceKey
+                #ifdef VERBOSE_TRACE
+                    DebugTrace("INFO: One-shot voice being saved for reuse (%08X)\n", it->first);
+                #endif
+                    voicepool_t::value_type v(it->first, it->second);
+                    mVoicePool.emplace(v);
                 }
                 else
-                    ++it;
+                {
+                    // Voice is to be destroyed rather than reused
+                #ifdef VERBOSE_TRACE
+                    DebugTrace("INFO: Destroying one-shot voice\n");
+                #endif
+                    it->second->DestroyVoice();
+                }
+                it = mOneShots.erase(it);
             }
-            break;
+            else
+                ++it;
+        }
+        break;
 
-        case WAIT_FAILED:
-            throw std::exception("WaitForMultipleObjects");
+    case WAIT_FAILED:
+        throw std::system_error(std::error_code(static_cast<int>(GetLastError()), std::system_category()), "WaitForMultipleObjectsEx");
     }
 
     //
     // Inform any notify objects of updates
     //
-    for (auto it = mNotifyUpdates.begin(); it != mNotifyUpdates.end(); ++it)
+    for (auto it : mNotifyUpdates)
     {
-        assert(*it != nullptr);
-        (*it)->OnUpdate();
+        assert(it != nullptr);
+        it->OnUpdate();
     }
 
     return true;
@@ -750,15 +787,15 @@ void AudioEngine::Impl::SetReverb(const XAUDIO2FX_REVERB_PARAMETERS* native) noe
         if (!mReverbEnabled)
         {
             mReverbEnabled = true;
-            (void)mReverbVoice->EnableEffect(0);
+            std::ignore = mReverbVoice->EnableEffect(0);
         }
 
-        (void)mReverbVoice->SetEffectParameters(0, native, sizeof(XAUDIO2FX_REVERB_PARAMETERS));
+        std::ignore = mReverbVoice->SetEffectParameters(0, native, sizeof(XAUDIO2FX_REVERB_PARAMETERS));
     }
     else if (mReverbEnabled)
     {
         mReverbEnabled = false;
-        (void)mReverbVoice->DisableEffect(0);
+        std::ignore = mReverbVoice->DisableEffect(0);
     }
 }
 
@@ -790,10 +827,10 @@ AudioStatistics AudioEngine::Impl::GetStatistics() const
     stats.allocatedVoices = stats.allocatedVoicesOneShot = mOneShots.size() + mVoicePool.size();
     stats.allocatedVoicesIdle = mVoicePool.size();
 
-    for (auto it = mNotifyObjects.begin(); it != mNotifyObjects.end(); ++it)
+    for (const auto it : mNotifyObjects)
     {
-        assert(*it != nullptr);
-        (*it)->GatherStatistics(stats);
+        assert(it != nullptr);
+        it->GatherStatistics(stats);
     }
 
     assert(stats.allocatedVoices == (mOneShots.size() + mVoicePool.size() + mVoiceInstances));
@@ -804,16 +841,16 @@ AudioStatistics AudioEngine::Impl::GetStatistics() const
 
 void AudioEngine::Impl::TrimVoicePool()
 {
-    for (auto it = mNotifyObjects.begin(); it != mNotifyObjects.end(); ++it)
+    for (auto it : mNotifyObjects)
     {
-        assert(*it != nullptr);
-        (*it)->OnTrim();
+        assert(it != nullptr);
+        it->OnTrim();
     }
 
-    for (auto it = mVoicePool.begin(); it != mVoicePool.end(); ++it)
+    for (auto& it : mVoicePool)
     {
-        assert(it->second != nullptr);
-        it->second->DestroyVoice();
+        assert(it.second != nullptr);
+        it.second->DestroyVoice();
     }
     mVoicePool.clear();
 }
@@ -827,12 +864,12 @@ void AudioEngine::Impl::AllocateVoice(
     IXAudio2SourceVoice** voice)
 {
     if (!wfx)
-        throw std::exception("Wave format is required\n");
+        throw std::invalid_argument("Wave format is required\n");
 
     // No need to call IsValid on wfx because CreateSourceVoice will do that
 
     if (!voice)
-        throw std::exception("Voice pointer must be non-null");
+        throw std::invalid_argument("Voice pointer must be non-null");
 
     *voice = nullptr;
 
@@ -850,9 +887,9 @@ void AudioEngine::Impl::AllocateVoice(
         if (flags & (SoundEffectInstance_Use3D | SoundEffectInstance_ReverbUseFilters | SoundEffectInstance_NoSetPitch))
         {
             DebugTrace((flags & SoundEffectInstance_NoSetPitch)
-                       ? "ERROR: One-shot voices must support pitch-shifting for voice reuse\n"
-                       : "ERROR: One-use voices cannot use 3D positional audio\n");
-            throw std::exception("Invalid flags for one-shot voice");
+                ? "ERROR: One-shot voices must support pitch-shifting for voice reuse\n"
+                : "ERROR: One-use voices cannot use 3D positional audio\n");
+            throw std::invalid_argument("Invalid flags for one-shot voice");
         }
 
     #ifdef VERBOSE_TRACE
@@ -901,7 +938,7 @@ void AudioEngine::Impl::AllocateVoice(
                 else if ((mVoicePool.size() + mOneShots.size() + 1) >= maxVoiceOneshots)
                 {
                     DebugTrace("WARNING: Too many one-shot voices in use (%zu + %zu >= %zu); one-shot not played\n",
-                               mVoicePool.size(), mOneShots.size() + 1, maxVoiceOneshots);
+                        mVoicePool.size(), mOneShots.size() + 1, maxVoiceOneshots);
                     return;
                 }
                 else
@@ -911,29 +948,32 @@ void AudioEngine::Impl::AllocateVoice(
                     char buff[64] = {};
                     auto wfmt = reinterpret_cast<WAVEFORMATEX*>(buff);
 
-                    uint32_t tag = GetFormatTag(wfx);
+                    const uint32_t tag = GetFormatTag(wfx);
                     switch (tag)
                     {
-                        case WAVE_FORMAT_PCM:
-                            CreateIntegerPCM(wfmt, defaultRate, wfx->nChannels, wfx->wBitsPerSample);
-                            break;
+                    case WAVE_FORMAT_PCM:
+                        CreateIntegerPCM(wfmt, defaultRate, wfx->nChannels, wfx->wBitsPerSample);
+                        break;
 
-                        case WAVE_FORMAT_IEEE_FLOAT:
-                            CreateFloatPCM(wfmt, defaultRate, wfx->nChannels);
-                            break;
+                    case WAVE_FORMAT_IEEE_FLOAT:
+                        CreateFloatPCM(wfmt, defaultRate, wfx->nChannels);
+                        break;
 
-                        case WAVE_FORMAT_ADPCM:
+                    case WAVE_FORMAT_ADPCM:
                         {
                             auto wfadpcm = reinterpret_cast<const ADPCMWAVEFORMAT*>(wfx);
                             CreateADPCM(wfmt, sizeof(buff), defaultRate, wfx->nChannels, wfadpcm->wSamplesPerBlock);
                         }
                         break;
 
-                        #ifdef DIRECTX_ENABLE_XMA2
-                        case WAVE_FORMAT_XMA2:
-                            CreateXMA2(wfmt, sizeof(buff), defaultRate, wfx->nChannels, 65536, 2, 0);
-                            break;
-                        #endif
+                    #ifdef DIRECTX_ENABLE_XMA2
+                    case WAVE_FORMAT_XMA2:
+                        CreateXMA2(wfmt, sizeof(buff), defaultRate, wfx->nChannels, 65536, 2, 0);
+                        break;
+                    #endif
+
+                    default:
+                        throw std::invalid_argument("Unsupported wave format");
                     }
 
                 #ifdef VERBOSE_TRACE
@@ -947,7 +987,7 @@ void AudioEngine::Impl::AllocateVoice(
                     if (FAILED(hr))
                     {
                         DebugTrace("ERROR: CreateSourceVoice (reuse) failed with error %08X\n", static_cast<unsigned int>(hr));
-                        throw std::exception("CreateSourceVoice");
+                        throw std::runtime_error("CreateSourceVoice");
                     }
                 }
 
@@ -956,7 +996,7 @@ void AudioEngine::Impl::AllocateVoice(
                 if (FAILED(hr))
                 {
                     DebugTrace("ERROR: SetSourceSampleRate failed with error %08X\n", static_cast<unsigned int>(hr));
-                    throw std::exception("SetSourceSampleRate");
+                    throw std::runtime_error("SetSourceSampleRate");
                 }
             }
         }
@@ -969,7 +1009,7 @@ void AudioEngine::Impl::AllocateVoice(
             if ((mVoicePool.size() + mOneShots.size() + 1) >= maxVoiceOneshots)
             {
                 DebugTrace("WARNING: Too many one-shot voices in use (%zu + %zu >= %zu); one-shot not played; see TrimVoicePool\n",
-                           mVoicePool.size(), mOneShots.size() + 1, maxVoiceOneshots);
+                    mVoicePool.size(), mOneShots.size() + 1, maxVoiceOneshots);
                 return;
             }
         }
@@ -977,10 +1017,10 @@ void AudioEngine::Impl::AllocateVoice(
         {
             DebugTrace("ERROR: Too many instance voices (%zu >= %zu); see TrimVoicePool\n",
                 mVoiceInstances + 1, maxVoiceInstances);
-            throw std::exception("Too many instance voices");
+            throw std::runtime_error("Too many instance voices");
         }
 
-        UINT32 vflags = (flags & SoundEffectInstance_NoSetPitch) ? XAUDIO2_VOICE_NOPITCH : 0u;
+        const UINT32 vflags = (flags & SoundEffectInstance_NoSetPitch) ? XAUDIO2_VOICE_NOPITCH : 0u;
 
         HRESULT hr;
         if (flags & SoundEffectInstance_Use3D)
@@ -1012,7 +1052,7 @@ void AudioEngine::Impl::AllocateVoice(
         if (FAILED(hr))
         {
             DebugTrace("ERROR: CreateSourceVoice failed with error %08X\n", static_cast<unsigned int>(hr));
-            throw std::exception("CreateSourceVoice");
+            throw std::runtime_error("CreateSourceVoice");
         }
         else if (!oneshot)
         {
@@ -1034,18 +1074,18 @@ void AudioEngine::Impl::DestroyVoice(_In_ IXAudio2SourceVoice* voice) noexcept
         return;
 
 #ifndef NDEBUG
-    for (auto it = mOneShots.cbegin(); it != mOneShots.cend(); ++it)
+    for (const auto& it : mOneShots)
     {
-        if (it->second == voice)
+        if (it.second == voice)
         {
             DebugTrace("ERROR: DestroyVoice should not be called for a one-shot voice\n");
             return;
         }
     }
 
-    for (auto it = mVoicePool.cbegin(); it != mVoicePool.cend(); ++it)
+    for (const auto& it : mVoicePool)
     {
-        if (it->second == voice)
+        if (it.second == voice)
         {
             DebugTrace("ERROR: DestroyVoice should not be called for a one-shot voice; see TrimVoicePool\n");
             return;
@@ -1081,17 +1121,17 @@ void AudioEngine::Impl::UnregisterNotify(_In_ IVoiceNotify* notify, bool usesOne
     {
         bool setevent = false;
 
-        for (auto it = mOneShots.begin(); it != mOneShots.end(); ++it)
+        for (auto& it : mOneShots)
         {
-            assert(it->second != nullptr);
+            assert(it.second != nullptr);
 
             XAUDIO2_VOICE_STATE state;
-            it->second->GetState(&state, XAUDIO2_VOICE_NOSAMPLESPLAYED);
+            it.second->GetState(&state, XAUDIO2_VOICE_NOSAMPLESPLAYED);
 
             if (state.pCurrentBufferContext == notify)
             {
-                (void)it->second->Stop(0);
-                (void)it->second->FlushSourceBuffers();
+                std::ignore = it.second->Stop(0);
+                std::ignore = it.second->FlushSourceBuffers();
                 setevent = true;
             }
         }
@@ -1126,42 +1166,44 @@ AudioEngine::AudioEngine(
     HRESULT hr = pImpl->Initialize(flags, wfx, deviceId, category);
     if (FAILED(hr))
     {
+        const wchar_t* deviceName = (deviceId) ? deviceId : L"default";
         if (hr == HRESULT_FROM_WIN32(ERROR_NOT_FOUND))
         {
             if (flags & AudioEngine_ThrowOnNoAudioHW)
             {
                 DebugTrace("ERROR: AudioEngine found no default audio device\n");
-                throw std::exception("AudioEngineNoAudioHW");
+                throw std::runtime_error("AudioEngineNoAudioHW");
             }
             else
             {
                 DebugTrace("WARNING: AudioEngine found no default audio device; running in 'silent mode'\n");
             }
         }
+        else if (hr == AUDCLNT_E_DEVICE_IN_USE)
+        {
+            if (flags & AudioEngine_ThrowOnNoAudioHW)
+            {
+                DebugTrace("ERROR: AudioEngine audio device [%ls] was already in use\n", deviceName);
+                throw std::runtime_error("AudioEngineNoAudioHW");
+            }
+            else
+            {
+                DebugTrace("WARNING: AudioEngine audio device [%ls] already in use; running in 'silent mode'\n", deviceName);
+            }
+        }
         else
         {
             DebugTrace("ERROR: AudioEngine failed (%08X) to initialize using device [%ls]\n",
-                static_cast<unsigned int>(hr),
-                (deviceId) ? deviceId : L"default");
-            throw std::exception("AudioEngine");
+                static_cast<unsigned int>(hr), deviceName);
+            throw std::runtime_error("AudioEngine");
         }
     }
 }
 
 
-// Move constructor.
-AudioEngine::AudioEngine(AudioEngine&& moveFrom) noexcept
-    : pImpl(std::move(moveFrom.pImpl))
-{
-}
-
-
-// Move assignment.
-AudioEngine& AudioEngine::operator= (AudioEngine&& moveFrom) noexcept
-{
-    pImpl = std::move(moveFrom.pImpl);
-    return *this;
-}
+// Move ctor/operator.
+AudioEngine::AudioEngine(AudioEngine&&) noexcept = default;
+AudioEngine& AudioEngine::operator= (AudioEngine&&) noexcept = default;
 
 
 // Public destructor.
@@ -1193,12 +1235,13 @@ bool AudioEngine::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceId)
     HRESULT hr = pImpl->Reset(wfx, deviceId);
     if (FAILED(hr))
     {
+        const wchar_t* deviceName = (deviceId) ? deviceId : L"default";
         if (hr == HRESULT_FROM_WIN32(ERROR_NOT_FOUND))
         {
             if (pImpl->mEngineFlags & AudioEngine_ThrowOnNoAudioHW)
             {
                 DebugTrace("ERROR: AudioEngine found no default audio device on Reset\n");
-                throw std::exception("AudioEngineNoAudioHW");
+                throw std::runtime_error("AudioEngineNoAudioHW");
             }
             else
             {
@@ -1206,11 +1249,24 @@ bool AudioEngine::Reset(const WAVEFORMATEX* wfx, const wchar_t* deviceId)
                 return false;
             }
         }
+        else if (hr == AUDCLNT_E_DEVICE_IN_USE)
+        {
+            if (pImpl->mEngineFlags & AudioEngine_ThrowOnNoAudioHW)
+            {
+                DebugTrace("ERROR: AudioEngine failed to initialize using device [%ls] because it was already in use.\n", deviceName);
+                throw std::runtime_error("AudioEngineNoAudioHW");
+            }
+            else
+            {
+                DebugTrace("WARNING: AudioEngine failed to initialize using device [%ls] because it was already in use.\n", deviceName);
+                return false;
+            }
+        }
         else
         {
             DebugTrace("ERROR: AudioEngine failed (%08X) to Reset using device [%ls]\n",
-                static_cast<unsigned int>(hr), (deviceId) ? deviceId : L"default");
-            throw std::exception("AudioEngine::Reset");
+                static_cast<unsigned int>(hr), deviceName);
+            throw std::runtime_error("AudioEngine::Reset");
         }
     }
 
@@ -1235,7 +1291,11 @@ void AudioEngine::Resume()
         return;
 
     HRESULT hr = pImpl->xaudio2->StartEngine();
-    ThrowIfFailed(hr);
+    if (FAILED(hr))
+    {
+        DebugTrace("WARNING: Resume of the audio engine failed; running in 'silent mode'\n");
+        pImpl->SetSilentMode();
+    }
 }
 
 
@@ -1262,7 +1322,7 @@ void AudioEngine::SetMasterVolume(float volume)
 void AudioEngine::SetReverb(AUDIO_ENGINE_REVERB reverb)
 {
     if (reverb >= Reverb_MAX)
-        throw std::out_of_range("AudioEngine::SetReverb");
+        throw std::invalid_argument("reverb parameter is invalid");
 
     if (reverb == Reverb_Off)
     {
@@ -1304,19 +1364,19 @@ WAVEFORMATEXTENSIBLE AudioEngine::GetOutputFormat() const noexcept
     if (!pImpl->xaudio2)
         return wfx;
 
-    wfx.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
-    wfx.Format.wBitsPerSample = wfx.Samples.wValidBitsPerSample = 16; // This is a guess
+    wfx.Format = pImpl->mOutputFormat;
     wfx.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
+    wfx.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
 
-    wfx.Format.nChannels = static_cast<WORD>(pImpl->masterChannels);
-    wfx.Format.nSamplesPerSec = pImpl->masterRate;
+    wfx.Samples.wValidBitsPerSample = wfx.Format.wBitsPerSample;
     wfx.dwChannelMask = pImpl->masterChannelMask;
 
     wfx.Format.nBlockAlign = static_cast<WORD>(wfx.Format.nChannels * wfx.Format.wBitsPerSample / 8);
     wfx.Format.nAvgBytesPerSec = wfx.Format.nSamplesPerSec * wfx.Format.nBlockAlign;
 
-    static const GUID s_pcm = { WAVE_FORMAT_PCM, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 } };
-    memcpy(&wfx.SubFormat, &s_pcm, sizeof(GUID));
+    static const GUID s_wfexBase = { 0x00000000, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 } };
+    memcpy(&wfx.SubFormat, &s_wfexBase, sizeof(GUID));
+    wfx.SubFormat.Data1 = wfx.Format.wFormatTag;
 
     return wfx;
 }
@@ -1325,6 +1385,12 @@ WAVEFORMATEXTENSIBLE AudioEngine::GetOutputFormat() const noexcept
 uint32_t AudioEngine::GetChannelMask() const noexcept
 {
     return pImpl->masterChannelMask;
+}
+
+
+int AudioEngine::GetOutputSampleRate() const noexcept
+{
+    return static_cast<int>(pImpl->masterRate);
 }
 
 
@@ -1350,7 +1416,7 @@ bool AudioEngine::IsCriticalError() const noexcept
 void AudioEngine::SetDefaultSampleRate(int sampleRate)
 {
     if ((sampleRate < XAUDIO2_MIN_SAMPLE_RATE) || (sampleRate > XAUDIO2_MAX_SAMPLE_RATE))
-        throw std::exception("Default sample rate is out of range");
+        throw std::out_of_range("Default sample rate is out of range");
 
     pImpl->defaultRate = sampleRate;
 }
@@ -1425,153 +1491,220 @@ X3DAUDIO_HANDLE& AudioEngine::Get3DHandle() const noexcept
 }
 
 
+uint32_t AudioEngine::Get3DCalculateFlags() const noexcept
+{
+    return pImpl->mX3DCalcFlags;
+}
+
 // Static methods.
-#if defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_GAMES)
-#include <mmdeviceapi.h>
-#elif defined(_XBOX_ONE)
-#include <Windows.Media.Devices.h>
-#include <wrl.h>
-#elif defined(USING_XAUDIO2_REDIST) || defined(_GAMING_DESKTOP)
-#include <mmdeviceapi.h>
-#include <functiondiscoverykeys_devpkey.h>
-#elif (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+#if (defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP)) || defined(USING_XAUDIO2_8)
+//--- Use Windows Runtime device enumeration ---
+
+// Note that this form of enumeration would also be needed for XAudio2.9 prior to Windows 10 (18362).
+//
+// If you care about supporting Windows 10 (17763), Windows Server 2019, or earlier Windows 10 builds,
+// you will need to modify the library to use this codepath for Windows desktop
+// -or- use XAudio2Redist -or- use XAudio 2.8.
+
+#ifdef _MSC_VER
 #pragma comment(lib,"runtimeobject.lib")
 #pragma warning(push)
-#pragma warning(disable: 4471 5204)
-#include <windows.devices.enumeration.h>
-#pragma warning(pop)
-#include <wrl.h>
+#pragma warning(disable: 4471 5204 5256 6553)
 #endif
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wnonportable-system-include-path"
+#endif
+#include <Windows.Devices.Enumeration.h>
+#include <Windows.Media.Devices.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+#include <wrl.h>
+
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wdeprecated-dynamic-exception-spec"
+#endif
+
+namespace
+{
+    const wchar_t* c_PKEY_AudioEngine_DeviceFormat = L"{f19f064d-082c-4e27-bc73-6882a1bb8e4c} 0";
+
+    class PropertyIterator : public Microsoft::WRL::RuntimeClass<ABI::Windows::Foundation::Collections::IIterator<HSTRING>>
+    {
+    #if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)
+        InspectableClass(L"AudioEngine.PropertyIterator", FullTrust)
+        #else
+        InspectableClass(L"AudioEngine.PropertyIterator", BaseTrust)
+        #endif
+
+    public:
+        PropertyIterator() : mFirst(true), mString(c_PKEY_AudioEngine_DeviceFormat) {}
+
+        HRESULT STDMETHODCALLTYPE get_Current(HSTRING *current) override
+        {
+            if (!current)
+                return E_INVALIDARG;
+
+            if (mFirst)
+            {
+                *current = mString.Get();
+            }
+
+            return S_OK;
+        }
+
+        HRESULT STDMETHODCALLTYPE get_HasCurrent(boolean *hasCurrent) override
+        {
+            if (!hasCurrent)
+                return E_INVALIDARG;
+
+            *hasCurrent = (mFirst) ? TRUE : FALSE;
+            return S_OK;
+        }
+
+        HRESULT STDMETHODCALLTYPE MoveNext(boolean *hasCurrent) override
+        {
+            if (!hasCurrent)
+                return E_INVALIDARG;
+
+            *hasCurrent = FALSE;
+            mFirst = false;
+            return S_OK;
+        }
+
+    private:
+        bool mFirst;
+        Microsoft::WRL::Wrappers::HStringReference mString;
+
+        ~PropertyIterator() override = default;
+    };
+
+    class PropertyList : public Microsoft::WRL::RuntimeClass<ABI::Windows::Foundation::Collections::IIterable<HSTRING>>
+    {
+    #if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)
+        InspectableClass(L"AudioEngine.PropertyList", FullTrust)
+        #else
+        InspectableClass(L"AudioEngine.PropertyList", BaseTrust)
+        #endif
+
+    public:
+        HRESULT STDMETHODCALLTYPE First(ABI::Windows::Foundation::Collections::IIterator<HSTRING> **first) override
+        {
+            if (!first)
+                return E_INVALIDARG;
+
+            ComPtr<PropertyIterator> p = Microsoft::WRL::Make<PropertyIterator>();
+            *first = p.Detach();
+            return S_OK;
+        }
+
+    private:
+        ~PropertyList() override = default;
+    };
+
+    void GetDeviceOutputFormat(const wchar_t* deviceId, WAVEFORMATEX& wfx)
+    {
+        using namespace Microsoft::WRL;
+        using namespace Microsoft::WRL::Wrappers;
+        using namespace ABI::Windows::Foundation;
+        using namespace ABI::Windows::Foundation::Collections;
+        using namespace ABI::Windows::Devices::Enumeration;
+
+    #if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)
+        RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+        ThrowIfFailed(initialize);
+    #endif
+
+        ComPtr<IDeviceInformationStatics> diFactory;
+        HRESULT hr = GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Enumeration_DeviceInformation).Get(), &diFactory);
+        ThrowIfFailed(hr);
+
+        HString id;
+        if (!deviceId)
+        {
+            using namespace ABI::Windows::Media::Devices;
+
+            ComPtr<IMediaDeviceStatics> mdStatics;
+            hr = GetActivationFactory(HStringReference(RuntimeClass_Windows_Media_Devices_MediaDevice).Get(), &mdStatics);
+            ThrowIfFailed(hr);
+
+            hr = mdStatics->GetDefaultAudioRenderId(AudioDeviceRole_Default, id.GetAddressOf());
+            ThrowIfFailed(hr);
+        }
+        else
+        {
+            id.Set(deviceId);
+        }
+
+        ComPtr<IAsyncOperation<DeviceInformation*>> operation;
+        ComPtr<IIterable<HSTRING>> props = Make<PropertyList>();
+
+        hr = diFactory->CreateFromIdAsyncAdditionalProperties(id.Get(), props.Get(), operation.GetAddressOf());
+        if (FAILED(hr))
+            return;
+
+        ComPtr<IAsyncInfo> asyncinfo;
+        hr = operation.As(&asyncinfo);
+        ThrowIfFailed(hr);
+
+        AsyncStatus status;
+        hr = asyncinfo->get_Status(&status);
+        ThrowIfFailed(hr);
+
+        while (status == ABI::Windows::Foundation::AsyncStatus::Started)
+        {
+            Sleep(100);
+            hr = asyncinfo->get_Status(&status);
+            ThrowIfFailed(hr);
+        }
+
+        if (status != ABI::Windows::Foundation::AsyncStatus::Completed)
+        {
+            throw std::runtime_error("CreateFromIdAsync");
+        }
+
+        ComPtr<IDeviceInformation> devInfo;
+        hr = operation->GetResults(devInfo.GetAddressOf());
+        ThrowIfFailed(hr);
+
+        ComPtr<IMapView<HSTRING, IInspectable*>> map;
+        hr = devInfo->get_Properties(map.GetAddressOf());
+        ThrowIfFailed(hr);
+
+        ComPtr<IInspectable> value;
+        hr = map->Lookup(HStringReference(c_PKEY_AudioEngine_DeviceFormat).Get(), value.GetAddressOf());
+        if (SUCCEEDED(hr))
+        {
+            ComPtr<IPropertyValue> pvalue;
+            if (SUCCEEDED(value.As(&pvalue)))
+            {
+                PropertyType ptype;
+                ThrowIfFailed(pvalue->get_Type(&ptype));
+
+                if (ptype == PropertyType_UInt8Array)
+                {
+                    UINT32 length = 0;
+                    BYTE* ptr;
+                    ThrowIfFailed(pvalue->GetUInt8Array(&length, &ptr));
+
+                    if (length >= sizeof(WAVEFORMATEX))
+                    {
+                        auto devicefx = reinterpret_cast<const WAVEFORMATEX*>(ptr);
+                        memcpy(&wfx, devicefx, sizeof(WAVEFORMATEX));
+                        wfx.wFormatTag = static_cast<WORD>(GetFormatTag(devicefx));
+                    }
+                }
+            }
+        }
+    }
+}
 
 std::vector<AudioEngine::RendererDetail> AudioEngine::GetRendererDetails()
 {
     std::vector<RendererDetail> list;
 
-#if defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_GAMES)
-
-    ComPtr<IMMDeviceEnumerator> devEnum;
-    HRESULT hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(devEnum.GetAddressOf()));
-    ThrowIfFailed(hr);
-
-    ComPtr<IMMDeviceCollection> devices;
-    hr = devEnum->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &devices);
-    ThrowIfFailed(hr);
-
-    ComPtr<IMMDevice> endpoint;
-    ThrowIfFailed(devices->Item(0, endpoint.GetAddressOf()));
-
-    LPWSTR id = nullptr;
-    ThrowIfFailed(endpoint->GetId(&id));
-
-    RendererDetail device;
-    device.deviceId = id;
-    device.description = L"Default";
-
-    CoTaskMemFree(id);
-
-    list.emplace_back(device);
-
-#elif defined(_XBOX_ONE)
-
-    using namespace Microsoft::WRL;
-    using namespace Microsoft::WRL::Wrappers;
-    using namespace ABI::Windows::Foundation;
-    using namespace ABI::Windows::Media::Devices;
-
-    ComPtr<IMediaDeviceStatics> mdStatics;
-    HRESULT hr = GetActivationFactory(HStringReference(RuntimeClass_Windows_Media_Devices_MediaDevice).Get(), &mdStatics);
-    ThrowIfFailed(hr);
-
-    HString id;
-    hr = mdStatics->GetDefaultAudioRenderId(AudioDeviceRole_Default, id.GetAddressOf());
-    ThrowIfFailed(hr);
-
-    RendererDetail device;
-    device.deviceId = id.GetRawBuffer(nullptr);
-    device.description = L"Default";
-    list.emplace_back(device);
-
-#elif defined(USING_XAUDIO2_REDIST) || defined(_GAMING_DESKTOP)
-
-    ComPtr<IMMDeviceEnumerator> devEnum;
-    HRESULT hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(devEnum.GetAddressOf()));
-    ThrowIfFailed(hr);
-
-    ComPtr<IMMDeviceCollection> devices;
-    hr = devEnum->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &devices);
-    ThrowIfFailed(hr);
-
-    UINT count = 0;
-    ThrowIfFailed(devices->GetCount(&count));
-
-    if (!count)
-        return list;
-
-    for (UINT j = 0; j < count; ++j)
-    {
-        ComPtr<IMMDevice> endpoint;
-        hr = devices->Item(j, endpoint.GetAddressOf());
-        ThrowIfFailed(hr);
-
-        LPWSTR id = nullptr;
-        ThrowIfFailed(endpoint->GetId(&id));
-
-        RendererDetail device;
-        device.deviceId = id;
-        CoTaskMemFree(id);
-
-        ComPtr<IPropertyStore> props;
-        if (SUCCEEDED(endpoint->OpenPropertyStore(STGM_READ, props.GetAddressOf())))
-        {
-            PROPVARIANT var;
-            PropVariantInit(&var);
-
-            if (SUCCEEDED(props->GetValue(PKEY_Device_FriendlyName, &var)))
-            {
-                if (var.vt == VT_LPWSTR)
-                {
-                    device.description = var.pwszVal;
-                }
-                PropVariantClear(&var);
-            }
-        }
-
-        list.emplace_back(device);
-    }
-
-#elif (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-
-#if defined(__cplusplus_winrt)
-
-    // Enumerating with WinRT using C++/CX (Windows Store apps)
-    using Windows::Devices::Enumeration::DeviceClass;
-    using Windows::Devices::Enumeration::DeviceInformation;
-    using Windows::Devices::Enumeration::DeviceInformationCollection;
-
-    auto operation = DeviceInformation::FindAllAsync(DeviceClass::AudioRender);
-    while (operation->Status == Windows::Foundation::AsyncStatus::Started) { Sleep(100); }
-    if (operation->Status != Windows::Foundation::AsyncStatus::Completed)
-    {
-        throw std::exception("FindAllAsync");
-    }
-
-    DeviceInformationCollection^ devices = operation->GetResults();
-
-    for (unsigned i = 0; i < devices->Size; ++i)
-    {
-        using Windows::Devices::Enumeration::DeviceInformation;
-
-        DeviceInformation^ d = devices->GetAt(i);
-
-        RendererDetail device;
-        device.deviceId = d->Id->Data();
-        device.description = d->Name->Data();
-        list.emplace_back(device);
-    }
-#else
-
     // Enumerating with WinRT using WRL (Win32 desktop app for Windows 8.x)
-    using namespace Microsoft::WRL;
     using namespace Microsoft::WRL::Wrappers;
     using namespace ABI::Windows::Foundation;
     using namespace ABI::Windows::Foundation::Collections;
@@ -1607,7 +1740,7 @@ std::vector<AudioEngine::RendererDetail> AudioEngine::GetRendererDetails()
 
     if (status != ABI::Windows::Foundation::AsyncStatus::Completed)
     {
-        throw std::exception("FindAllAsyncDeviceClass");
+        throw std::runtime_error("FindAllAsyncDeviceClass");
     }
 
     ComPtr<IVectorView<DeviceInformation*>> devices;
@@ -1644,10 +1777,178 @@ std::vector<AudioEngine::RendererDetail> AudioEngine::GetRendererDetails()
             list.emplace_back(device);
         }
     }
-#endif
+
+    return list;
+}
+
+
+#elif defined(_XBOX_ONE)
+//--- Use legacy Xbox One XDK device enumeration ---
+
+#include <Windows.Media.Devices.h>
+#include <wrl.h>
+
+namespace
+{
+    void GetDeviceOutputFormat(const wchar_t*, WAVEFORMATEX& wfx)
+    {
+        wfx.nSamplesPerSec = 48000;
+        wfx.wBitsPerSample = 24;
+    }
+}
+
+std::vector<AudioEngine::RendererDetail> AudioEngine::GetRendererDetails()
+{
+    std::vector<RendererDetail> list;
+
+    using namespace Microsoft::WRL;
+    using namespace Microsoft::WRL::Wrappers;
+    using namespace ABI::Windows::Foundation;
+    using namespace ABI::Windows::Media::Devices;
+
+    ComPtr<IMediaDeviceStatics> mdStatics;
+    HRESULT hr = GetActivationFactory(HStringReference(RuntimeClass_Windows_Media_Devices_MediaDevice).Get(), &mdStatics);
+    ThrowIfFailed(hr);
+
+    HString id;
+    hr = mdStatics->GetDefaultAudioRenderId(AudioDeviceRole_Default, id.GetAddressOf());
+    ThrowIfFailed(hr);
+
+    RendererDetail device;
+    device.deviceId = id.GetRawBuffer(nullptr);
+    device.description = L"Default";
+    list.emplace_back(device);
+
+    return list;
+}
+
+
+#elif defined(USING_XAUDIO2_9) || defined(USING_XAUDIO2_REDIST) || defined(_GAMING_DESKTOP)
+#include <mmdeviceapi.h>
+//--- Use WASAPI device enumeration ---
+
+namespace
+{
+    void GetDeviceOutputFormat(const wchar_t* deviceId, WAVEFORMATEX& wfx)
+    {
+        ComPtr<IMMDeviceEnumerator> devEnum;
+        if (FAILED(CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(devEnum.GetAddressOf()))))
+            return;
+
+        ComPtr<IMMDevice> endpoint;
+        if (!deviceId)
+        {
+            if (FAILED(devEnum->GetDefaultAudioEndpoint(eRender, eConsole, endpoint.GetAddressOf())))
+                return;
+        }
+        else
+        {
+            if (FAILED(devEnum->GetDevice(deviceId, endpoint.GetAddressOf())))
+                return;
+        }
+
+        // Value matches Windows SDK header um\mmdeviceapi.h
+        constexpr static PROPERTYKEY s_PKEY_AudioEngine_DeviceFormat = { { 0xf19f064d, 0x82c, 0x4e27, { 0xbc, 0x73, 0x68, 0x82, 0xa1, 0xbb, 0x8e, 0x4c } }, 0 };
+
+        ComPtr<IPropertyStore> props;
+        if (SUCCEEDED(endpoint->OpenPropertyStore(STGM_READ, props.GetAddressOf())))
+        {
+            PROPVARIANT var;
+            PropVariantInit(&var);
+
+            if (SUCCEEDED(props->GetValue(s_PKEY_AudioEngine_DeviceFormat, &var)))
+            {
+                if (var.vt == VT_BLOB && var.blob.cbSize >= sizeof(WAVEFORMATEX))
+                {
+                    auto devicefx = reinterpret_cast<const WAVEFORMATEX*>(var.blob.pBlobData);
+                    memcpy(&wfx, devicefx, sizeof(WAVEFORMATEX));
+                    wfx.wFormatTag = static_cast<WORD>(GetFormatTag(devicefx));
+                }
+                PropVariantClear(&var);
+            }
+        }
+    }
+}
+
+std::vector<AudioEngine::RendererDetail> AudioEngine::GetRendererDetails()
+{
+    std::vector<RendererDetail> list;
+
+    // Value matches Windows SDK header shared\devpkey.h
+    constexpr static PROPERTYKEY s_PKEY_Device_FriendlyName = { { 0xa45c254e, 0xdf1c, 0x4efd, { 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0 } }, 14 };
+
+    ComPtr<IMMDeviceEnumerator> devEnum;
+    HRESULT hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(devEnum.GetAddressOf()));
+    ThrowIfFailed(hr);
+
+    ComPtr<IMMDeviceCollection> devices;
+    hr = devEnum->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &devices);
+    ThrowIfFailed(hr);
+
+    UINT count = 0;
+    ThrowIfFailed(devices->GetCount(&count));
+
+    if (!count)
+        return list;
+
+    for (UINT j = 0; j < count; ++j)
+    {
+        ComPtr<IMMDevice> endpoint;
+        hr = devices->Item(j, endpoint.GetAddressOf());
+        ThrowIfFailed(hr);
+
+        LPWSTR id = nullptr;
+        ThrowIfFailed(endpoint->GetId(&id));
+
+        RendererDetail device;
+        device.deviceId = id;
+        CoTaskMemFree(id);
+
+        ComPtr<IPropertyStore> props;
+        if (SUCCEEDED(endpoint->OpenPropertyStore(STGM_READ, props.GetAddressOf())))
+        {
+            PROPVARIANT var;
+            PropVariantInit(&var);
+
+            if (SUCCEEDED(props->GetValue(s_PKEY_Device_FriendlyName, &var)))
+            {
+                if (var.vt == VT_LPWSTR)
+                {
+                    device.description = var.pwszVal;
+                }
+                PropVariantClear(&var);
+            }
+        }
+
+        list.emplace_back(device);
+    }
+
+    return list;
+}
+
+
 #else
 #error DirectX Tool Kit for Audio not supported on this platform
 #endif
 
-    return list;
+
+//--------------------------------------------------------------------------------------
+// Adapters for /Zc:wchar_t- clients
+#if defined(_MSC_VER) && !defined(_NATIVE_WCHAR_T_DEFINED)
+
+_Use_decl_annotations_
+AudioEngine::AudioEngine(
+    AUDIO_ENGINE_FLAGS flags,
+    const WAVEFORMATEX* wfx,
+    const __wchar_t* deviceId,
+    AUDIO_STREAM_CATEGORY category) noexcept(false) :
+    AudioEngine(flags, wfx, reinterpret_cast<const unsigned short*>(deviceId), category)
+{}
+
+_Use_decl_annotations_
+bool AudioEngine::Reset(const WAVEFORMATEX* wfx, const __wchar_t* deviceId)
+{
+    return Reset(wfx, reinterpret_cast<const unsigned short*>(deviceId));
 }
+
+#endif // !_NATIVE_WCHAR_T_DEFINED

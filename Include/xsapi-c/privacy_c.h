@@ -231,10 +231,10 @@ enum class XblPermission : uint32_t
 
     /// <summary>
     /// Check whether or not the user can send a message with text content or an invitation to the target user.
-    /// This value does not change if the player has muted the target user.  Use CommunicateUsingVoice instead.
-    /// This value will be false if for example you have set your comms to friends only and the target is not a friend.
-    /// This value will be false if for example if the target user has blocked you.
-    /// This value will be false if for example you have set your comms settings to Blocked.
+    /// This value doesn't change if the player has muted the target user.  Use CommunicateUsingVoice instead.
+    /// This value will be false if you have set your comms to friends only and the target is not a friend.
+    /// This value will be false if the target user has blocked you.
+    /// This value will be false if you have set your comms settings to Blocked.
     /// </summary>
     CommunicateUsingText = 1000,
 
@@ -360,7 +360,7 @@ enum class XblPermissionDenyReason : uint32_t
     MuteListRestrictsTarget = 7,
 
     /// <summary>
-    /// A privacy value for the requestor has a restriction that doesn't allow interaction with the target.  
+    /// A privacy value for the requester has a restriction that doesn't allow interaction with the target.  
     /// For instance, a parental control only allows interaction with friends and the target isn't a friend.
     /// </summary>
     PrivacySettingRestrictsTarget = 9,
@@ -703,6 +703,152 @@ STDAPI XblPrivacyGetMuteListResult(
     _In_ XAsyncBlock* async,
     _In_ size_t xuidCount,
     _Out_writes_(xuidCount) uint64_t* xuids
+) XBL_NOEXCEPT;
+
+/// <summary>
+/// Defines the type of change that occurred on a privacy list.
+/// </summary>
+/// <memof><see cref="XblPrivacyMuteListChangeEventArgs"/></memof>
+/// <memof><see cref="XblPrivacyBlockListChangeEventArgs"/></memof>
+enum class XblPrivacyListChangeType : uint32_t
+{
+    /// <summary>
+    /// One or more users were added to the list.
+    /// </summary>
+    Added,
+
+    /// <summary>
+    /// One or more users were removed from the list.
+    /// </summary>
+    Removed
+};
+
+/// <summary>
+/// Event arguments for a mute list change.
+/// </summary>
+typedef struct XblPrivacyMuteListChangeEventArgs
+{
+    /// <summary>
+    /// The type of change (Added or Removed).
+    /// </summary>
+    XblPrivacyListChangeType changeType;
+
+    /// <summary>
+    /// The Xbox user IDs affected by the change.
+    /// </summary>
+    uint64_t* xuids;
+
+    /// <summary>
+    /// The number of entries in the xuids array.
+    /// </summary>
+    size_t xuidsCount;
+} XblPrivacyMuteListChangeEventArgs;
+
+/// <summary>
+/// Event arguments for a block list change.
+/// </summary>
+typedef struct XblPrivacyBlockListChangeEventArgs
+{
+    /// <summary>
+    /// The type of change (Added or Removed).
+    /// </summary>
+    XblPrivacyListChangeType changeType;
+
+    /// <summary>
+    /// The Xbox user IDs affected by the change.
+    /// </summary>
+    uint64_t* xuids;
+
+    /// <summary>
+    /// The number of entries in the xuids array.
+    /// </summary>
+    size_t xuidsCount;
+} XblPrivacyBlockListChangeEventArgs;
+
+/// <summary>
+/// A callback invoked when the user's mute list changes.
+/// </summary>
+/// <param name="eventArgs">The arguments associated with the mute list change.
+/// The fields of the struct are only valid during the callback.</param>
+/// <param name="context">Context provided when the handler is added.</param>
+/// <returns></returns>
+typedef void
+(STDAPIVCALLTYPE* XblPrivacyMuteListChangedHandler)(
+    _In_ const XblPrivacyMuteListChangeEventArgs* eventArgs,
+    _In_opt_ void* context
+);
+
+/// <summary>
+/// A callback invoked when the user's block list changes.
+/// </summary>
+/// <param name="eventArgs">The arguments associated with the block list change.
+/// The fields of the struct are only valid during the callback.</param>
+/// <param name="context">Context provided when the handler is added.</param>
+/// <returns></returns>
+typedef void
+(STDAPIVCALLTYPE* XblPrivacyBlockListChangedHandler)(
+    _In_ const XblPrivacyBlockListChangeEventArgs* eventArgs,
+    _In_opt_ void* context
+);
+
+/// <summary>
+/// Registers an event handler for notifications when the user's mute list changes.
+/// </summary>
+/// <param name="xboxLiveContext">An xbox services context handle created with XblContextCreateHandle.</param>
+/// <param name="handler">The callback function that receives notifications.</param>
+/// <param name="handlerContext">Client context pointer to be passed back to the handler.</param>
+/// <returns>A XblFunctionContext used to remove the handler.</returns>
+/// <remarks>
+/// Call <see cref="XblPrivacyRemoveMuteListChangedHandler"/> to un-register the event handler.
+/// </remarks>
+STDAPI_(XblFunctionContext) XblPrivacyAddMuteListChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblPrivacyMuteListChangedHandler handler,
+    _In_opt_ void* handlerContext
+) XBL_NOEXCEPT;
+
+/// <summary>
+/// Removes a mute list change handler.
+/// </summary>
+/// <param name="xboxLiveContext">An xbox services context handle created with XblContextCreateHandle.</param>
+/// <param name="handlerFunctionContext">Context for the handler to remove.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>
+/// Call this API only if <see cref="XblPrivacyAddMuteListChangedHandler"/> was used to register an event handler.
+/// </remarks>
+STDAPI XblPrivacyRemoveMuteListChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblFunctionContext handlerFunctionContext
+) XBL_NOEXCEPT;
+
+/// <summary>
+/// Registers an event handler for notifications when the user's block list changes.
+/// </summary>
+/// <param name="xboxLiveContext">An xbox services context handle created with XblContextCreateHandle.</param>
+/// <param name="handler">The callback function that receives notifications.</param>
+/// <param name="handlerContext">Client context pointer to be passed back to the handler.</param>
+/// <returns>A XblFunctionContext used to remove the handler.</returns>
+/// <remarks>
+/// Call <see cref="XblPrivacyRemoveBlockListChangedHandler"/> to un-register the event handler.
+/// </remarks>
+STDAPI_(XblFunctionContext) XblPrivacyAddBlockListChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblPrivacyBlockListChangedHandler handler,
+    _In_opt_ void* handlerContext
+) XBL_NOEXCEPT;
+
+/// <summary>
+/// Removes a block list change handler.
+/// </summary>
+/// <param name="xboxLiveContext">An xbox services context handle created with XblContextCreateHandle.</param>
+/// <param name="handlerFunctionContext">Context for the handler to remove.</param>
+/// <returns>HRESULT return code for this API operation.</returns>
+/// <remarks>
+/// Call this API only if <see cref="XblPrivacyAddBlockListChangedHandler"/> was used to register an event handler.
+/// </remarks>
+STDAPI XblPrivacyRemoveBlockListChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblFunctionContext handlerFunctionContext
 ) XBL_NOEXCEPT;
 
 }

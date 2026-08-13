@@ -87,7 +87,7 @@ private:
     TaskQueue m_queue;
     std::shared_ptr<xbox::services::XboxLiveContextSettings> m_xboxLiveContextSettings;
     uint32_t m_titleId{ AppConfig::Instance()->TitleId() };
-    mutable std::mutex m_mutex{};
+    mutable DefaultUnnamedMutex m_mutex{};
 };
 
 }

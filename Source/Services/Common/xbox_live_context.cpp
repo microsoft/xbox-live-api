@@ -111,7 +111,7 @@ HRESULT XblContext::Initialize(
     {
         Result<xbox::services::User> userResult = m_user.Copy();
         RETURN_HR_IF_FAILED(userResult.Hresult());
-        m_privacyService = MakeShared<privacy::PrivacyService>(userResult.ExtractPayload(), m_xboxLiveContextSettings);
+        m_privacyService = MakeShared<privacy::PrivacyService>(userResult.ExtractPayload(), m_xboxLiveContextSettings, rtaManager);
     }
 
     {

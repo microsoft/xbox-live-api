@@ -220,6 +220,86 @@ int PrivacyServiceGetAvoidOrMuteList_Lua(lua_State* L)
     return LuaReturnHR(L, S_OK);
 }
 
+int PrivacyServiceAddMuteListChangedHandler_Lua(lua_State* L)
+{
+#if CPP_TESTS_ENABLED
+    std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xboxLiveContext);
+    Data()->muteListChangedHandlerContext = xblc->privacy_service().add_mute_list_changed_handler(
+        [](XblPrivacyMuteListChangeEventArgs args)
+        {
+            LogToFile("Mute list changed (C++):");
+            std::stringstream ss;
+            for (size_t i = 0; i < args.xuidsCount; ++i)
+            {
+                if (i > 0)
+                {
+                    ss << ", ";
+                }
+                ss << args.xuids[i];
+            }
+            LogToFile("changeType = %u, affectedXuids = %s", args.changeType, ss.str().data());
+            CallLuaFunction("OnMuteListChanged");
+        });
+    LogToFile("PrivacyServiceAddMuteListChangedHandler");
+#else
+    LogToFile("PrivacyServiceAddMuteListChangedHandler is disabled on this platform.");
+#endif
+    return LuaReturnHR(L, S_OK);
+}
+
+int PrivacyServiceRemoveMuteListChangedHandler_Lua(lua_State* L)
+{
+#if CPP_TESTS_ENABLED
+    std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xboxLiveContext);
+    xblc->privacy_service().remove_mute_list_changed_handler(Data()->muteListChangedHandlerContext);
+    Data()->muteListChangedHandlerContext = nullptr;
+    LogToFile("PrivacyServiceRemoveMuteListChangedHandler");
+#else
+    LogToFile("PrivacyServiceRemoveMuteListChangedHandler is disabled on this platform");
+#endif
+    return LuaReturnHR(L, S_OK);
+}
+
+int PrivacyServiceAddBlockListChangedHandler_Lua(lua_State* L)
+{
+#if CPP_TESTS_ENABLED
+    std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xboxLiveContext);
+    Data()->blockListChangedHandlerContext = xblc->privacy_service().add_block_list_changed_handler(
+        [](XblPrivacyBlockListChangeEventArgs args)
+        {
+            LogToFile("Block list changed (C++):");
+            std::stringstream ss;
+            for (size_t i = 0; i < args.xuidsCount; ++i)
+            {
+                if (i > 0)
+                {
+                    ss << ", ";
+                }
+                ss << args.xuids[i];
+            }
+            LogToFile("changeType = %u, affectedXuids = %s", args.changeType, ss.str().data());
+            CallLuaFunction("OnBlockListChanged");
+        });
+    LogToFile("PrivacyServiceAddBlockListChangedHandler");
+#else
+    LogToFile("PrivacyServiceAddBlockListChangedHandler is disabled on this platform.");
+#endif
+    return LuaReturnHR(L, S_OK);
+}
+
+int PrivacyServiceRemoveBlockListChangedHandler_Lua(lua_State* L)
+{
+#if CPP_TESTS_ENABLED
+    std::shared_ptr<xbox::services::xbox_live_context> xblc = std::make_shared<xbox::services::xbox_live_context>(Data()->xboxLiveContext);
+    xblc->privacy_service().remove_block_list_changed_handler(Data()->blockListChangedHandlerContext);
+    Data()->blockListChangedHandlerContext = nullptr;
+    LogToFile("PrivacyServiceRemoveBlockListChangedHandler");
+#else
+    LogToFile("PrivacyServiceRemoveBlockListChangedHandler is disabled on this platform");
+#endif
+    return LuaReturnHR(L, S_OK);
+}
+
 void SetupAPIs_CppPrivacy()
 {
     lua_register(Data()->L, "PrivacyServiceGetAvoidList", PrivacyServiceGetAvoidList_Lua);
@@ -227,4 +307,8 @@ void SetupAPIs_CppPrivacy()
     lua_register(Data()->L, "PrivacyServiceCheckMultiplePermissionsWithMultipleTargetUsers", PrivacyServiceCheckMultiplePermissionsWithMultipleTargetUsers_Lua);
     lua_register(Data()->L, "PrivacyServiceGetMuteList", PrivacyServiceGetMuteList_Lua);
     lua_register(Data()->L, "PrivacyServiceGetAvoidOrMuteList", PrivacyServiceGetAvoidOrMuteList_Lua);
+    lua_register(Data()->L, "PrivacyServiceAddMuteListChangedHandler", PrivacyServiceAddMuteListChangedHandler_Lua);
+    lua_register(Data()->L, "PrivacyServiceRemoveMuteListChangedHandler", PrivacyServiceRemoveMuteListChangedHandler_Lua);
+    lua_register(Data()->L, "PrivacyServiceAddBlockListChangedHandler", PrivacyServiceAddBlockListChangedHandler_Lua);
+    lua_register(Data()->L, "PrivacyServiceRemoveBlockListChangedHandler", PrivacyServiceRemoveBlockListChangedHandler_Lua);
 }
