@@ -27,7 +27,7 @@
     Platform to validate against. Defaults to x64.
 
 .PARAMETER Toolset
-    Toolset version of the static library to link. Defaults to 142.
+    Toolset version of the static library to link. Defaults to 143.
 
 .EXAMPLE
     .\Test-Linkage.ps1
@@ -48,7 +48,7 @@ param(
     [ValidateSet('x64', 'ARM64')]
     [string]$Platform = 'x64',
 
-    [string]$Toolset = '142'
+    [string]$Toolset = '143'
 )
 
 $ErrorActionPreference = 'Stop'

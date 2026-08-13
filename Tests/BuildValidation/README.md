@@ -36,7 +36,7 @@ Build the configuration under test first:
 
 ```powershell
 # Static
-msbuild Build\Microsoft.Xbox.Services.142.GDK.C\Microsoft.Xbox.Services.142.GDK.C.vcxproj /p:Configuration=Debug /p:Platform=x64
+msbuild Build\Microsoft.Xbox.Services.143.GDK.C\Microsoft.Xbox.Services.143.GDK.C.vcxproj /p:Configuration=Debug /p:Platform=x64
 
 # Dynamic
 msbuild Build\Microsoft.Xbox.Services.GDK.C.Thunks\Microsoft.Xbox.Services.GDK.C.Thunks.vcxproj /p:Configuration=Debug /p:Platform=x64

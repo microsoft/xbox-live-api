@@ -28,7 +28,7 @@ From the command line:
 
     msbuild Build\Microsoft.Xbox.Services.143.GDK.C\Microsoft.Xbox.Services.143.GDK.C.vcxproj /p:Configuration=Debug /p:Platform=x64
 
-Build output goes to `Bins\Binaries\<Configuration>\<Platform>\`.
+Build output goes to `Bins\Binaries\<Configuration>\<Platform>\<ProjectName>\`, so the command above writes to `Bins\Binaries\Debug\x64\Microsoft.Xbox.Services.143.GDK.C\`.
 
 ### Building the Thunks DLL
 
@@ -38,7 +38,9 @@ The usual reason is the C runtime. The static library links the C runtime dynami
 
     msbuild Build\Microsoft.Xbox.Services.GDK.C.Thunks\Microsoft.Xbox.Services.GDK.C.Thunks.vcxproj /p:Configuration=Debug /p:Platform=x64
 
-This produces `Microsoft.Xbox.Services.C.Thunks.dll` and its import library `Microsoft.Xbox.Services.C.Thunks.lib`. Link against the import library and ship the DLL alongside your title.
+This produces `Microsoft.Xbox.Services.C.Thunks.dll` and its import library `Microsoft.Xbox.Services.C.Thunks.lib` in `Bins\Binaries\Debug\x64\Microsoft.Xbox.Services.GDK.C.Thunks\`. Link against the import library and ship the DLL alongside your title.
+
+Note that the Microsoft GDK also ships a `Microsoft.Xbox.Services.C.Thunks.lib` under the same name. Link against the one you built here by full path, or the linker may quietly pick up the other.
 
 The DLL depends on `libHttpClient.GDK.dll`, which is built by a separate project and must be deployed with it:
 
@@ -75,6 +77,22 @@ If you already cloned the repo, you can initialize submodules with:
 
 **Note that using GitHub's feature to "Download Zip" does not contain the submodules and will not properly build.  Please clone recursively instead.**
 
+### Long paths on Windows
+
+Some nested submodules contain paths longer than the legacy 260 character limit. If long path support is not enabled, the recursive clone fails partway through with `Filename too long` and leaves the submodules incompletely checked out:
+
+    error: unable to create file ...: Filename too long
+    fatal: Unable to checkout '...' in submodule path 'External/Xal/External/libHttpClient'
+
+Enable long paths before cloning:
+
+    git config --global core.longpaths true
+
+If you already hit the error, enable the setting and then re-run the submodule update to finish the checkout:
+
+    git config --global core.longpaths true
+    git submodule update --init --recursive
+
 ## How to link your project against source
 
 You might want to link against the XSAPI source if you want to debug an issue, or understand where an error code is coming from.  How to do this can be found at [How to link your project against source](LINKTOSOURCE.md)
@@ -87,7 +105,7 @@ Big or small we'd like to take your contributions back to help improve the Xbox 
 
 ## Having Trouble?
 
-We'd love to get your review score, whether good or bad, but even more than that, we want to fix your problem. If you submit your issue as a Review, we won't be able to respond to your problem and ask any follow-up questions that may be necessary. The most efficient way to do that is to open a an issue in our [issue tracker](https://github.com/Microsoft/xbox-live-api/issues).  The Xbox Live team will be engaged with the community and be continually improving our APIs, tools, and documentation based on the feedback received.
+We'd love to get your review score, whether good or bad, but even more than that, we want to fix your problem. If you submit your issue as a Review, we won't be able to respond to your problem and ask any follow-up questions that may be necessary. The most efficient way to do that is to open an issue in our [issue tracker](https://github.com/Microsoft/xbox-live-api/issues).  The Xbox Live team will be engaged with the community and be continually improving our APIs, tools, and documentation based on the feedback received.
 
 ### Xbox Live GitHub projects
 *   [Xbox Live Service API for C++](https://github.com/Microsoft/xbox-live-api)
