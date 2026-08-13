@@ -128,12 +128,43 @@ else {
     $crt = if ($Configuration -eq 'Debug') { '/MTd' } else { '/MT' }
 }
 
+# A cold build of a project that references libHttpClient does not always copy
+# its outputs next to the XSAPI library, so fall back to libHttpClient's own
+# output folder and build it on demand if it has not been produced yet.
+function Resolve-LibHttpClientFile {
+    param([Parameter(Mandatory)][string]$FileName)
+
+    $candidates = @(
+        (Join-Path $libDir $FileName),
+        (Join-Path $repoRoot "External\Xal\External\libHttpClient\Out\$Platform\$Configuration\libHttpClient.GDK\$FileName")
+    )
+
+    foreach ($candidate in $candidates) {
+        if (Test-Path $candidate) { return $candidate }
+    }
+    return $null
+}
+
+if (-not (Resolve-LibHttpClientFile 'libHttpClient.GDK.lib')) {
+    Write-Host 'libHttpClient has not been built yet. Building it now...'
+    $hcProject = Join-Path $repoRoot 'External\Xal\External\libHttpClient\Build\libHttpClient.GDK\libHttpClient.GDK.vcxproj'
+    & msbuild $hcProject "/p:Configuration=$Configuration" "/p:Platform=$Platform" /v:minimal /nologo | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error 'libHttpClient failed to build, so the link inputs could not be resolved.'
+    }
+}
+
+$httpClientLib = Resolve-LibHttpClientFile 'libHttpClient.GDK.lib'
+if (-not $httpClientLib) {
+    Write-Error 'libHttpClient.GDK.lib could not be located after building libHttpClient.'
+}
+
 # Link the XSAPI library by full path. The GDK ships a library with the same
 # name, and linking that one instead would defeat the purpose of the test.
 $linkInputs = @(
     "/LIBPATH:$gdkLib",
     $xsapiLib,
-    (Join-Path $libDir 'libHttpClient.GDK.lib'),
+    $httpClientLib,
     'xgameruntime.lib',
     'appnotify.lib',
     'winhttp.lib',
@@ -180,8 +211,8 @@ if ($Linkage -eq 'Static') {
 # Linking against the import library only proves the .def lists the export. The
 # executable has to load for the export to be proven present in the DLL itself.
 Copy-Item (Join-Path $libDir 'Microsoft.Xbox.Services.C.Thunks.dll') $outputDir -Force
-$httpClientDll = Join-Path $libDir 'libHttpClient.GDK.dll'
-if (Test-Path $httpClientDll) {
+$httpClientDll = Resolve-LibHttpClientFile 'libHttpClient.GDK.dll'
+if ($httpClientDll) {
     Copy-Item $httpClientDll $outputDir -Force
 }
 
