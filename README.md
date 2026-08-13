@@ -30,6 +30,14 @@ From the command line:
 
 Build output goes to `Bins\Binaries\<Configuration>\<Platform>\<ProjectName>\`, so the command above writes to `Bins\Binaries\Debug\x64\Microsoft.Xbox.Services.143.GDK.C\`.
 
+The static library depends on libHttpClient, which is built from the `External\Xal\External\libHttpClient` submodule and copied next to the XSAPI library. On a completely clean tree the first build copies `libHttpClient.GDK.dll` but not its import library `libHttpClient.GDK.lib`, so linking against a freshly built XSAPI can fail with:
+
+    LNK1181: cannot open input file 'libHttpClient.GDK.lib'
+
+Running the build a second time copies it. Alternatively, take the import library directly from where libHttpClient builds it:
+
+    External\Xal\External\libHttpClient\Out\<Platform>\<Configuration>\libHttpClient.GDK\
+
 ### Building the Thunks DLL
 
 **Linking XSAPI statically is the recommended configuration and is what most titles should use.** The Thunks DLL exists for titles that cannot link statically, or prefer not to.
