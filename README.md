@@ -66,6 +66,10 @@ The best way to learn the API and see the best practices is to look at the Xbox 
 
 This repo contains submodules.  There are two ways to make sure you get submodules.
 
+On Windows, enable long path support before cloning, or the recursive clone will fail partway through. See [Long paths on Windows](#long-paths-on-windows) below.
+
+    git config --global core.longpaths true
+
 When initially cloning, make sure you use the `--recursive` option. IE:
 
     git clone --recursive https://github.com/Microsoft/xbox-live-api.git
@@ -84,11 +88,7 @@ Some nested submodules contain paths longer than the legacy 260 character limit.
     error: unable to create file ...: Filename too long
     fatal: Unable to checkout '...' in submodule path 'External/Xal/External/libHttpClient'
 
-Enable long paths before cloning:
-
-    git config --global core.longpaths true
-
-If you already hit the error, enable the setting and then re-run the submodule update to finish the checkout:
+If you already hit this, enable the setting and then re-run the submodule update to finish the checkout:
 
     git config --global core.longpaths true
     git submodule update --init --recursive
