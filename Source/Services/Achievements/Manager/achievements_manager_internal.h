@@ -146,8 +146,7 @@ private:
         _In_ AsyncContext<HRESULT> async,
         _In_ Vector<XblAchievement> fetchedAchievements = Vector<XblAchievement>()
     );
-
-    std::mutex m_mutex;
+    DefaultUnnamedMutex m_mutex;
     bool m_isInitialized = false;
     bool m_isFetchingAchievements = true;
 
@@ -236,8 +235,7 @@ public:
     );
 
 private:
-    
-    std::mutex m_mutex;
+    DefaultUnnamedMutex m_mutex;
     Vector<XblAchievementsManagerEvent> m_publishedEvents;
     Vector<XblAchievementsManagerEvent> m_pendingEvents;
     Map<uint64_t, std::shared_ptr<AchievementsManagerUser>> m_localUsers;

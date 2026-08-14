@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: EffectCommon.h
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -28,25 +28,28 @@
 
 namespace DirectX
 {
-    // Internal effect flags
-    namespace EffectFlags
+    inline namespace DX12
     {
-        constexpr int PerPixelLightingBit = 0x04;
-    }
+        // Internal effect flags
+        namespace EffectFlags
+        {
+            constexpr int PerPixelLightingBit = 0x04;
+        }
 
-    static_assert(((EffectFlags::PerPixelLighting) & EffectFlags::PerPixelLightingBit) != 0, "PerPixelLighting enum flags mismatch");
+        static_assert(((EffectFlags::PerPixelLighting)& EffectFlags::PerPixelLightingBit) != 0, "PerPixelLighting enum flags mismatch");
+    }
 
     // Bitfield tracks which derived parameter values need to be recomputed.
     namespace EffectDirtyFlags
     {
-        constexpr int ConstantBuffer        = 0x01;
-        constexpr int WorldViewProj         = 0x02;
+        constexpr int ConstantBuffer = 0x01;
+        constexpr int WorldViewProj = 0x02;
         constexpr int WorldInverseTranspose = 0x04;
-        constexpr int EyePosition           = 0x08;
-        constexpr int MaterialColor         = 0x10;
-        constexpr int FogVector             = 0x20;
-        constexpr int FogEnable             = 0x40;
-        constexpr int AlphaTest             = 0x80;
+        constexpr int EyePosition = 0x08;
+        constexpr int MaterialColor = 0x10;
+        constexpr int FogVector = 0x20;
+        constexpr int FogEnable = 0x40;
+        constexpr int AlphaTest = 0x80;
     }
 
     // Helper stores matrix parameter values, and computes derived matrices.
@@ -123,7 +126,7 @@ namespace DirectX
     public:
         EffectDeviceResources(_In_ ID3D12Device* device) noexcept
             : mDevice(device)
-        { }
+        {}
 
         ID3D12RootSignature* DemandCreateRootSig(_Inout_ Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSig, D3D12_ROOT_SIGNATURE_DESC const& desc);
 
@@ -140,13 +143,17 @@ namespace DirectX
     public:
         typename Traits::ConstantBufferType constants;
 
-       // Constructor.
+        // Constructor.
         EffectBase(_In_ ID3D12Device* device)
             : constants{},
             dirtyFlags(INT_MAX),
-            mRootSignature(nullptr),
-            mDeviceResources(deviceResourcesPool.DemandCreate(device))
+            mRootSignature(nullptr)
         {
+            if (!device)
+                throw std::invalid_argument("Direct3D device is null");
+
+            mDeviceResources = deviceResourcesPool.DemandCreate(device);
+
             // Initialize the constant buffer data
             mConstantBuffer = GraphicsMemory::Get(device).AllocateConstant(constants);
         }
@@ -171,6 +178,11 @@ namespace DirectX
         ID3D12RootSignature* GetRootSignature(int slot, CD3DX12_ROOT_SIGNATURE_DESC const& rootSig)
         {
             return mDeviceResources->GetRootSignature(slot, rootSig);
+        }
+
+        ID3D12Device* GetDevice() const noexcept
+        {
+            return mDeviceResources->GetDevice();
         }
 
         // Fields.
@@ -205,7 +217,7 @@ namespace DirectX
             DeviceResources(_In_ ID3D12Device* device) noexcept
                 : EffectDeviceResources(device),
                 mRootSignature{}
-            { }
+            {}
 
             // Gets or lazily creates the specified root signature
             ID3D12RootSignature* GetRootSignature(int slot, D3D12_ROOT_SIGNATURE_DESC const& desc)

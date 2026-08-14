@@ -402,4 +402,68 @@ pplx::task<xbox_live_result<std::vector<string_t>>> privacy_service::get_avoid_o
     return pplx::task_from_result(xbox_live_result<std::vector<string_t>>(std::make_error_code(xbox_live_error_code::invalid_argument)));
 }
 
+struct privacy_service::MuteListHandlerContext
+{
+    XblFunctionContext token{ 0 };
+    std::function<void(XblPrivacyMuteListChangeEventArgs)> handler;
+};
+
+struct privacy_service::BlockListHandlerContext
+{
+    XblFunctionContext token{ 0 };
+    std::function<void(XblPrivacyBlockListChangeEventArgs)> handler;
+};
+
+function_context privacy_service::add_mute_list_changed_handler(
+    _In_ std::function<void(XblPrivacyMuteListChangeEventArgs)> handler
+)
+{
+    auto context = new MuteListHandlerContext{};
+    context->handler = std::move(handler);
+
+    context->token = XblPrivacyAddMuteListChangedHandler(m_xblContext,
+        [](const XblPrivacyMuteListChangeEventArgs* args, void* context)
+        {
+            auto handlerContext{ static_cast<MuteListHandlerContext*>(context) };
+            handlerContext->handler(*args);
+        }, context);
+
+    return context;
+}
+
+void privacy_service::remove_mute_list_changed_handler(
+    _In_ function_context context
+)
+{
+    auto handlerContext{ static_cast<MuteListHandlerContext*>(context) };
+    XblPrivacyRemoveMuteListChangedHandler(m_xblContext, handlerContext->token);
+    delete handlerContext;
+}
+
+function_context privacy_service::add_block_list_changed_handler(
+    _In_ std::function<void(XblPrivacyBlockListChangeEventArgs)> handler
+)
+{
+    auto context = new BlockListHandlerContext{};
+    context->handler = std::move(handler);
+
+    context->token = XblPrivacyAddBlockListChangedHandler(m_xblContext,
+        [](const XblPrivacyBlockListChangeEventArgs* args, void* context)
+        {
+            auto handlerContext{ static_cast<BlockListHandlerContext*>(context) };
+            handlerContext->handler(*args);
+        }, context);
+
+    return context;
+}
+
+void privacy_service::remove_block_list_changed_handler(
+    _In_ function_context context
+)
+{
+    auto handlerContext{ static_cast<BlockListHandlerContext*>(context) };
+    XblPrivacyRemoveBlockListChangedHandler(m_xblContext, handlerContext->token);
+    delete handlerContext;
+}
+
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRIVACY_CPP_END

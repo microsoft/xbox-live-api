@@ -7,7 +7,7 @@
 // The meshconvert sample tool for DirectXMesh can produce this file type
 // http://go.microsoft.com/fwlink/?LinkID=324981
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
@@ -28,9 +28,16 @@ namespace VBO
         uint32_t numIndices;
     };
 
+    struct vertex_t
+    {
+        DirectX::XMFLOAT3 position;
+        DirectX::XMFLOAT3 normal;
+        DirectX::XMFLOAT2 textureCoordinate;
+    };
+
 #pragma pack(pop)
 
 } // namespace
 
 static_assert(sizeof(VBO::header_t) == 8, "VBO header size mismatch");
-
+static_assert(sizeof(VBO::vertex_t) == 32, "VBO vertex size mismatch");

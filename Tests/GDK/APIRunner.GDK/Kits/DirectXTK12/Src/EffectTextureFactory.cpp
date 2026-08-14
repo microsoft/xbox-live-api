@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: EffectTextureFactory.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -49,8 +49,11 @@ public:
         , mSharing(true)
         , mForceSRGB(false)
         , mAutoGenMips(false)
-    { 
-        *mPath = 0; 
+    {
+        if (!device)
+            throw std::invalid_argument("Direct3D device is null");
+
+        *mPath = 0;
     }
 
     Impl(
@@ -68,6 +71,12 @@ public:
     {
         SetDebugObjectName(mTextureDescriptorHeap.Heap(), L"EffectTextureFactory");
     }
+
+    Impl(const Impl&) = delete;
+    Impl& operator=(const Impl&) = delete;
+
+    Impl(Impl&&) = delete;
+    Impl& operator=(Impl&&) = delete;
 
     size_t CreateTexture(_In_z_ const wchar_t* name, int descriptorSlot);
 
@@ -99,7 +108,7 @@ _Use_decl_annotations_
 size_t EffectTextureFactory::Impl::CreateTexture(_In_z_ const wchar_t* name, int descriptorSlot)
 {
     if (!name)
-        throw std::exception("invalid arguments");
+        throw std::invalid_argument("name required for CreateTexture");
 
     auto it = mTextureCache.find(name);
 
@@ -123,12 +132,13 @@ size_t EffectTextureFactory::Impl::CreateTexture(_In_z_ const wchar_t* name, int
             if (!GetFileAttributesExW(fullName, GetFileExInfoStandard, &fileAttr))
             {
                 DebugTrace("ERROR: EffectTextureFactory could not find texture file '%ls'\n", name);
-                throw std::exception("CreateTexture");
+                throw std::runtime_error("EffectTextureFactory::CreateTexture");
             }
         }
 
-        wchar_t ext[_MAX_EXT];
+        wchar_t ext[_MAX_EXT] = {};
         _wsplitpath_s(name, nullptr, 0, nullptr, 0, nullptr, 0, ext, _MAX_EXT);
+        const bool isdds = _wcsicmp(ext, L".dds") == 0;
 
         DDS_LOADER_FLAGS loadFlags = DDS_LOADER_DEFAULT;
         if (mForceSRGB)
@@ -136,12 +146,7 @@ size_t EffectTextureFactory::Impl::CreateTexture(_In_z_ const wchar_t* name, int
         if (mAutoGenMips)
             loadFlags |= DDS_LOADER_MIP_AUTOGEN;
 
-        static_assert(static_cast<int>(DDS_LOADER_DEFAULT) == static_cast<int>(WIC_LOADER_DEFAULT), "DDS/WIC Load flags mismatch");
-        static_assert(static_cast<int>(DDS_LOADER_FORCE_SRGB) == static_cast<int>(WIC_LOADER_FORCE_SRGB), "DDS/WIC Load flags mismatch");
-        static_assert(static_cast<int>(DDS_LOADER_MIP_AUTOGEN) == static_cast<int>(WIC_LOADER_MIP_AUTOGEN), "DDS/WIC Load flags mismatch");
-        static_assert(static_cast<int>(DDS_LOADER_MIP_RESERVE) == static_cast<int>(WIC_LOADER_MIP_RESERVE), "DDS/WIC Load flags mismatch");
-
-        if (_wcsicmp(ext, L".dds") == 0)
+        if (isdds)
         {
             HRESULT hr = CreateDDSTextureFromFileEx(
                 mDevice.Get(),
@@ -157,11 +162,16 @@ size_t EffectTextureFactory::Impl::CreateTexture(_In_z_ const wchar_t* name, int
             {
                 DebugTrace("ERROR: CreateDDSTextureFromFile failed (%08X) for '%ls'\n",
                     static_cast<unsigned int>(hr), fullName);
-                throw std::exception("CreateDDSTextureFromFile");
+                throw std::runtime_error("EffectTextureFactory::CreateDDSTextureFromFile");
             }
         }
         else
         {
+            static_assert(static_cast<int>(DDS_LOADER_DEFAULT) == static_cast<int>(WIC_LOADER_DEFAULT), "DDS/WIC Load flags mismatch");
+            static_assert(static_cast<int>(DDS_LOADER_FORCE_SRGB) == static_cast<int>(WIC_LOADER_FORCE_SRGB), "DDS/WIC Load flags mismatch");
+            static_assert(static_cast<int>(DDS_LOADER_MIP_AUTOGEN) == static_cast<int>(WIC_LOADER_MIP_AUTOGEN), "DDS/WIC Load flags mismatch");
+            static_assert(static_cast<int>(DDS_LOADER_MIP_RESERVE) == static_cast<int>(WIC_LOADER_MIP_RESERVE), "DDS/WIC Load flags mismatch");
+
             textureEntry.mIsCubeMap = false;
 
             HRESULT hr = CreateWICTextureFromFileEx(
@@ -176,7 +186,7 @@ size_t EffectTextureFactory::Impl::CreateTexture(_In_z_ const wchar_t* name, int
             {
                 DebugTrace("ERROR: CreateWICTextureFromFile failed (%08X) for '%ls'\n",
                     static_cast<unsigned int>(hr), fullName);
-                throw std::exception("CreateWICTextureFromFile");
+                throw std::runtime_error("EffectTextureFactory::CreateWICTextureFromFile");
             }
         }
 
@@ -192,8 +202,8 @@ size_t EffectTextureFactory::Impl::CreateTexture(_In_z_ const wchar_t* name, int
 
     assert(textureEntry.mResource != nullptr);
 
-    // bind a new descriptor in slot 
-    auto textureDescriptor = mTextureDescriptorHeap.GetCpuHandle(static_cast<size_t>(descriptorSlot));
+    // bind a new descriptor in slot
+    const auto textureDescriptor = mTextureDescriptorHeap.GetCpuHandle(static_cast<size_t>(descriptorSlot));
     DirectX::CreateShaderResourceView(mDevice.Get(), textureEntry.mResource.Get(), textureDescriptor, textureEntry.mIsCubeMap);
 
     return textureEntry.slot;
@@ -215,36 +225,24 @@ _Use_decl_annotations_
 EffectTextureFactory::EffectTextureFactory(
     ID3D12Device* device,
     ResourceUploadBatch& resourceUploadBatch,
-    ID3D12DescriptorHeap* descriptorHeap) noexcept(false)
-{
-    pImpl = std::make_unique<Impl>(device, resourceUploadBatch, descriptorHeap);
-}
+    ID3D12DescriptorHeap* descriptorHeap) noexcept(false) :
+    pImpl(std::make_unique<Impl>(device, resourceUploadBatch, descriptorHeap))
+{}
 
 _Use_decl_annotations_
 EffectTextureFactory::EffectTextureFactory(
     ID3D12Device* device,
     ResourceUploadBatch& resourceUploadBatch,
     size_t numDescriptors,
-    D3D12_DESCRIPTOR_HEAP_FLAGS descriptorHeapFlags) noexcept(false)
-{
-    pImpl = std::make_unique<Impl>(device, resourceUploadBatch, numDescriptors, descriptorHeapFlags);
-}
-
-EffectTextureFactory::~EffectTextureFactory()
-{
-}
+    D3D12_DESCRIPTOR_HEAP_FLAGS descriptorHeapFlags) noexcept(false) :
+    pImpl(std::make_unique<Impl>(device, resourceUploadBatch, numDescriptors, descriptorHeapFlags))
+{}
 
 
-EffectTextureFactory::EffectTextureFactory(EffectTextureFactory&& moveFrom) noexcept
-    : pImpl(std::move(moveFrom.pImpl))
-{
-}
+EffectTextureFactory::EffectTextureFactory(EffectTextureFactory&&) noexcept = default;
+EffectTextureFactory& EffectTextureFactory::operator= (EffectTextureFactory&&) noexcept = default;
+EffectTextureFactory::~EffectTextureFactory() = default;
 
-EffectTextureFactory& EffectTextureFactory::operator= (EffectTextureFactory&& moveFrom) noexcept
-{
-    pImpl = std::move(moveFrom.pImpl);
-    return *this;
-}
 
 _Use_decl_annotations_
 size_t EffectTextureFactory::CreateTexture(_In_z_ const wchar_t* name, int descriptorIndex)
@@ -252,11 +250,14 @@ size_t EffectTextureFactory::CreateTexture(_In_z_ const wchar_t* name, int descr
     return pImpl->CreateTexture(name, descriptorIndex);
 }
 
+
 void EffectTextureFactory::ReleaseCache()
 {
     pImpl->ReleaseCache();
 }
 
+
+// Properties.
 void EffectTextureFactory::SetSharing(bool enabled) noexcept
 {
     pImpl->SetSharing(enabled);
@@ -317,7 +318,7 @@ _Use_decl_annotations_
 void EffectTextureFactory::GetResource(size_t slot, ID3D12Resource** resource, bool* isCubeMap)
 {
     if (slot >= pImpl->mResources.size())
-        throw std::exception("Accessing resource out of range.");
+        throw std::invalid_argument("Resource slot is invalid");
 
     const auto& textureEntry = pImpl->mResources[slot];
 

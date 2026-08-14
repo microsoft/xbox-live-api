@@ -341,6 +341,7 @@ MultiplayerClientManager::JoinGameFromLobby(
     return latestPending->GameClient()->JoinGameFromLobbyHelper( 
         [](Result<std::shared_ptr<XblMultiplayerSession>> result)
     {
+        (void)result;
         assert(SUCCEEDED(result.Hresult()));
     });
 }

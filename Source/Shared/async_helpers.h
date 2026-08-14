@@ -208,7 +208,7 @@ private:
     std::function<void()> const m_task;
 
     int32_t m_skipCount{ 0 };
-    std::mutex mutex;
+    DefaultUnnamedMutex mutex;
 };
 
 template<typename... Args>

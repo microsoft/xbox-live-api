@@ -483,3 +483,89 @@ try
     return XAsyncGetResult(async, nullptr, xuidCount * sizeof(uint64_t), xuids, nullptr);
 }
 CATCH_RETURN()
+
+STDAPI_(XblFunctionContext) XblPrivacyAddMuteListChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblPrivacyMuteListChangedHandler handler,
+    _In_opt_ void* context
+) XBL_NOEXCEPT
+try
+{
+    if (xboxLiveContext == nullptr || handler == nullptr)
+    {
+        return XblFunctionContext{ 0 };
+    }
+
+    return xboxLiveContext->PrivacyService()->AddMuteListChangedHandler(
+        [
+            handler,
+            context
+        ]
+    (const XblPrivacyMuteListChangeEventArgs& args)
+    {
+        try
+        {
+            handler(&args, context);
+        }
+        catch (...)
+        {
+            LOGS_ERROR << __FUNCTION__ << ": exception in client handler!";
+        }
+    });
+}
+CATCH_RETURN()
+
+STDAPI XblPrivacyRemoveMuteListChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblFunctionContext handlerFunctionContext
+) XBL_NOEXCEPT
+try
+{
+    RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
+    xboxLiveContext->PrivacyService()->RemoveMuteListChangedHandler(handlerFunctionContext);
+    return S_OK;
+}
+CATCH_RETURN()
+
+STDAPI_(XblFunctionContext) XblPrivacyAddBlockListChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblPrivacyBlockListChangedHandler handler,
+    _In_opt_ void* context
+) XBL_NOEXCEPT
+try
+{
+    if (xboxLiveContext == nullptr || handler == nullptr)
+    {
+        return XblFunctionContext{ 0 };
+    }
+
+    return xboxLiveContext->PrivacyService()->AddBlockListChangedHandler(
+        [
+            handler,
+            context
+        ]
+    (const XblPrivacyBlockListChangeEventArgs& args)
+    {
+        try
+        {
+            handler(&args, context);
+        }
+        catch (...)
+        {
+            LOGS_ERROR << __FUNCTION__ << ": exception in client handler!";
+        }
+    });
+}
+CATCH_RETURN()
+
+STDAPI XblPrivacyRemoveBlockListChangedHandler(
+    _In_ XblContextHandle xboxLiveContext,
+    _In_ XblFunctionContext handlerFunctionContext
+) XBL_NOEXCEPT
+try
+{
+    RETURN_HR_INVALIDARGUMENT_IF_NULL(xboxLiveContext);
+    xboxLiveContext->PrivacyService()->RemoveBlockListChangedHandler(handlerFunctionContext);
+    return S_OK;
+}
+CATCH_RETURN()

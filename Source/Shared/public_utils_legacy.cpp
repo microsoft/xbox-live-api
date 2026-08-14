@@ -164,7 +164,7 @@ namespace legacy
         int len = (int)strlen(inArray);
         if (len < cchOutArray && outArray != nullptr)
         {
-            strlcpy(outArray, inArray, len + 1);
+            strlcpy(outArray, inArray, cchOutArray);
         }
         else if (cchOutArray > 0)
         {
@@ -212,7 +212,7 @@ namespace legacy
         int len = (int)strlen(inArray);
         if (len < cchOutArray && outArray != nullptr)
         {
-            strlcpy(outArray, inArray, len + 1);
+            strlcpy(outArray, inArray, cchOutArray);
         }
         else if (cchOutArray > 0)
         {

@@ -86,6 +86,8 @@ extern "C"
 #define E_XAL_UNLISTEDCONSENT               MAKE_E_HC(0x511CL) // 0x8923511C
 #define E_XAL_CONSENTNOTAPPLICABLE          MAKE_E_HC(0x511DL) // 0x8923511D
 #define E_XAL_NO_SIGNED_IN_USER_FOUND       MAKE_E_HC(0x511EL) // 0x8923511E
+#define E_XAL_TIMEOUT                       MAKE_E_HC(0x511FL) // 0x8923511F
+#define E_XAL_AGEVERIFICATIONCLAIMMISSING   MAKE_E_HC(0x5120L) // 0x89235120
 
 // E_XAL_INTERNAL_* values should never be returned to callers of XAL.
 #define E_XAL_INTERNAL_SWITCHUSER           MAKE_E_HC(0x5171L) // 0x89235171

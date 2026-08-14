@@ -139,11 +139,15 @@ XblTitleStorageBlobMetadataResult::DeserializeXblTitleStorageBlobMetadata(_In_ c
 
     xsapi_internal_string displayName;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "displayName", displayName));
-    utils::strcpy(returnObject.displayName, displayName.length() + 1, displayName.c_str());
+    utils::strcpy(returnObject.displayName, sizeof(returnObject.displayName), displayName.c_str());
 
     xsapi_internal_string etag;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "etag", etag));
-    utils::strcpy(returnObject.eTag, etag.length() + 1, etag.c_str());
+    if (etag.size() >= sizeof(returnObject.eTag))
+    {
+        return Result<XblTitleStorageBlobMetadata>(returnObject, WEB_E_INVALID_JSON_STRING);
+    }
+    utils::strcpy(returnObject.eTag, sizeof(returnObject.eTag), etag.c_str());
 
     uint64_t size = 0;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonUInt64(json, "size", size));
@@ -162,7 +166,11 @@ XblTitleStorageBlobMetadataResult::DeserializeXblTitleStorageBlobMetadata(_In_ c
         xsapi_internal_string smartBlobType = fileName.substr(nPos + 1);
         returnObject.blobType = ConvertStringToTitleStorageBlobType(smartBlobType);
         fileName.resize(nPos);
-        utils::strcpy(returnObject.blobPath, fileName.length() + 1, fileName.c_str());
+        if (fileName.size() >= sizeof(returnObject.blobPath))
+        {
+            return Result<XblTitleStorageBlobMetadata>(returnObject, WEB_E_INVALID_JSON_STRING);
+        }
+        utils::strcpy(returnObject.blobPath, sizeof(returnObject.blobPath), fileName.c_str());
     }
 
     return Result<XblTitleStorageBlobMetadata>(returnObject, xbox::services::legacy::ConvertHr(errc));

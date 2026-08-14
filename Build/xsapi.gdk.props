@@ -2,12 +2,31 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- This file is a replacement for Microsoft.Cpp.Default.Props and Microsoft.Cpp.props for Cpp projects targeting GDK -->
   <Import Project="..\xsapi.paths.props" />
+  
+  <!-- Define project configurations for all GDK projects -->
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Gaming.Desktop.x64">
+      <Configuration>Debug</Configuration>
+      <Platform>Gaming.Desktop.x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugSuffix|Gaming.Desktop.x64">
+      <Configuration>DebugSuffix</Configuration>
+      <Platform>Gaming.Desktop.x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Gaming.Desktop.x64">
+      <Configuration>Release</Configuration>
+      <Platform>Gaming.Desktop.x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  
   <!--Bring in LHC build config-->
   <!--Order is important here. We have to define default platform toolset before importing libHttpClient.GDK.props as it will set to v100 as default-->
   <PropertyGroup>
     <PlatformToolset Condition="'$(PlatformToolset)' == '' and $(VisualStudioVersion)==15">v141</PlatformToolset>
     <!--Spectre mitigation breaks the GDK BWOI builds so conditionally disable that-->
     <SpectreMitigation Condition="'$(GDKUseBWOI)'=='true'">false</SpectreMitigation>
+    <HCPlatform>GDK</HCPlatform>
+    <LibHttpClientIncludeSuffix Condition="'$(XsapiUseLegacyGdkSegment)' != 'true'">false</LibHttpClientIncludeSuffix>
   </PropertyGroup>
   <Import Project="$(XsapiSourceRoot)\External\Xal\External\libHttpClient\Build\libHttpClient.GDK.props" />
   <!--Overrides to LHC build config-->
@@ -15,4 +34,58 @@
     <OutDir>$(XsapiOutDir)</OutDir>
     <IntDir>$(XsapiIntDir)</IntDir>
   </PropertyGroup>
+  
+  <!--Target naming conventions for all GDK project types-->
+  <!-- GDK naming suffix logic (simplified)
+       Default: remove legacy .GDK segment.
+       To keep it: pass /p:XsapiUseLegacyGdkSegment=true
+       To use custom segment: /p:XsapiGdkSegment=.YourTag
+       Implementation: simple replace of the literal token ".GDK." with "$(XsapiGdkSegment)."
+       If XsapiGdkSegment is blank the replacement becomes a single '.' giving the shortened name.
+  -->
+  <PropertyGroup>
+    <!-- Naming defaults: new naming (no .GDK). Set XsapiUseLegacyGdkSegment=true to keep legacy .GDK segment. -->
+    <XsapiUseLegacyGdkSegment Condition="'$(XsapiUseLegacyGdkSegment)'==''">false</XsapiUseLegacyGdkSegment>
+    <!-- If caller explicitly sets XsapiGdkSegment, honor it first -->
+    <XsapiGdkSegment Condition="'$(XsapiGdkSegment)'=='' and '$(XsapiUseLegacyGdkSegment)'=='true'">.GDK</XsapiGdkSegment>
+    <XsapiGdkSegment Condition="'$(XsapiGdkSegment)'=='' and '$(XsapiUseLegacyGdkSegment)'!='true'"></XsapiGdkSegment>
+    <XsapiAdjustedProjectName>$([System.String]::Copy('$(MSBuildProjectName)').Replace('.GDK.','$(XsapiGdkSegment).'))</XsapiAdjustedProjectName>
+    <!-- ARM builds always use 143 but some project names have 142 in them, so we need to fix that -->
+    <XsapiAdjustedProjectName Condition="'$(Platform)' == 'ARM64'">$([System.Text.RegularExpressions.Regex]::Replace($(XsapiAdjustedProjectName), '\.142\.', '.143.'))</XsapiAdjustedProjectName>
+  </PropertyGroup>
+
+  <!-- Debug -->
+  <PropertyGroup Condition="('$(XsapiImpl)'=='true' or '$(XsapiLibBuildFromSource)'=='true') and '$(Configuration)'=='Debug'">
+    <TargetName>$(XsapiAdjustedProjectName)</TargetName>
+  </PropertyGroup>
+
+  <!-- DebugSuffix -->
+  <PropertyGroup Condition="('$(XsapiImpl)'=='true' or '$(XsapiLibBuildFromSource)'=='true') and '$(Configuration)'=='DebugSuffix'">
+    <TargetName>$(XsapiAdjustedProjectName).Debug</TargetName>
+  </PropertyGroup>
+
+  <!-- Release -->
+  <PropertyGroup Condition="('$(XsapiImpl)'=='true' or '$(XsapiLibBuildFromSource)'=='true') and '$(Configuration)'=='Release'">
+    <TargetName>$(XsapiAdjustedProjectName)</TargetName>
+  </PropertyGroup>
+  <!-- The DebugSuffix configuration produces a .Debug suffixed binary but prior to this fix it inherited
+       Release-like settings from libHttpClient.GDK.props (no _DEBUG define) which resulted in _ITERATOR_DEBUG_LEVEL=0
+       while being linked into true Debug consumers expecting level 2. Explicitly mark DebugSuffix as a Debug-style
+       build so iterator debugging and other debug CRT features match. -->
+  <PropertyGroup Condition="'$(Configuration)'=='DebugSuffix'">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='DebugSuffix'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <!-- Ensure _DEBUG is defined and explicitly set _ITERATOR_DEBUG_LEVEL to 2 -->
+      <PreprocessorDefinitions>_DEBUG;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
 </Project>

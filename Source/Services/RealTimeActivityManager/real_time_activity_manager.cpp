@@ -73,6 +73,7 @@ HRESULT RealTimeActivityManager::RemoveSubscription(
         ]
     (Result<void> result)
     {
+        UNREFERENCED_PARAMETER(result);
         if (auto sharedThis{ weakThis.lock() })
         {
             std::unique_lock<std::recursive_mutex> lock{ sharedThis->m_lock };

@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: SoundEffectInstance.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
@@ -189,7 +189,7 @@ void SoundEffectInstance::Impl::Play(bool loop)
     buffer.pContext = nullptr;
 
     HRESULT hr;
-    #ifdef DIRECTX_ENABLE_XWMA
+#ifdef DIRECTX_ENABLE_XWMA
     if (iswma)
     {
         hr = mBase.voice->SubmitSourceBuffer(&buffer, &wmaBuffer);
@@ -209,13 +209,13 @@ void SoundEffectInstance::Impl::Play(bool loop)
         auto wfx = (mWaveBank) ? mWaveBank->GetFormat(mIndex, reinterpret_cast<WAVEFORMATEX*>(buff), sizeof(buff))
             : mEffect->GetFormat();
 
-        size_t length = (mWaveBank) ? mWaveBank->GetSampleSizeInBytes(mIndex) : mEffect->GetSampleSizeInBytes();
+        const size_t length = (mWaveBank) ? mWaveBank->GetSampleSizeInBytes(mIndex) : mEffect->GetSampleSizeInBytes();
 
         DebugTrace("\tFormat Tag %u, %u channels, %u-bit, %u Hz, %zu bytes\n",
             wfx->wFormatTag, wfx->nChannels, wfx->wBitsPerSample, wfx->nSamplesPerSec, length);
     #endif
         mBase.Stop(true, mLooped);
-        throw std::exception("SubmitSourceBuffer");
+        throw std::runtime_error("SubmitSourceBuffer");
     }
 }
 
@@ -228,29 +228,17 @@ void SoundEffectInstance::Impl::Play(bool loop)
 _Use_decl_annotations_
 SoundEffectInstance::SoundEffectInstance(AudioEngine* engine, SoundEffect* effect, SOUND_EFFECT_INSTANCE_FLAGS flags) :
     pImpl(std::make_unique<Impl>(engine, effect, flags))
-{
-}
+{}
 
 _Use_decl_annotations_
 SoundEffectInstance::SoundEffectInstance(AudioEngine* engine, WaveBank* waveBank, unsigned int index, SOUND_EFFECT_INSTANCE_FLAGS flags) :
     pImpl(std::make_unique<Impl>(engine, waveBank, index, flags))
-{
-}
+{}
 
 
-// Move constructor.
-SoundEffectInstance::SoundEffectInstance(SoundEffectInstance&& moveFrom) noexcept
-    : pImpl(std::move(moveFrom.pImpl))
-{
-}
-
-
-// Move assignment.
-SoundEffectInstance& SoundEffectInstance::operator= (SoundEffectInstance&& moveFrom) noexcept
-{
-    pImpl = std::move(moveFrom.pImpl);
-    return *this;
-}
+// Move ctor/operator.
+SoundEffectInstance::SoundEffectInstance(SoundEffectInstance&&) noexcept = default;
+SoundEffectInstance& SoundEffectInstance::operator= (SoundEffectInstance&&) noexcept = default;
 
 
 // Public destructor.
@@ -316,7 +304,7 @@ void SoundEffectInstance::SetPan(float pan)
 }
 
 
-void SoundEffectInstance::Apply3D(const AudioListener& listener, const AudioEmitter& emitter, bool rhcoords)
+void SoundEffectInstance::Apply3D(const X3DAUDIO_LISTENER& listener, const X3DAUDIO_EMITTER& emitter, bool rhcoords)
 {
     pImpl->mBase.Apply3D(listener, emitter, rhcoords);
 }
@@ -332,6 +320,12 @@ bool SoundEffectInstance::IsLooped() const noexcept
 SoundState SoundEffectInstance::GetState() noexcept
 {
     return pImpl->mBase.GetState(true);
+}
+
+
+unsigned int SoundEffectInstance::GetChannelCount() const noexcept
+{
+    return pImpl->mBase.GetChannelCount();
 }
 
 

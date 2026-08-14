@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: EffectPipelineStateDescription.h
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -13,20 +13,43 @@
 #include <d3d12_xs.h>
 #elif (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
 #include <d3d12_x.h>
+#elif defined(USING_DIRECTX_HEADERS)
+#include <directx/d3d12.h>
+#include <directx/dxgiformat.h>
+#include <dxguids/dxguids.h>
 #else
 #include <d3d12.h>
 #include <dxgiformat.h>
 #endif
 
 #include <cstdint>
+#include <cstring>
 
 #include "RenderTargetState.h"
+
+#ifndef DIRECTX_TOOLKIT_API
+#ifdef DIRECTX_TOOLKIT_EXPORT
+#ifdef __GNUC__
+#define DIRECTX_TOOLKIT_API __attribute__ ((dllexport))
+#else
+#define DIRECTX_TOOLKIT_API __declspec(dllexport)
+#endif
+#elif defined(DIRECTX_TOOLKIT_IMPORT)
+#ifdef __GNUC__
+#define DIRECTX_TOOLKIT_API __attribute__ ((dllimport))
+#else
+#define DIRECTX_TOOLKIT_API __declspec(dllimport)
+#endif
+#else
+#define DIRECTX_TOOLKIT_API
+#endif
+#endif
 
 
 namespace DirectX
 {
     // Pipeline state information for creating effects.
-    struct EffectPipelineStateDescription
+    struct DIRECTX_TOOLKIT_API EffectPipelineStateDescription
     {
         EffectPipelineStateDescription(
             _In_opt_ const D3D12_INPUT_LAYOUT_DESC* iinputLayout,
@@ -62,6 +85,7 @@ namespace DirectX
             const D3D12_SHADER_BYTECODE& pixelShader,
             _Outptr_ ID3D12PipelineState** pPipelineState) const;
 
+    #if defined(_MSC_VER) || !defined(_WIN32)
         D3D12_GRAPHICS_PIPELINE_STATE_DESC GetDesc() const noexcept
         {
             D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
@@ -73,12 +97,34 @@ namespace DirectX
             psoDesc.IBStripCutValue = stripCutValue;
             psoDesc.PrimitiveTopologyType = primitiveTopology;
             psoDesc.NumRenderTargets = renderTargetState.numRenderTargets;
-            memcpy_s(psoDesc.RTVFormats, sizeof(psoDesc.RTVFormats), renderTargetState.rtvFormats, sizeof(DXGI_FORMAT) * D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
+            memcpy(psoDesc.RTVFormats, renderTargetState.rtvFormats, sizeof(DXGI_FORMAT) * D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
             psoDesc.DSVFormat = renderTargetState.dsvFormat;
             psoDesc.SampleDesc = renderTargetState.sampleDesc;
             psoDesc.NodeMask = renderTargetState.nodeMask;
             return psoDesc;
         }
+    #else
+        D3D12_GRAPHICS_PIPELINE_STATE_DESC* GetDesc(_Out_ D3D12_GRAPHICS_PIPELINE_STATE_DESC* psoDesc) const noexcept
+        {
+            if (!psoDesc)
+                return nullptr;
+
+            *psoDesc = {};
+            psoDesc->BlendState = blendDesc;
+            psoDesc->SampleMask = renderTargetState.sampleMask;
+            psoDesc->RasterizerState = rasterizerDesc;
+            psoDesc->DepthStencilState = depthStencilDesc;
+            psoDesc->InputLayout = inputLayout;
+            psoDesc->IBStripCutValue = stripCutValue;
+            psoDesc->PrimitiveTopologyType = primitiveTopology;
+            psoDesc->NumRenderTargets = renderTargetState.numRenderTargets;
+            memcpy(psoDesc->RTVFormats, renderTargetState.rtvFormats, sizeof(DXGI_FORMAT) * D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT);
+            psoDesc->DSVFormat = renderTargetState.dsvFormat;
+            psoDesc->SampleDesc = renderTargetState.sampleDesc;
+            psoDesc->NodeMask = renderTargetState.nodeMask;
+            return psoDesc;
+        }
+    #endif
 
         uint32_t ComputeHash() const noexcept;
 

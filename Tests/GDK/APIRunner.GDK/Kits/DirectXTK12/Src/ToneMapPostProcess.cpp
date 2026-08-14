@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: ToneMapPostProcess.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -16,6 +16,7 @@
 #include "DirectXHelpers.h"
 #include "EffectPipelineStateDescription.h"
 #include "GraphicsMemory.h"
+#include "PlatformHelpers.h"
 #include "SharedResourcePool.h"
 
 using namespace DirectX;
@@ -24,8 +25,8 @@ using Microsoft::WRL::ComPtr;
 
 namespace
 {
-    constexpr int Dirty_ConstantBuffer  = 0x01;
-    constexpr int Dirty_Parameters      = 0x02;
+    constexpr int Dirty_ConstantBuffer = 0x01;
+    constexpr int Dirty_Parameters = 0x02;
 
 #if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
     constexpr int PixelShaderCount = 15;
@@ -36,92 +37,118 @@ namespace
 #endif
 
     // Constant buffer layout. Must match the shader!
-    __declspec(align(16)) struct ToneMapConstants
+    XM_ALIGNED_STRUCT(16) ToneMapConstants
     {
         // linearExposure is .x
         // paperWhiteNits is .y
         XMVECTOR parameters;
+        XMVECTOR colorRotation[3];
     };
 
     static_assert((sizeof(ToneMapConstants) % 16) == 0, "CB size not padded correctly");
+
+    // HDTV to UHDTV (Rec.709 color primaries into Rec.2020)
+    constexpr float c_from709to2020[12] =
+    {
+        0.6274040f, 0.3292820f, 0.0433136f, 0.f,
+        0.0690970f, 0.9195400f, 0.0113612f, 0.f,
+        0.0163916f, 0.0880132f, 0.8955950f, 0.f,
+    };
+
+    // DCI-P3-D65 https://en.wikipedia.org/wiki/DCI-P3 to UHDTV (DCI-P3-D65 color primaries into Rec.2020)
+    constexpr float c_fromP3D65to2020[12] =
+    {
+        0.753845f,    0.198593f,  0.047562f, 0.f,
+        0.0457456f,   0.941777f,  0.0124772f, 0.f,
+        -0.00121055f, 0.0176041f, 0.983607f, 0.f,
+    };
+
+    // HDTV to DCI-P3-D65 (a.k.a. Display P3 or P3D65)
+    constexpr float c_from709toP3D65[12] =
+    {
+        0.822461969f, 0.1775380f,        0.f, 0.f,
+        0.033194199f, 0.9668058f,        0.f, 0.f,
+        0.017082631f, 0.0723974f, 0.9105199f, 0.f,
+    };
 }
 
+#pragma region Shaders
 // Include the precompiled shader code.
 namespace
 {
 #ifdef _GAMING_XBOX_SCARLETT
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_VSQuad.inc"
+#include "XboxGamingScarlettToneMap_VSQuad.inc"
 
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSCopy.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSSaturate.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSReinhard.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSACESFilmic.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PS_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSSaturate_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSReinhard_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSACESFilmic_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSHDR10.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSHDR10_Saturate.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSHDR10_Reinhard.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSHDR10_ACESFilmic.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSHDR10_Saturate_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSHDR10_Reinhard_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettToneMap_PSHDR10_ACESFilmic_SRGB.inc"
+#include "XboxGamingScarlettToneMap_PSCopy.inc"
+#include "XboxGamingScarlettToneMap_PSSaturate.inc"
+#include "XboxGamingScarlettToneMap_PSReinhard.inc"
+#include "XboxGamingScarlettToneMap_PSACESFilmic.inc"
+#include "XboxGamingScarlettToneMap_PS_SRGB.inc"
+#include "XboxGamingScarlettToneMap_PSSaturate_SRGB.inc"
+#include "XboxGamingScarlettToneMap_PSReinhard_SRGB.inc"
+#include "XboxGamingScarlettToneMap_PSACESFilmic_SRGB.inc"
+#include "XboxGamingScarlettToneMap_PSHDR10.inc"
+#include "XboxGamingScarlettToneMap_PSHDR10_Saturate.inc"
+#include "XboxGamingScarlettToneMap_PSHDR10_Reinhard.inc"
+#include "XboxGamingScarlettToneMap_PSHDR10_ACESFilmic.inc"
+#include "XboxGamingScarlettToneMap_PSHDR10_Saturate_SRGB.inc"
+#include "XboxGamingScarlettToneMap_PSHDR10_Reinhard_SRGB.inc"
+#include "XboxGamingScarlettToneMap_PSHDR10_ACESFilmic_SRGB.inc"
 #elif defined(_GAMING_XBOX)
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_VSQuad.inc"
+#include "XboxGamingXboxOneToneMap_VSQuad.inc"
 
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSCopy.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSSaturate.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSReinhard.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSACESFilmic.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PS_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSSaturate_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSReinhard_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSACESFilmic_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSHDR10.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSHDR10_Saturate.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSHDR10_Reinhard.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSHDR10_ACESFilmic.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSHDR10_Saturate_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSHDR10_Reinhard_SRGB.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneToneMap_PSHDR10_ACESFilmic_SRGB.inc"
+#include "XboxGamingXboxOneToneMap_PSCopy.inc"
+#include "XboxGamingXboxOneToneMap_PSSaturate.inc"
+#include "XboxGamingXboxOneToneMap_PSReinhard.inc"
+#include "XboxGamingXboxOneToneMap_PSACESFilmic.inc"
+#include "XboxGamingXboxOneToneMap_PS_SRGB.inc"
+#include "XboxGamingXboxOneToneMap_PSSaturate_SRGB.inc"
+#include "XboxGamingXboxOneToneMap_PSReinhard_SRGB.inc"
+#include "XboxGamingXboxOneToneMap_PSACESFilmic_SRGB.inc"
+#include "XboxGamingXboxOneToneMap_PSHDR10.inc"
+#include "XboxGamingXboxOneToneMap_PSHDR10_Saturate.inc"
+#include "XboxGamingXboxOneToneMap_PSHDR10_Reinhard.inc"
+#include "XboxGamingXboxOneToneMap_PSHDR10_ACESFilmic.inc"
+#include "XboxGamingXboxOneToneMap_PSHDR10_Saturate_SRGB.inc"
+#include "XboxGamingXboxOneToneMap_PSHDR10_Reinhard_SRGB.inc"
+#include "XboxGamingXboxOneToneMap_PSHDR10_ACESFilmic_SRGB.inc"
 #elif defined(_XBOX_ONE) && defined(_TITLE)
-    #include "Shaders/Compiled/XboxOneToneMap_VSQuad.inc"
+#include "XboxOneToneMap_VSQuad.inc"
 
-    #include "Shaders/Compiled/XboxOneToneMap_PSCopy.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSSaturate.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSReinhard.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSACESFilmic.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PS_SRGB.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSSaturate_SRGB.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSReinhard_SRGB.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSACESFilmic_SRGB.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSHDR10.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSHDR10_Saturate.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSHDR10_Reinhard.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSHDR10_ACESFilmic.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSHDR10_Saturate_SRGB.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSHDR10_Reinhard_SRGB.inc"
-    #include "Shaders/Compiled/XboxOneToneMap_PSHDR10_ACESFilmic_SRGB.inc"
+#include "XboxOneToneMap_PSCopy.inc"
+#include "XboxOneToneMap_PSSaturate.inc"
+#include "XboxOneToneMap_PSReinhard.inc"
+#include "XboxOneToneMap_PSACESFilmic.inc"
+#include "XboxOneToneMap_PS_SRGB.inc"
+#include "XboxOneToneMap_PSSaturate_SRGB.inc"
+#include "XboxOneToneMap_PSReinhard_SRGB.inc"
+#include "XboxOneToneMap_PSACESFilmic_SRGB.inc"
+#include "XboxOneToneMap_PSHDR10.inc"
+#include "XboxOneToneMap_PSHDR10_Saturate.inc"
+#include "XboxOneToneMap_PSHDR10_Reinhard.inc"
+#include "XboxOneToneMap_PSHDR10_ACESFilmic.inc"
+#include "XboxOneToneMap_PSHDR10_Saturate_SRGB.inc"
+#include "XboxOneToneMap_PSHDR10_Reinhard_SRGB.inc"
+#include "XboxOneToneMap_PSHDR10_ACESFilmic_SRGB.inc"
 #else
-    #include "Shaders/Compiled/ToneMap_VSQuad.inc"
+#include "ToneMap_VSQuad.inc"
 
-    #include "Shaders/Compiled/ToneMap_PSCopy.inc"
-    #include "Shaders/Compiled/ToneMap_PSSaturate.inc"
-    #include "Shaders/Compiled/ToneMap_PSReinhard.inc"
-    #include "Shaders/Compiled/ToneMap_PSACESFilmic.inc"
-    #include "Shaders/Compiled/ToneMap_PS_SRGB.inc"
-    #include "Shaders/Compiled/ToneMap_PSSaturate_SRGB.inc"
-    #include "Shaders/Compiled/ToneMap_PSReinhard_SRGB.inc"
-    #include "Shaders/Compiled/ToneMap_PSACESFilmic_SRGB.inc"
-    #include "Shaders/Compiled/ToneMap_PSHDR10.inc"
+#include "ToneMap_PSCopy.inc"
+#include "ToneMap_PSSaturate.inc"
+#include "ToneMap_PSReinhard.inc"
+#include "ToneMap_PSACESFilmic.inc"
+#include "ToneMap_PS_SRGB.inc"
+#include "ToneMap_PSSaturate_SRGB.inc"
+#include "ToneMap_PSReinhard_SRGB.inc"
+#include "ToneMap_PSACESFilmic_SRGB.inc"
+#include "ToneMap_PSHDR10.inc"
 #endif
 }
 
 namespace
 {
     const D3D12_SHADER_BYTECODE vertexShader =
-        { ToneMap_VSQuad,                   sizeof(ToneMap_VSQuad) };
+    { ToneMap_VSQuad,                   sizeof(ToneMap_VSQuad) };
 
     const D3D12_SHADER_BYTECODE pixelShaders[] =
     {
@@ -146,7 +173,7 @@ namespace
 #endif
     };
 
-    static_assert(_countof(pixelShaders) == PixelShaderCount, "array/max mismatch");
+    static_assert(static_cast<int>(std::size(pixelShaders)) == PixelShaderCount, "array/max mismatch");
 
     const int pixelShaderIndices[] =
     {
@@ -189,7 +216,7 @@ namespace
 #endif
     };
 
-    static_assert(_countof(pixelShaderIndices) == ShaderPermutationCount, "array/max mismatch");
+    static_assert(static_cast<int>(std::size(pixelShaderIndices)) == ShaderPermutationCount, "array/max mismatch");
 
     // Factory for lazily instantiating shared root signatures.
     class DeviceResources
@@ -197,34 +224,47 @@ namespace
     public:
         DeviceResources(_In_ ID3D12Device* device) noexcept
             : mDevice(device)
-        { }
+        {}
+
+        DeviceResources(const DeviceResources&) = delete;
+        DeviceResources& operator=(const DeviceResources&) = delete;
+
+        DeviceResources(DeviceResources&&) = delete;
+        DeviceResources& operator=(DeviceResources&&) = delete;
 
         ID3D12RootSignature* GetRootSignature(const D3D12_ROOT_SIGNATURE_DESC& desc)
         {
             return DemandCreate(mRootSignature, mMutex, [&](ID3D12RootSignature** pResult) noexcept -> HRESULT
-            {
-                HRESULT hr = CreateRootSignature(mDevice.Get(), &desc, pResult);
+                {
+                    HRESULT hr = CreateRootSignature(mDevice.Get(), &desc, pResult);
 
-                if (SUCCEEDED(hr))
-                    SetDebugObjectName(*pResult, L"ToneMapPostProcess");
+                    if (SUCCEEDED(hr))
+                        SetDebugObjectName(*pResult, L"ToneMapPostProcess");
 
-                return hr;
-            });
+                    return hr;
+                });
         }
 
         ID3D12Device* GetDevice() const noexcept { return mDevice.Get(); }
 
     protected:
-        ComPtr<ID3D12Device>                        mDevice;
-        Microsoft::WRL::ComPtr<ID3D12RootSignature> mRootSignature;
-        std::mutex                                  mMutex;
+        ComPtr<ID3D12Device>        mDevice;
+        ComPtr<ID3D12RootSignature> mRootSignature;
+        std::mutex                  mMutex;
     };
 }
+#pragma endregion
 
 class ToneMapPostProcess::Impl : public AlignedNew<ToneMapConstants>
 {
 public:
     Impl(_In_ ID3D12Device* device, const RenderTargetState& rtState, Operator op, TransferFunction func, bool mrt = false);
+
+    Impl(const Impl&) = delete;
+    Impl& operator=(const Impl&) = delete;
+
+    Impl(Impl&&) = default;
+    Impl& operator=(Impl&&) = default;
 
     void Process(_In_ ID3D12GraphicsCommandList* commandList);
 
@@ -246,7 +286,7 @@ public:
 private:
     int                                     mDirtyFlags;
 
-   // D3D constant buffer holds a copy of the same data as the public 'constants' field.
+    // D3D constant buffer holds a copy of the same data as the public 'constants' field.
     GraphicsResource mConstantBuffer;
 
     // Per instance cache of PSOs, populated with variants for each shader & layout
@@ -272,27 +312,36 @@ ToneMapPostProcess::Impl::Impl(_In_ ID3D12Device* device, const RenderTargetStat
     texture{},
     linearExposure(1.f),
     paperWhiteNits(200.f),
-    mDirtyFlags(INT_MAX),
-    mDeviceResources(deviceResourcesPool.DemandCreate(device))
+    mDirtyFlags(INT_MAX)
 {
     if (op >= Operator_Max)
-        throw std::out_of_range("Tonemap operator not defined");
+        throw std::invalid_argument("Tonemap operator not defined");
 
     if (func > TransferFunction_Max)
-        throw std::out_of_range("Transfer function not defined");
+        throw std::invalid_argument("Transfer function not defined");
+
+    if (!device)
+        throw std::invalid_argument("Direct3D device is null");
+
+    mDeviceResources = deviceResourcesPool.DemandCreate(device);
 
     // Create root signature.
     {
-        D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
-            D3D12_ROOT_SIGNATURE_FLAG_DENY_VERTEX_SHADER_ROOT_ACCESS |
-            D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-            D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-            D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS;
+        ENUM_FLAGS_CONSTEXPR D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
+            D3D12_ROOT_SIGNATURE_FLAG_DENY_VERTEX_SHADER_ROOT_ACCESS
+            | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS
+            | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS
+            | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS
+        #ifdef _GAMING_XBOX_SCARLETT
+            | D3D12_ROOT_SIGNATURE_FLAG_DENY_AMPLIFICATION_SHADER_ROOT_ACCESS
+            | D3D12_ROOT_SIGNATURE_FLAG_DENY_MESH_SHADER_ROOT_ACCESS
+        #endif
+            ;
 
-        CD3DX12_DESCRIPTOR_RANGE textureSRVs(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+        const CD3DX12_DESCRIPTOR_RANGE textureSRVs(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
         // Same as CommonStates::StaticPointClamp
-        CD3DX12_STATIC_SAMPLER_DESC sampler(
+        const CD3DX12_STATIC_SAMPLER_DESC sampler(
             0, // register
             D3D12_FILTER_MIN_MAG_MIP_POINT,
             D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
@@ -305,10 +354,10 @@ ToneMapPostProcess::Impl::Impl(_In_ ID3D12Device* device, const RenderTargetStat
             0.f,
             D3D12_FLOAT32_MAX,
             D3D12_SHADER_VISIBILITY_PIXEL);
-        
+
         CD3DX12_ROOT_PARAMETER rootParameters[RootParameterIndex::RootParameterCount] = {};
 
-        CD3DX12_DESCRIPTOR_RANGE texture1Range(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+        const CD3DX12_DESCRIPTOR_RANGE texture1Range(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
         rootParameters[RootParameterIndex::TextureSRV].InitAsDescriptorTable(1, &textureSRVs, D3D12_SHADER_VISIBILITY_PIXEL);
 
         // Root parameter descriptor
@@ -317,7 +366,7 @@ ToneMapPostProcess::Impl::Impl(_In_ ID3D12Device* device, const RenderTargetStat
         // Constant buffer
         rootParameters[RootParameterIndex::ConstantBuffer].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_PIXEL);
 
-        rsigDesc.Init(_countof(rootParameters), rootParameters, 1, &sampler, rootSignatureFlags);
+        rsigDesc.Init(static_cast<UINT>(std::size(rootParameters)), rootParameters, 1, &sampler, rootSignatureFlags);
 
         mRootSignature = mDeviceResources->GetRootSignature(rsigDesc);
     }
@@ -330,18 +379,18 @@ ToneMapPostProcess::Impl::Impl(_In_ ID3D12Device* device, const RenderTargetStat
     permutation += (static_cast<int>(func) * static_cast<int>(Operator_Max)) + static_cast<int>(op);
 #else
     UNREFERENCED_PARAMETER(mrt);
-    int permutation = (static_cast<int>(func) * static_cast<int>(Operator_Max)) + static_cast<int>(op);
+    const int permutation = (static_cast<int>(func) * static_cast<int>(Operator_Max)) + static_cast<int>(op);
 #endif
 
     assert(permutation >= 0 && permutation < ShaderPermutationCount);
     _Analysis_assume_(permutation >= 0 && permutation < ShaderPermutationCount);
 
-    int shaderIndex = pixelShaderIndices[permutation];
+    const int shaderIndex = pixelShaderIndices[permutation];
     assert(shaderIndex >= 0 && shaderIndex < PixelShaderCount);
     _Analysis_assume_(shaderIndex >= 0 && shaderIndex < PixelShaderCount);
 
     // Create pipeline state.
-    EffectPipelineStateDescription psd(nullptr,
+    const EffectPipelineStateDescription psd(nullptr,
         CommonStates::Opaque,
         CommonStates::DepthNone,
         CommonStates::CullNone,
@@ -354,6 +403,8 @@ ToneMapPostProcess::Impl::Impl(_In_ ID3D12Device* device, const RenderTargetStat
         vertexShader,
         pixelShaders[shaderIndex],
         mPipelineState.GetAddressOf());
+
+    memcpy(constants.colorRotation, c_from709to2020, sizeof(c_from709to2020));
 
     SetDebugObjectName(mPipelineState.Get(), L"ToneMapPostProcess");
 }
@@ -369,7 +420,7 @@ void ToneMapPostProcess::Impl::Process(_In_ ID3D12GraphicsCommandList* commandLi
     if (!texture.ptr)
     {
         DebugTrace("ERROR: Missing texture for ToneMapPostProcess (texture %llu)\n", texture.ptr);
-        throw std::exception("ToneMapPostProcess");
+        throw std::runtime_error("ToneMapPostProcess");
     }
     commandList->SetGraphicsRootDescriptorTable(RootParameterIndex::TextureSRV, texture);
 
@@ -402,34 +453,17 @@ void ToneMapPostProcess::Impl::Process(_In_ ID3D12GraphicsCommandList* commandLi
 // Public constructor.
 #if (defined(_XBOX_ONE) && defined(_TITLE)) || defined(_GAMING_XBOX)
 ToneMapPostProcess::ToneMapPostProcess(_In_ ID3D12Device* device, const RenderTargetState& rtState, Operator op, TransferFunction func, bool mrt)
-  : pImpl(std::make_unique<Impl>(device, rtState, op, func, mrt))
+    : pImpl(std::make_unique<Impl>(device, rtState, op, func, mrt))
 #else
 ToneMapPostProcess::ToneMapPostProcess(_In_ ID3D12Device* device, const RenderTargetState& rtState, Operator op, TransferFunction func)
     : pImpl(std::make_unique<Impl>(device, rtState, op, func))
 #endif
-{
-}
+{}
 
 
-// Move constructor.
-ToneMapPostProcess::ToneMapPostProcess(ToneMapPostProcess&& moveFrom) noexcept
-  : pImpl(std::move(moveFrom.pImpl))
-{
-}
-
-
-// Move assignment.
-ToneMapPostProcess& ToneMapPostProcess::operator= (ToneMapPostProcess&& moveFrom) noexcept
-{
-    pImpl = std::move(moveFrom.pImpl);
-    return *this;
-}
-
-
-// Public destructor.
-ToneMapPostProcess::~ToneMapPostProcess()
-{
-}
+ToneMapPostProcess::ToneMapPostProcess(ToneMapPostProcess&&) noexcept = default;
+ToneMapPostProcess& ToneMapPostProcess::operator= (ToneMapPostProcess&&) noexcept = default;
+ToneMapPostProcess::~ToneMapPostProcess() = default;
 
 
 // IPostProcess methods.
@@ -443,6 +477,29 @@ void ToneMapPostProcess::Process(_In_ ID3D12GraphicsCommandList* commandList)
 void ToneMapPostProcess::SetHDRSourceTexture(D3D12_GPU_DESCRIPTOR_HANDLE srvDescriptor)
 {
     pImpl->texture = srvDescriptor;
+}
+
+
+void ToneMapPostProcess::SetColorRotation(ColorPrimaryRotation value)
+{
+    switch (value)
+    {
+    case DCI_P3_D65_to_UHDTV:   memcpy(pImpl->constants.colorRotation, c_fromP3D65to2020, sizeof(c_fromP3D65to2020)); break;
+    case HDTV_to_DCI_P3_D65:    memcpy(pImpl->constants.colorRotation, c_from709toP3D65, sizeof(c_from709toP3D65)); break;
+    default:                    memcpy(pImpl->constants.colorRotation, c_from709to2020, sizeof(c_from709to2020)); break;
+    }
+
+    pImpl->SetDirtyFlag();
+}
+
+
+void ToneMapPostProcess::SetColorRotation(CXMMATRIX value)
+{
+    const XMMATRIX transpose = XMMatrixTranspose(value);
+    pImpl->constants.colorRotation[0] = transpose.r[0];
+    pImpl->constants.colorRotation[1] = transpose.r[1];
+    pImpl->constants.colorRotation[2] = transpose.r[2];
+    pImpl->SetDirtyFlag();
 }
 
 

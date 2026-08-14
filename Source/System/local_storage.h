@@ -74,8 +74,7 @@ private:
         _In_ XblUserHandle user,
         _In_z_ const char* key
     );
-
-    std::mutex m_mutex;
+    DefaultUnnamedMutex m_mutex;
     TaskQueue m_queue;
     Queue<std::shared_ptr<XblClientOperation>> m_operationQueue;
     std::shared_ptr<XblClientOperation> m_currentOperation;

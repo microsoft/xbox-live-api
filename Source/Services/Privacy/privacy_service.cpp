@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "privacy_service_internal.h"
 #include "xbox_live_context_internal.h"
+#include "real_time_activity_manager.h"
 
 using namespace xbox::services;
 using namespace xbox::services::legacy;
@@ -15,11 +16,25 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_PRIVACY_CPP_BEGIN
 
 PrivacyService::PrivacyService(
     _In_ User&& user,
-    _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
+    _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings,
+    _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
 ) noexcept :
     m_user{ std::move(user) },
-    m_contextSettings{ contextSettings }
+    m_contextSettings{ contextSettings },
+    m_rtaManager{ std::move(rtaManager) }
 {
+}
+
+PrivacyService::~PrivacyService() noexcept
+{
+    if (m_muteListSubscription)
+    {
+        m_rtaManager->RemoveSubscription(m_user, m_muteListSubscription);
+    }
+    if (m_blockListSubscription)
+    {
+        m_rtaManager->RemoveSubscription(m_user, m_blockListSubscription);
+    }
 }
 
 HRESULT PrivacyService::GetAvoidList(
@@ -277,6 +292,66 @@ Result<xsapi_internal_vector<uint64_t>> PrivacyService::DeserializeUserList(
     }
     
     return xuids;
+}
+
+XblFunctionContext PrivacyService::AddMuteListChangedHandler(
+    _In_ MuteListChangedHandler handler
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_rtaLock };
+
+    if (!m_muteListSubscription)
+    {
+        m_muteListSubscription = MakeShared<MuteListChangeSubscription>(m_user.Xuid());
+        m_rtaManager->AddSubscription(m_user, m_muteListSubscription);
+    }
+    return m_muteListSubscription->AddHandler(std::move(handler));
+}
+
+XblFunctionContext PrivacyService::AddBlockListChangedHandler(
+    _In_ BlockListChangedHandler handler
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_rtaLock };
+
+    if (!m_blockListSubscription)
+    {
+        m_blockListSubscription = MakeShared<BlockListChangeSubscription>(m_user.Xuid());
+        m_rtaManager->AddSubscription(m_user, m_blockListSubscription);
+    }
+    return m_blockListSubscription->AddHandler(std::move(handler));
+}
+
+void PrivacyService::RemoveMuteListChangedHandler(
+    _In_ XblFunctionContext token
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_rtaLock };
+
+    if (m_muteListSubscription)
+    {
+        if (m_muteListSubscription->RemoveHandler(token) == 0)
+        {
+            m_rtaManager->RemoveSubscription(m_user, m_muteListSubscription);
+            m_muteListSubscription.reset();
+        }
+    }
+}
+
+void PrivacyService::RemoveBlockListChangedHandler(
+    _In_ XblFunctionContext token
+) noexcept
+{
+    std::lock_guard<std::mutex> lock{ m_rtaLock };
+
+    if (m_blockListSubscription)
+    {
+        if (m_blockListSubscription->RemoveHandler(token) == 0)
+        {
+            m_rtaManager->RemoveSubscription(m_user, m_blockListSubscription);
+            m_blockListSubscription.reset();
+        }
+    }
 }
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRIVACY_CPP_END

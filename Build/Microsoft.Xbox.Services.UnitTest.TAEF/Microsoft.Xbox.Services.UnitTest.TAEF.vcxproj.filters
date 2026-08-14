@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{1f9633c6-8476-4edf-a40b-2ca30fb821e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests">
+      <UniqueIdentifier>{055afa13-d3b8-4f0e-b05c-ba524c54c528}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests\Support">
+      <UniqueIdentifier>{c8ee0189-9574-4ec1-a345-108bffb47a28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests\Support\TAEF">
+      <UniqueIdentifier>{28e8c082-ca34-4f3d-948c-73b6c26c8725}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Tests\UnitTests\Support\TAEF\UnitTestBase.cpp">
+      <Filter>Tests\UnitTests\Support\TAEF</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\TAEF\UnitTestBase.h">
+      <Filter>Tests\UnitTests\Support\TAEF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\TAEF\UnitTestIncludes_TAEF.h">
+      <Filter>Tests\UnitTests\Support\TAEF</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: EffectPipelineStateDescription.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -91,7 +91,16 @@ void EffectPipelineStateDescription::CreatePipelineState(
     const D3D12_SHADER_BYTECODE& pixelShader,
     _Outptr_ ID3D12PipelineState** pPipelineState) const
 {
+    if (!device)
+        throw std::invalid_argument("Direct3D device is null");
+
+#if defined(_MSC_VER) || !defined(_WIN32)
     auto psoDesc = GetDesc();
+#else
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC tmpPSODesc;
+    auto& psoDesc = *GetDesc(&tmpPSODesc);
+#endif
+
     psoDesc.pRootSignature = rootSignature;
     psoDesc.VS = vertexShader;
     psoDesc.PS = pixelShader;
@@ -101,8 +110,8 @@ void EffectPipelineStateDescription::CreatePipelineState(
         IID_GRAPHICS_PPV_ARGS(pPipelineState));
 
     if (FAILED(hr))
-    { 
+    {
         DebugTrace("ERROR: CreatePipelineState failed to create a PSO. Enable the Direct3D Debug Layer for more information (%08X)\n", static_cast<unsigned int>(hr));
-        throw std::exception("CreateGraphicsPipelineState");
+        throw std::runtime_error("CreateGraphicsPipelineState");
     }
 }

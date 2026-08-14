@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: PrimitiveBatch.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -14,7 +14,7 @@
 #include "GraphicsMemory.h"
 
 using namespace DirectX;
-using namespace DirectX::Internal;
+using namespace DirectX::DX12::Private;
 using Microsoft::WRL::ComPtr;
 
 
@@ -23,6 +23,12 @@ class PrimitiveBatchBase::Impl
 {
 public:
     Impl(_In_ ID3D12Device* device, size_t maxIndices, size_t maxVertices, size_t vertexSize);
+
+    Impl(const Impl&) = delete;
+    Impl& operator=(const Impl&) = delete;
+
+    Impl(Impl&&) = default;
+    Impl& operator=(Impl&&) = default;
 
     void Begin(_In_ ID3D12GraphicsCommandList* cmdList);
     void End();
@@ -73,17 +79,20 @@ PrimitiveBatchBase::Impl::Impl(_In_ ID3D12Device* device, size_t maxIndices, siz
     mBaseIndex(0),
     mBaseVertex(0)
 {
+    if (!device)
+        throw std::invalid_argument("Direct3D device is null");
+
     if (!maxVertices)
-        throw std::exception("maxVertices must be greater than 0");
+        throw std::invalid_argument("maxVertices must be greater than 0");
 
     if (vertexSize > D3D12_REQ_MULTI_ELEMENT_STRUCTURE_SIZE_IN_BYTES)
-        throw std::exception("Vertex size is too large for DirectX 12");
+        throw std::invalid_argument("Vertex size is too large for DirectX 12");
 
     if ((uint64_t(maxIndices) * sizeof(uint16_t)) > uint64_t(D3D12_REQ_RESOURCE_SIZE_IN_MEGABYTES_EXPRESSION_A_TERM * 1024u * 1024u))
-        throw std::exception("IB too large for DirectX 12");
+        throw std::invalid_argument("IB too large for DirectX 12");
 
     if ((uint64_t(maxVertices) * uint64_t(vertexSize)) > uint64_t(D3D12_REQ_RESOURCE_SIZE_IN_MEGABYTES_EXPRESSION_A_TERM * 1024u * 1024u))
-        throw std::exception("VB too large for DirectX 12");
+        throw std::invalid_argument("VB too large for DirectX 12");
 }
 
 
@@ -92,7 +101,7 @@ PrimitiveBatchBase::Impl::Impl(_In_ ID3D12Device* device, size_t maxIndices, siz
 void PrimitiveBatchBase::Impl::Begin(_In_ ID3D12GraphicsCommandList* cmdList)
 {
     if (mInBeginEndPair)
-        throw std::exception("Cannot nest Begin calls");
+        throw std::logic_error("Cannot nest Begin calls");
 
     mCommandList = cmdList;
     mInBeginEndPair = true;
@@ -103,7 +112,7 @@ void PrimitiveBatchBase::Impl::Begin(_In_ ID3D12GraphicsCommandList* cmdList)
 void PrimitiveBatchBase::Impl::End()
 {
     if (!mInBeginEndPair)
-        throw std::exception("Begin must be called before End");
+        throw std::logic_error("Begin must be called before End");
 
     FlushBatch();
 
@@ -120,15 +129,15 @@ static bool CanBatchPrimitives(D3D_PRIMITIVE_TOPOLOGY topology) noexcept
 {
     switch (topology)
     {
-        case D3D_PRIMITIVE_TOPOLOGY_POINTLIST:
-        case D3D_PRIMITIVE_TOPOLOGY_LINELIST:
-        case D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST:
-            // Lists can easily be merged.
-            return true;
+    case D3D_PRIMITIVE_TOPOLOGY_POINTLIST:
+    case D3D_PRIMITIVE_TOPOLOGY_LINELIST:
+    case D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST:
+        // Lists can easily be merged.
+        return true;
 
-        default:
-            // Strips cannot.
-            return false;
+    default:
+        // Strips cannot.
+        return false;
     }
 
     // We could also merge indexed strips by inserting degenerates,
@@ -141,22 +150,22 @@ _Use_decl_annotations_
 void PrimitiveBatchBase::Impl::Draw(D3D_PRIMITIVE_TOPOLOGY topology, bool isIndexed, uint16_t const* indices, size_t indexCount, size_t vertexCount, void** pMappedVertices)
 {
     if (isIndexed && !indices)
-        throw std::exception("Indices cannot be null");
+        throw std::invalid_argument("Indices cannot be null");
 
     if (indexCount >= mMaxIndices)
-        throw std::exception("Too many indices");
+        throw std::invalid_argument("Too many indices");
 
     if (vertexCount >= mMaxVertices)
-        throw std::exception("Too many vertices");
+        throw std::invalid_argument("Too many vertices");
 
     if (!mInBeginEndPair)
-        throw std::exception("Begin must be called before Draw");
+        throw std::logic_error("Begin must be called before Draw");
 
     assert(pMappedVertices != nullptr);
 
     // Can we merge this primitive in with an existing batch, or must we flush first?
-    bool wrapIndexBuffer = (mIndexCount + indexCount > mMaxIndices);
-    bool wrapVertexBuffer = (mVertexCount + vertexCount > mMaxVertices);
+    const bool wrapIndexBuffer = (mIndexCount + indexCount > mMaxIndices);
+    const bool wrapVertexBuffer = (mVertexCount + vertexCount > mMaxVertices);
 
     if ((topology != mCurrentTopology) ||
         (isIndexed != mCurrentlyIndexed) ||
@@ -178,9 +187,11 @@ void PrimitiveBatchBase::Impl::Draw(D3D_PRIMITIVE_TOPOLOGY topology, bool isInde
 
         // Allocate a page for the primitive data
         if (isIndexed)
-            mIndexSegment = GraphicsMemory::Get(mDevice.Get()).Allocate(mIndexPageSize);
+        {
+            mIndexSegment = GraphicsMemory::Get(mDevice.Get()).Allocate(mIndexPageSize, 16, GraphicsMemory::TAG_INDEX);
+        }
 
-        mVertexSegment = GraphicsMemory::Get(mDevice.Get()).Allocate(mVertexPageSize);
+        mVertexSegment = GraphicsMemory::Get(mDevice.Get()).Allocate(mVertexPageSize, 16, GraphicsMemory::TAG_VERTEX);
     }
 
     // Copy over the index data.
@@ -244,29 +255,12 @@ void PrimitiveBatchBase::Impl::FlushBatch()
 // Public constructor.
 PrimitiveBatchBase::PrimitiveBatchBase(_In_ ID3D12Device* device, size_t maxIndices, size_t maxVertices, size_t vertexSize)
     : pImpl(std::make_unique<Impl>(device, maxIndices, maxVertices, vertexSize))
-{
-}
+{}
 
 
-// Move constructor.
-PrimitiveBatchBase::PrimitiveBatchBase(PrimitiveBatchBase&& moveFrom) noexcept
-    : pImpl(std::move(moveFrom.pImpl))
-{
-}
-
-
-// Move assignment.
-PrimitiveBatchBase& PrimitiveBatchBase::operator= (PrimitiveBatchBase&& moveFrom) noexcept
-{
-    pImpl = std::move(moveFrom.pImpl);
-    return *this;
-}
-
-
-// Public destructor.
-PrimitiveBatchBase::~PrimitiveBatchBase()
-{
-}
+PrimitiveBatchBase::PrimitiveBatchBase(PrimitiveBatchBase&&) noexcept = default;
+PrimitiveBatchBase& PrimitiveBatchBase::operator= (PrimitiveBatchBase&&) noexcept = default;
+PrimitiveBatchBase::~PrimitiveBatchBase() = default;
 
 
 void PrimitiveBatchBase::Begin(_In_ ID3D12GraphicsCommandList* cmdList)

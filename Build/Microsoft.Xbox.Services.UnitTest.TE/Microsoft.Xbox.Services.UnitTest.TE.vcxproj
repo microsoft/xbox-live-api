@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3092CCC9-DB6E-4199-95CC-4959950B95FA}</ProjectGuid>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <XsapiImpl>true</XsapiImpl>
+    <useWsppWebsockets>false</useWsppWebsockets>
+  </PropertyGroup>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(xsapi.win32.props))" />
+  <Import Project="$(XsapiSourceRoot)\xsapi.staticlib.props" />
+  <Import Project="$(XsapiSourceRoot)\Build\Microsoft.Xbox.Services.Common\Microsoft.Xbox.Services.Common.vcxitems" Label="Shared" />
+  <Import Project="$(XsapiSourceRoot)\Build\Microsoft.Xbox.Services.UnitTest\Microsoft.Xbox.Services.UnitTest.vcxitems" Label="Shared" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)..\..\Tests\UnitTests\Tests\Services\TestResponses" "$(OutDir)TestResponses" /e /y /i /r</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Tests\UnitTests\Support\TE\UnitTestHelpers_TE.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\TE\UnitTestHelpers_TE.h" />
+    <ClInclude Include="..\..\Tests\UnitTests\Support\TE\UnitTestIncludes_TE.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

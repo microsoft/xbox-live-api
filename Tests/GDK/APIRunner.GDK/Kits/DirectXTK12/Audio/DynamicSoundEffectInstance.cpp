@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: DynamicSoundEffectInstance.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
@@ -23,9 +23,9 @@ class DynamicSoundEffectInstance::Impl : public IVoiceNotify
 {
 public:
     Impl(_In_ AudioEngine* engine,
-         _In_ DynamicSoundEffectInstance* object,
+        _In_ DynamicSoundEffectInstance* object,
         std::function<void(DynamicSoundEffectInstance*)>& bufferNeeded,
-         int sampleRate, int channels, int sampleBits,
+        int sampleRate, int channels, int sampleBits,
         SOUND_EFFECT_INSTANCE_FLAGS flags) :
         mBase(),
         mBufferNeeded(nullptr),
@@ -35,30 +35,30 @@ public:
             || (sampleRate > XAUDIO2_MAX_SAMPLE_RATE))
         {
             DebugTrace("DynamicSoundEffectInstance sampleRate must be in range %u...%u\n", XAUDIO2_MIN_SAMPLE_RATE, XAUDIO2_MAX_SAMPLE_RATE);
-            throw std::invalid_argument("DynamicSoundEffectInstance");
+            throw std::out_of_range("DynamicSoundEffectInstance");
         }
 
         if (!channels || (channels > 8))
         {
             DebugTrace("DynamicSoundEffectInstance channels must be in range 1...8\n");
-            throw std::invalid_argument("DynamicSoundEffectInstance");
+            throw std::out_of_range("DynamicSoundEffectInstance channel count out of range");
         }
 
         switch (sampleBits)
         {
-            case 8:
-            case 16:
-                break;
+        case 8:
+        case 16:
+            break;
 
-            default:
-                DebugTrace("DynamicSoundEffectInstance sampleBits must be 8-bit or 16-bit\n");
-                throw std::invalid_argument("DynamicSoundEffectInstance");
+        default:
+            DebugTrace("DynamicSoundEffectInstance sampleBits must be 8-bit or 16-bit\n");
+            throw std::invalid_argument("DynamicSoundEffectInstance supports 8 or 16 bit");
         }
 
         mBufferEvent.reset(CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE));
         if (!mBufferEvent)
         {
-            throw std::exception("CreateEvent");
+            throw std::system_error(std::error_code(static_cast<int>(GetLastError()), std::system_category()), "CreateEventEx");
         }
 
         CreateIntegerPCM(&mWaveFormat, sampleRate, channels, sampleBits);
@@ -130,8 +130,7 @@ public:
     }
 
     void __cdecl OnDestroyParent() noexcept override
-    {
-    }
+    {}
 
     SoundEffectInstanceBase                             mBase;
 
@@ -150,7 +149,7 @@ void DynamicSoundEffectInstance::Impl::Play()
         mBase.AllocateVoice(&mWaveFormat);
     }
 
-    (void)mBase.Play();
+    std::ignore = mBase.Play();
 
     if (mBase.voice && (mBase.state == PLAYING) && (mBase.GetPendingBufferCount() <= 2))
     {
@@ -177,7 +176,7 @@ _Use_decl_annotations_
 void DynamicSoundEffectInstance::Impl::SubmitBuffer(const uint8_t* pAudioData, uint32_t offset, size_t audioBytes)
 {
     if (!pAudioData || !audioBytes)
-        throw std::exception("Invalid audio data buffer");
+        throw std::invalid_argument("Invalid audio data buffer");
 
     if (audioBytes > UINT32_MAX)
         throw std::out_of_range("SubmitBuffer");
@@ -204,29 +203,30 @@ void DynamicSoundEffectInstance::Impl::SubmitBuffer(const uint8_t* pAudioData, u
         DebugTrace("\tFormat Tag %u, %u channels, %u-bit, %u Hz, %zu bytes [%u offset)\n",
             mWaveFormat.wFormatTag, mWaveFormat.nChannels, mWaveFormat.wBitsPerSample, mWaveFormat.nSamplesPerSec, audioBytes, offset);
     #endif
-        throw std::exception("SubmitSourceBuffer");
+        throw std::runtime_error("SubmitSourceBuffer");
     }
 }
 
 
 void DynamicSoundEffectInstance::Impl::OnUpdate()
 {
-    DWORD result = WaitForSingleObjectEx(mBufferEvent.get(), 0, FALSE);
+    const DWORD result = WaitForSingleObjectEx(mBufferEvent.get(), 0, FALSE);
     switch (result)
     {
-        case WAIT_TIMEOUT:
-            break;
+    default:
+    case WAIT_TIMEOUT:
+        break;
 
-        case WAIT_OBJECT_0:
-            if (mBufferNeeded)
-            {
-                // This callback happens on the same thread that called AudioEngine::Update()
-                mBufferNeeded(mObject);
-            }
-            break;
+    case WAIT_OBJECT_0:
+        if (mBufferNeeded)
+        {
+            // This callback happens on the same thread that called AudioEngine::Update()
+            mBufferNeeded(mObject);
+        }
+        break;
 
-        case WAIT_FAILED:
-            throw std::exception("WaitForSingleObjectEx");
+    case WAIT_FAILED:
+        throw std::system_error(std::error_code(static_cast<int>(GetLastError()), std::system_category()), "WaitForSingleObjectEx");
     }
 }
 
@@ -236,7 +236,9 @@ void DynamicSoundEffectInstance::Impl::OnUpdate()
 // DynamicSoundEffectInstance
 //--------------------------------------------------------------------------------------
 
+#ifdef _MSC_VER
 #pragma warning( disable : 4355 )
+#endif
 
 // Public constructors
 _Use_decl_annotations_
@@ -248,29 +250,12 @@ DynamicSoundEffectInstance::DynamicSoundEffectInstance(
     int sampleBits,
     SOUND_EFFECT_INSTANCE_FLAGS flags) :
     pImpl(std::make_unique<Impl>(engine, this, bufferNeeded, sampleRate, channels, sampleBits, flags))
-{
-}
+{}
 
 
-// Move constructor.
-DynamicSoundEffectInstance::DynamicSoundEffectInstance(DynamicSoundEffectInstance&& moveFrom) noexcept
-    : pImpl(std::move(moveFrom.pImpl))
-{
-}
-
-
-// Move assignment.
-DynamicSoundEffectInstance& DynamicSoundEffectInstance::operator= (DynamicSoundEffectInstance&& moveFrom) noexcept
-{
-    pImpl = std::move(moveFrom.pImpl);
-    return *this;
-}
-
-
-// Public destructor.
-DynamicSoundEffectInstance::~DynamicSoundEffectInstance()
-{
-}
+DynamicSoundEffectInstance::DynamicSoundEffectInstance(DynamicSoundEffectInstance&&) noexcept = default;
+DynamicSoundEffectInstance& DynamicSoundEffectInstance::operator= (DynamicSoundEffectInstance&&) noexcept = default;
+DynamicSoundEffectInstance::~DynamicSoundEffectInstance() = default;
 
 
 // Public methods.
@@ -317,7 +302,7 @@ void DynamicSoundEffectInstance::SetPan(float pan)
 }
 
 
-void DynamicSoundEffectInstance::Apply3D(const AudioListener& listener, const AudioEmitter& emitter, bool rhcoords)
+void DynamicSoundEffectInstance::Apply3D(const X3DAUDIO_LISTENER& listener, const X3DAUDIO_EMITTER& emitter, bool rhcoords)
 {
     pImpl->mBase.Apply3D(listener, emitter, rhcoords);
 }
@@ -351,7 +336,7 @@ size_t DynamicSoundEffectInstance::GetSampleDuration(size_t bytes) const noexcep
         return 0;
 
     return static_cast<size_t>((uint64_t(bytes) * 8)
-                               / (uint64_t(wfx->wBitsPerSample) * uint64_t(wfx->nChannels)));
+        / (uint64_t(wfx->wBitsPerSample) * uint64_t(wfx->nChannels)));
 }
 
 
@@ -378,6 +363,12 @@ size_t DynamicSoundEffectInstance::GetSampleSizeInBytes(uint64_t duration) const
 int DynamicSoundEffectInstance::GetPendingBufferCount() const noexcept
 {
     return pImpl->mBase.GetPendingBufferCount();
+}
+
+
+unsigned int DynamicSoundEffectInstance::GetChannelCount() const noexcept
+{
+    return pImpl->mBase.GetChannelCount();
 }
 
 

@@ -303,7 +303,7 @@ typedef struct XalPlatformStorageEventHandlers2
 /// XalPlatformRemoteConnectClosePromptEventHandler is called or it is dismissed
 /// by the user.
 ///
-/// Game should still render the URL and code that it got back in case the user can’t scan
+/// Game should still render the URL and code that it got back in case the user can't scan
 /// the QR code. The QR code will also not contain the code embedded into it.
 ///
 /// All arguments are owned by the caller (except context).
@@ -594,13 +594,13 @@ typedef enum XalSpopOperationResult
     /// </summary>
     XalSpopOperationResult_SwitchAccount = 1,
     /// <summary>
-    /// Canceled client operation.
-    /// </summary>
-    XalSpopOperationResult_Canceled = 2,
-    /// <summary>
     /// Unrecoverable failure in client operation.
     /// </summary>
-    XalSpopOperationResult_Failure = 3,
+    XalSpopOperationResult_Failure = 2,
+    /// <summary>
+    /// Canceled client operation.
+    /// </summary>
+    XalSpopOperationResult_Canceled = 3
 } XalSpopOperationResult;
 
 }

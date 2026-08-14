@@ -586,26 +586,20 @@ int HCMockResponseSetNetworkErrorCode_Lua(lua_State *L)
 }
 
 #if HC_PLATFORM == HC_PLATFORM_GDK
-namespace xbox
-{
-namespace httpclient
-{
-extern void HCWinHttpSuspend();
-extern void HCWinHttpResume();
-}
-}
+extern "C" void HCWinHttpSuspend();
+extern "C" void HCWinHttpResume();
 
 int HCWinHttpSuspend_lua(lua_State *L)
 {
     UNREFERENCED_PARAMETER(L);
-    xbox::httpclient::HCWinHttpSuspend();
+    HCWinHttpSuspend();
     return 0;
 }
 
 int HCWinHttpResume_lua(lua_State *L)
 {
     UNREFERENCED_PARAMETER(L);
-    xbox::httpclient::HCWinHttpResume();
+    HCWinHttpResume();
     return 0;
 }
 #endif

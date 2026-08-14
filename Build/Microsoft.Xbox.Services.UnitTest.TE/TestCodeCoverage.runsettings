@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <TargetPlatform>x64</TargetPlatform>
+    <BatchSize>1</BatchSize>
+  </RunConfiguration>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0" assemblyQualifiedName="Microsoft.VisualStudio.Coverage.DynamicCoverageDataCollector, Microsoft.VisualStudio.TraceCollector, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+        <Configuration>
+          <CodeCoverage>
+              <Functions>
+                <Include>
+                  <!-- Include methods in the Fabrikam namespace: -->
+                  <Function>.*Microsoft::Xbox.*</Function>
+                  <Function>.*xbox::services.*</Function>
+                </Include>
+                <Exclude>
+                  <!-- Exclude methods in a class or namespace named UnitTest: -->
+                  <Function>^Platform::.*</Function>
+                  <Function>^Windows::Foundation::.*</Function>
+                  <Function>^std::.*</Function>
+                  <Function>.*_abi_.*</Function>
+                  <Function>Platform</Function>
+                  <Function>Microsoft::VisualStudio::.*</Function>
+                  <Function>Concurrency.*</Function>
+                </Exclude>
+              </Functions>          
+            <ModulePaths>
+              <Exclude>
+                <ModulePath>.*CPPUnitTestFramework.*</ModulePath>
+              </Exclude>
+            </ModulePaths>
+          </CodeCoverage>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

@@ -362,7 +362,12 @@ HRESULT TitleStorageService::DownloadBlobHelper(
                             args->startByte == args->blobMetadata.length)
                         {
                             auto etag = httpResult.Payload()->GetResponseHeader(ETAG_HEADER);
-                            utils::strcpy(args->blobMetadata.eTag, etag.length() + 1, etag.c_str());
+                            if (etag.size() >= sizeof(args->blobMetadata.eTag))
+                            {
+                                args->async.Complete(E_NOT_SUFFICIENT_BUFFER);
+                                return;
+                            }
+                            utils::strcpy(args->blobMetadata.eTag, sizeof(args->blobMetadata.eTag), etag.c_str());
                             args->blobMetadata.length = args->startByte;
                             args->async.Complete(std::move(args->blobMetadata));
                         }
@@ -499,7 +504,12 @@ TitleStorageService::UploadBlobHelper(
                 if (SUCCEEDED(hr))
                 {
                     auto etag = httpResult.Payload()->GetResponseHeader(ETAG_HEADER);
-                    utils::strcpy(args->blobMetadata.eTag, etag.length() + 1, etag.c_str());
+                    if (etag.size() >= sizeof(args->blobMetadata.eTag))
+                    {
+                        args->async.Complete(E_NOT_SUFFICIENT_BUFFER);
+                        return;
+                    }
+                    utils::strcpy(args->blobMetadata.eTag, sizeof(args->blobMetadata.eTag), etag.c_str());
 
                     if (finalBlock)
                     {

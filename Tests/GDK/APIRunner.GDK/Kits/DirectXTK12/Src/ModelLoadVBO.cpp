@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: ModelLoadVBO.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -22,14 +22,14 @@
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
-static_assert(sizeof(VertexPositionNormalTexture) == 32, "VBO vertex size mismatch");
+static_assert(sizeof(VertexPositionNormalTexture) == sizeof(VBO::vertex_t), "VBO vertex size mismatch");
 
 namespace
 {
     //--------------------------------------------------------------------------------------
     // Shared VB input element description
     INIT_ONCE g_InitOnce = INIT_ONCE_STATIC_INIT;
-    std::shared_ptr<std::vector<D3D12_INPUT_ELEMENT_DESC>> g_vbdecl;
+    std::shared_ptr<ModelMeshPart::InputLayoutCollection> g_vbdecl;
 
     BOOL CALLBACK InitializeDecl(PINIT_ONCE initOnce, PVOID Parameter, PVOID *lpContext)
     {
@@ -37,7 +37,7 @@ namespace
         UNREFERENCED_PARAMETER(Parameter);
         UNREFERENCED_PARAMETER(lpContext);
 
-        g_vbdecl = std::make_shared<std::vector<D3D12_INPUT_ELEMENT_DESC>>(VertexPositionNormalTexture::InputLayout.pInputElementDescs,
+        g_vbdecl = std::make_shared<ModelMeshPart::InputLayoutCollection>(VertexPositionNormalTexture::InputLayout.pInputElementDescs,
             VertexPositionNormalTexture::InputLayout.pInputElementDescs + VertexPositionNormalTexture::InputLayout.NumElements);
 
         return TRUE;
@@ -47,66 +47,66 @@ namespace
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-std::unique_ptr<Model> DirectX::Model::CreateFromVBO(
+std::unique_ptr<Model> Model::CreateFromVBO(
     ID3D12Device* device,
     const uint8_t* meshData, size_t dataSize,
     ModelLoaderFlags flags)
 {
     if (!InitOnceExecuteOnce(&g_InitOnce, InitializeDecl, nullptr, nullptr))
-        throw std::exception("One-time initialization failed");
+        throw std::system_error(std::error_code(static_cast<int>(GetLastError()), std::system_category()), "InitOnceExecuteOnce");
 
     if (!meshData)
-        throw std::exception("meshData cannot be null");
+        throw std::invalid_argument("meshData cannot be null");
 
     // File Header
     if (dataSize < sizeof(VBO::header_t))
-        throw std::exception("End of file");
+        throw std::runtime_error("End of file");
     auto header = reinterpret_cast<const VBO::header_t*>(meshData);
 
     if (!header->numVertices || !header->numIndices)
-        throw std::exception("No vertices or indices found");
+        throw std::runtime_error("No vertices or indices found");
 
     uint64_t sizeInBytes = uint64_t(header->numVertices) * sizeof(VertexPositionNormalTexture);
     if (sizeInBytes > UINT32_MAX)
-        throw std::exception("VB too large");
+        throw std::runtime_error("VB too large");
 
     if (!(flags & ModelLoader_AllowLargeModels))
     {
         if (sizeInBytes > uint64_t(D3D12_REQ_RESOURCE_SIZE_IN_MEGABYTES_EXPRESSION_A_TERM * 1024u * 1024u))
-            throw std::exception("VB too large for DirectX 12");
+            throw std::runtime_error("VB too large for DirectX 12");
     }
 
-    auto vertSize = static_cast<size_t>(sizeInBytes);
+    const auto vertSize = static_cast<size_t>(sizeInBytes);
 
     if (dataSize < (vertSize + sizeof(VBO::header_t)))
-        throw std::exception("End of file");
+        throw std::runtime_error("End of file");
     auto verts = reinterpret_cast<const VertexPositionNormalTexture*>(meshData + sizeof(VBO::header_t));
 
     sizeInBytes = uint64_t(header->numIndices) * sizeof(uint16_t);
     if (sizeInBytes > UINT32_MAX)
-        throw std::exception("IB too large");
+        throw std::runtime_error("IB too large");
 
     if (!(flags & ModelLoader_AllowLargeModels))
     {
         if (sizeInBytes > uint64_t(D3D12_REQ_RESOURCE_SIZE_IN_MEGABYTES_EXPRESSION_A_TERM * 1024u * 1024u))
-            throw std::exception("IB too large for DirectX 12");
+            throw std::runtime_error("IB too large for DirectX 12");
     }
 
-    auto indexSize = static_cast<size_t>(sizeInBytes);
+    const auto indexSize = static_cast<size_t>(sizeInBytes);
 
     if (dataSize < (sizeof(VBO::header_t) + vertSize + indexSize))
-        throw std::exception("End of file");
+        throw std::runtime_error("End of file");
     auto indices = reinterpret_cast<const uint16_t*>(meshData + sizeof(VBO::header_t) + vertSize);
 
     // Create vertex buffer
-    auto vb = GraphicsMemory::Get(device).Allocate(vertSize);
+    auto vb = GraphicsMemory::Get(device).Allocate(vertSize, 16, GraphicsMemory::TAG_VERTEX);
     memcpy(vb.Memory(), verts, vertSize);
 
     // Create index buffer
-    auto ib = GraphicsMemory::Get(device).Allocate(indexSize);
+    auto ib = GraphicsMemory::Get(device).Allocate(indexSize, 16, GraphicsMemory::TAG_INDEX);
     memcpy(ib.Memory(), indices, indexSize);
 
-    auto part = new ModelMeshPart(0);
+    auto part = std::make_unique<ModelMeshPart>(0);
     part->materialIndex = 0;
     part->indexCount = header->numIndices;
     part->startIndex = 0;
@@ -121,9 +121,11 @@ std::unique_ptr<Model> DirectX::Model::CreateFromVBO(
     auto mesh = std::make_shared<ModelMesh>();
     BoundingSphere::CreateFromPoints(mesh->boundingSphere, header->numVertices, &verts->position, sizeof(VertexPositionNormalTexture));
     BoundingBox::CreateFromPoints(mesh->boundingBox, header->numVertices, &verts->position, sizeof(VertexPositionNormalTexture));
-    mesh->opaqueMeshParts.emplace_back(part);
+    mesh->opaqueMeshParts.reserve(1);
+    mesh->opaqueMeshParts.emplace_back(std::move(part));
 
     auto model = std::make_unique<Model>();
+    model->meshes.reserve(1);
     model->meshes.emplace_back(mesh);
 
     return model;
@@ -132,7 +134,7 @@ std::unique_ptr<Model> DirectX::Model::CreateFromVBO(
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-std::unique_ptr<Model> DirectX::Model::CreateFromVBO(
+std::unique_ptr<Model> Model::CreateFromVBO(
     ID3D12Device* device,
     const wchar_t* szFileName,
     ModelLoaderFlags flags)
@@ -144,7 +146,7 @@ std::unique_ptr<Model> DirectX::Model::CreateFromVBO(
     {
         DebugTrace("ERROR: CreateFromVBO failed (%08X) loading '%ls'\n",
             static_cast<unsigned int>(hr), szFileName);
-        throw std::exception("CreateFromVBO");
+        throw std::runtime_error("CreateFromVBO");
     }
 
     auto model = CreateFromVBO(device, data.get(), dataSize, flags);
@@ -153,3 +155,20 @@ std::unique_ptr<Model> DirectX::Model::CreateFromVBO(
 
     return model;
 }
+
+
+//--------------------------------------------------------------------------------------
+// Adapters for /Zc:wchar_t- clients
+
+#if defined(_MSC_VER) && !defined(_NATIVE_WCHAR_T_DEFINED)
+
+_Use_decl_annotations_
+std::unique_ptr<Model> Model::CreateFromVBO(
+    ID3D12Device* device,
+    const __wchar_t* szFileName,
+    ModelLoaderFlags flags)
+{
+    return CreateFromVBO(device, reinterpret_cast<const unsigned short*>(szFileName), flags);
+}
+
+#endif

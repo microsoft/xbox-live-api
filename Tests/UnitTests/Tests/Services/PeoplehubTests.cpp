@@ -403,6 +403,62 @@ public:
         }
     }
 
+    DEFINE_TEST_CASE(TestPresenceTitleNameParsing)
+    {
+        TEST_LOG(L"Test starting: TestPresenceTitleNameParsing");
+
+        // Rich presence strings use the format "Title - Rich Presence Text". The title name must be
+        // parsed off the " - " delimiter (space-hyphen-space), not the first hyphen, so titles that
+        // legitimately contain a hyphen (e.g. "Gears of War: E-Day") are not truncated. presenceText
+        // must retain the full formatted presence string. Regression test for AB#63099577.
+        struct TitleNameCase
+        {
+            const char* presenceText;
+            const char* expectedTitleName;
+        };
+
+        const TitleNameCase cases[] =
+        {
+            { "Gears of War: E-Day - Playing Ranked", "Gears of War: E-Day" },
+            { "Gears of War: E-Day", "Gears of War: E-Day" },
+            { "Forza Horizon 2 - In a Race", "Forza Horizon 2" },
+            { "Home", "Home" }
+        };
+
+        for (const auto& testCase : cases)
+        {
+            PeoplehubTestEnvironment env{};
+
+            JsonDocument jsonResponse;
+            jsonResponse.Parse(peoplehubResponse);
+            jsonResponse["people"][0]["presenceDetails"][0]["PresenceText"].SetString(
+                testCase.presenceText, jsonResponse.GetAllocator());
+
+            auto peoplehubMock = std::make_shared<HttpMock>("GET", "https://peoplehub.xboxlive.com/", 200, jsonResponse);
+
+            Event callComplete;
+            Result<Vector<XblSocialManagerUser>> result;
+
+            env.PeoplehubService->GetSocialGraph(env.XboxLiveContext->Xuid(), XblSocialManagerExtraDetailLevel::NoExtraDetail, {
+                [&](Result<Vector<XblSocialManagerUser>> temp)
+                {
+                    result = temp;
+                    callComplete.Set();
+                }
+                });
+
+            callComplete.Wait();
+
+            VERIFY_SUCCEEDED(result.Hresult());
+            VERIFY_IS_TRUE(result.Payload().size() > 0);
+            auto& presenceRecord = result.Payload()[0].presenceRecord;
+            VERIFY_IS_TRUE(presenceRecord.presenceTitleRecordCount > 0);
+            auto& titleRecord = presenceRecord.presenceTitleRecords[0];
+            VERIFY_ARE_EQUAL_STR(testCase.expectedTitleName, titleRecord.titleName);
+            VERIFY_ARE_EQUAL_STR(testCase.presenceText, titleRecord.presenceText);
+        }
+    }
+
     DEFINE_TEST_CASE(TestInvalidResponse)
     {
         TEST_LOG(L"Test starting: TestInvalidResponse");

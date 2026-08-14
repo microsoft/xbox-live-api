@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: SkinnedEffect.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -58,6 +58,12 @@ class SkinnedEffect::Impl : public EffectBase<SkinnedEffectTraits>
 public:
     Impl(_In_ ID3D12Device* device, uint32_t effectFlags, const EffectPipelineStateDescription& pipelineDescription);
 
+    Impl(const Impl&) = delete;
+    Impl& operator=(const Impl&) = delete;
+
+    Impl(Impl&&) = default;
+    Impl& operator=(Impl&&) = default;
+
     enum RootParameterIndex
     {
         ConstantBuffer,
@@ -71,51 +77,52 @@ public:
 
     EffectLights lights;
 
-    int GetPipelineStatePermutation(bool preferPerPixelLighting, bool biasedVertexNormals) const noexcept;
+    int GetPipelineStatePermutation(uint32_t effectFlags) const noexcept;
 
     void Apply(_In_ ID3D12GraphicsCommandList* commandList);
 };
 
 
+#pragma region Shaders
 // Include the precompiled shader code.
 namespace
 {
 #ifdef _GAMING_XBOX_SCARLETT
-    #include "Shaders/Compiled/XboxGamingScarlettSkinnedEffect_VSSkinnedVertexLightingFourBones.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettSkinnedEffect_VSSkinnedPixelLightingFourBones.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettSkinnedEffect_VSSkinnedVertexLightingFourBonesBn.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettSkinnedEffect_VSSkinnedPixelLightingFourBonesBn.inc"
+#include "XboxGamingScarlettSkinnedEffect_VSSkinnedVertexLightingFourBones.inc"
+#include "XboxGamingScarlettSkinnedEffect_VSSkinnedPixelLightingFourBones.inc"
+#include "XboxGamingScarlettSkinnedEffect_VSSkinnedVertexLightingFourBonesBn.inc"
+#include "XboxGamingScarlettSkinnedEffect_VSSkinnedPixelLightingFourBonesBn.inc"
 
-    #include "Shaders/Compiled/XboxGamingScarlettSkinnedEffect_PSSkinnedVertexLighting.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettSkinnedEffect_PSSkinnedVertexLightingNoFog.inc"
-    #include "Shaders/Compiled/XboxGamingScarlettSkinnedEffect_PSSkinnedPixelLighting.inc"
+#include "XboxGamingScarlettSkinnedEffect_PSSkinnedVertexLighting.inc"
+#include "XboxGamingScarlettSkinnedEffect_PSSkinnedVertexLightingNoFog.inc"
+#include "XboxGamingScarlettSkinnedEffect_PSSkinnedPixelLighting.inc"
 #elif defined(_GAMING_XBOX)
-    #include "Shaders/Compiled/XboxGamingXboxOneSkinnedEffect_VSSkinnedVertexLightingFourBones.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneSkinnedEffect_VSSkinnedPixelLightingFourBones.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneSkinnedEffect_VSSkinnedVertexLightingFourBonesBn.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneSkinnedEffect_VSSkinnedPixelLightingFourBonesBn.inc"
+#include "XboxGamingXboxOneSkinnedEffect_VSSkinnedVertexLightingFourBones.inc"
+#include "XboxGamingXboxOneSkinnedEffect_VSSkinnedPixelLightingFourBones.inc"
+#include "XboxGamingXboxOneSkinnedEffect_VSSkinnedVertexLightingFourBonesBn.inc"
+#include "XboxGamingXboxOneSkinnedEffect_VSSkinnedPixelLightingFourBonesBn.inc"
 
-    #include "Shaders/Compiled/XboxGamingXboxOneSkinnedEffect_PSSkinnedVertexLighting.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneSkinnedEffect_PSSkinnedVertexLightingNoFog.inc"
-    #include "Shaders/Compiled/XboxGamingXboxOneSkinnedEffect_PSSkinnedPixelLighting.inc"
+#include "XboxGamingXboxOneSkinnedEffect_PSSkinnedVertexLighting.inc"
+#include "XboxGamingXboxOneSkinnedEffect_PSSkinnedVertexLightingNoFog.inc"
+#include "XboxGamingXboxOneSkinnedEffect_PSSkinnedPixelLighting.inc"
 #elif defined(_XBOX_ONE) && defined(_TITLE)
-    #include "Shaders/Compiled/XboxOneSkinnedEffect_VSSkinnedVertexLightingFourBones.inc"
-    #include "Shaders/Compiled/XboxOneSkinnedEffect_VSSkinnedPixelLightingFourBones.inc"
-    #include "Shaders/Compiled/XboxOneSkinnedEffect_VSSkinnedVertexLightingFourBonesBn.inc"
-    #include "Shaders/Compiled/XboxOneSkinnedEffect_VSSkinnedPixelLightingFourBonesBn.inc"
+#include "XboxOneSkinnedEffect_VSSkinnedVertexLightingFourBones.inc"
+#include "XboxOneSkinnedEffect_VSSkinnedPixelLightingFourBones.inc"
+#include "XboxOneSkinnedEffect_VSSkinnedVertexLightingFourBonesBn.inc"
+#include "XboxOneSkinnedEffect_VSSkinnedPixelLightingFourBonesBn.inc"
 
-    #include "Shaders/Compiled/XboxOneSkinnedEffect_PSSkinnedVertexLighting.inc"
-    #include "Shaders/Compiled/XboxOneSkinnedEffect_PSSkinnedVertexLightingNoFog.inc"
-    #include "Shaders/Compiled/XboxOneSkinnedEffect_PSSkinnedPixelLighting.inc"
+#include "XboxOneSkinnedEffect_PSSkinnedVertexLighting.inc"
+#include "XboxOneSkinnedEffect_PSSkinnedVertexLightingNoFog.inc"
+#include "XboxOneSkinnedEffect_PSSkinnedPixelLighting.inc"
 #else
-    #include "Shaders/Compiled/SkinnedEffect_VSSkinnedVertexLightingFourBones.inc"
-    #include "Shaders/Compiled/SkinnedEffect_VSSkinnedPixelLightingFourBones.inc"
-    #include "Shaders/Compiled/SkinnedEffect_VSSkinnedVertexLightingFourBonesBn.inc"
-    #include "Shaders/Compiled/SkinnedEffect_VSSkinnedPixelLightingFourBonesBn.inc"
+#include "SkinnedEffect_VSSkinnedVertexLightingFourBones.inc"
+#include "SkinnedEffect_VSSkinnedPixelLightingFourBones.inc"
+#include "SkinnedEffect_VSSkinnedVertexLightingFourBonesBn.inc"
+#include "SkinnedEffect_VSSkinnedPixelLightingFourBonesBn.inc"
 
-    #include "Shaders/Compiled/SkinnedEffect_PSSkinnedVertexLighting.inc"
-    #include "Shaders/Compiled/SkinnedEffect_PSSkinnedVertexLightingNoFog.inc"
-    #include "Shaders/Compiled/SkinnedEffect_PSSkinnedPixelLighting.inc"
+#include "SkinnedEffect_PSSkinnedVertexLighting.inc"
+#include "SkinnedEffect_PSSkinnedVertexLightingNoFog.inc"
+#include "SkinnedEffect_PSSkinnedPixelLighting.inc"
 #endif
 }
 
@@ -171,7 +178,7 @@ const int EffectBase<SkinnedEffectTraits>::PixelShaderIndices[] =
     2,      // pixel lighting (biased vertex normals), four bones
     2,      // pixel lighting (biased vertex normals), four bones, no fog
 };
-
+#pragma endregion
 
 // Global pool of per-device SkinnedEffect resources.
 template<>
@@ -184,13 +191,13 @@ SkinnedEffect::Impl::Impl(
     uint32_t effectFlags,
     const EffectPipelineStateDescription& pipelineDescription)
     : EffectBase(device),
-        texture{},
-        sampler{}
+    texture{},
+    sampler{}
 {
-    static_assert(_countof(EffectBase<SkinnedEffectTraits>::VertexShaderIndices) == SkinnedEffectTraits::ShaderPermutationCount, "array/max mismatch");
-    static_assert(_countof(EffectBase<SkinnedEffectTraits>::VertexShaderBytecode) == SkinnedEffectTraits::VertexShaderCount, "array/max mismatch");
-    static_assert(_countof(EffectBase<SkinnedEffectTraits>::PixelShaderBytecode) == SkinnedEffectTraits::PixelShaderCount, "array/max mismatch");
-    static_assert(_countof(EffectBase<SkinnedEffectTraits>::PixelShaderIndices) == SkinnedEffectTraits::ShaderPermutationCount, "array/max mismatch");
+    static_assert(static_cast<int>(std::size(EffectBase<SkinnedEffectTraits>::VertexShaderIndices)) == SkinnedEffectTraits::ShaderPermutationCount, "array/max mismatch");
+    static_assert(static_cast<int>(std::size(EffectBase<SkinnedEffectTraits>::VertexShaderBytecode)) == SkinnedEffectTraits::VertexShaderCount, "array/max mismatch");
+    static_assert(static_cast<int>(std::size(EffectBase<SkinnedEffectTraits>::PixelShaderBytecode)) == SkinnedEffectTraits::PixelShaderCount, "array/max mismatch");
+    static_assert(static_cast<int>(std::size(EffectBase<SkinnedEffectTraits>::PixelShaderIndices)) == SkinnedEffectTraits::ShaderPermutationCount, "array/max mismatch");
 
     lights.InitializeConstants(constants.specularColorAndPower, constants.lightDirection, constants.lightDiffuseColor, constants.lightSpecularColor);
 
@@ -203,14 +210,19 @@ SkinnedEffect::Impl::Impl(
 
     // Create root signature.
     {
-        D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
-            D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-            D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-            D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-            D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS;
+        ENUM_FLAGS_CONSTEXPR D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
+            D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+            | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS
+            | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS
+            | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS
+        #ifdef _GAMING_XBOX_SCARLETT
+            | D3D12_ROOT_SIGNATURE_FLAG_DENY_AMPLIFICATION_SHADER_ROOT_ACCESS
+            | D3D12_ROOT_SIGNATURE_FLAG_DENY_MESH_SHADER_ROOT_ACCESS
+        #endif
+            ;
 
-        CD3DX12_DESCRIPTOR_RANGE textureSrvDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
-        CD3DX12_DESCRIPTOR_RANGE textureSamplerDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, 1, 0);
+        const CD3DX12_DESCRIPTOR_RANGE textureSrvDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+        const CD3DX12_DESCRIPTOR_RANGE textureSamplerDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, 1, 0);
 
         CD3DX12_ROOT_PARAMETER rootParameters[RootParameterIndex::RootParameterCount] = {};
         rootParameters[RootParameterIndex::TextureSRV].InitAsDescriptorTable(1, &textureSrvDescriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
@@ -218,7 +230,7 @@ SkinnedEffect::Impl::Impl(
         rootParameters[RootParameterIndex::ConstantBuffer].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
 
         CD3DX12_ROOT_SIGNATURE_DESC rsigDesc = {};
-        rsigDesc.Init(_countof(rootParameters), rootParameters, 0, nullptr, rootSignatureFlags);
+        rsigDesc.Init(static_cast<UINT>(std::size(rootParameters)), rootParameters, 0, nullptr, rootSignatureFlags);
 
         mRootSignature = GetRootSignature(0, rsigDesc);
     }
@@ -230,20 +242,23 @@ SkinnedEffect::Impl::Impl(
     if (effectFlags & EffectFlags::VertexColor)
     {
         DebugTrace("ERROR: SkinnedEffect does not implement EffectFlags::VertexColor\n");
-        throw std::invalid_argument("SkinnedEffect");
+        throw std::invalid_argument("VertexColor effect flag is invalid");
+    }
+    else if (effectFlags & EffectFlags::Instancing)
+    {
+        DebugTrace("ERROR: SkinnedEffect does not implement EffectFlags::Instancing\n");
+        throw std::invalid_argument("Instancing effect flag is invalid");
     }
 
     // Create pipeline state.
-    int sp = GetPipelineStatePermutation(
-        (effectFlags & EffectFlags::PerPixelLightingBit) != 0,
-        (effectFlags & EffectFlags::BiasedVertexNormals) != 0);
+    const int sp = GetPipelineStatePermutation(effectFlags);
     assert(sp >= 0 && sp < SkinnedEffectTraits::ShaderPermutationCount);
     _Analysis_assume_(sp >= 0 && sp < SkinnedEffectTraits::ShaderPermutationCount);
 
-    int vi = EffectBase<SkinnedEffectTraits>::VertexShaderIndices[sp];
+    const int vi = EffectBase<SkinnedEffectTraits>::VertexShaderIndices[sp];
     assert(vi >= 0 && vi < SkinnedEffectTraits::VertexShaderCount);
     _Analysis_assume_(vi >= 0 && vi < SkinnedEffectTraits::VertexShaderCount);
-    int pi = EffectBase<SkinnedEffectTraits>::PixelShaderIndices[sp];
+    const int pi = EffectBase<SkinnedEffectTraits>::PixelShaderIndices[sp];
     assert(pi >= 0 && pi < SkinnedEffectTraits::PixelShaderCount);
     _Analysis_assume_(pi >= 0 && pi < SkinnedEffectTraits::PixelShaderCount);
 
@@ -258,7 +273,7 @@ SkinnedEffect::Impl::Impl(
 }
 
 
-int SkinnedEffect::Impl::GetPipelineStatePermutation(bool preferPerPixelLighting, bool biasedVertexNormals) const noexcept
+int SkinnedEffect::Impl::GetPipelineStatePermutation(uint32_t effectFlags) const noexcept
 {
     int permutation = 0;
 
@@ -268,13 +283,13 @@ int SkinnedEffect::Impl::GetPipelineStatePermutation(bool preferPerPixelLighting
         permutation += 1;
     }
 
-    if (preferPerPixelLighting)
+    if (effectFlags & EffectFlags::PerPixelLightingBit)
     {
         // Do lighting in the pixel shader.
         permutation += 2;
     }
 
-    if (biasedVertexNormals)
+    if (effectFlags & EffectFlags::BiasedVertexNormals)
     {
         // Compressed normals need to be scaled and biased in the vertex shader.
         permutation += 4;
@@ -301,13 +316,13 @@ void SkinnedEffect::Impl::Apply(_In_ ID3D12GraphicsCommandList* commandList)
     if (!texture.ptr || !sampler.ptr)
     {
         DebugTrace("ERROR: Missing texture or sampler for SkinnedEffect (texture %llu, sampler %llu)\n", texture.ptr, sampler.ptr);
-        throw std::exception("SkinnedEffect");
+        throw std::runtime_error("SkinnedEffect");
     }
 
     // **NOTE** If D3D asserts or crashes here, you probably need to call commandList->SetDescriptorHeaps() with the required descriptor heaps.
     commandList->SetGraphicsRootDescriptorTable(RootParameterIndex::TextureSRV, texture);
     commandList->SetGraphicsRootDescriptorTable(RootParameterIndex::TextureSampler, sampler);
-    
+
     // Set constants
     commandList->SetGraphicsRootConstantBufferView(RootParameterIndex::ConstantBuffer, GetConstantBufferGpuAddress());
 
@@ -322,29 +337,12 @@ SkinnedEffect::SkinnedEffect(
     uint32_t effectFlags,
     const EffectPipelineStateDescription& pipelineDescription)
     : pImpl(std::make_unique<Impl>(device, effectFlags, pipelineDescription))
-{
-}
+{}
 
 
-// Move constructor.
-SkinnedEffect::SkinnedEffect(SkinnedEffect&& moveFrom) noexcept
-    : pImpl(std::move(moveFrom.pImpl))
-{
-}
-
-
-// Move assignment.
-SkinnedEffect& SkinnedEffect::operator= (SkinnedEffect&& moveFrom) noexcept
-{
-    pImpl = std::move(moveFrom.pImpl);
-    return *this;
-}
-
-
-// Public destructor.
-SkinnedEffect::~SkinnedEffect()
-{
-}
+SkinnedEffect::SkinnedEffect(SkinnedEffect&&) noexcept = default;
+SkinnedEffect& SkinnedEffect::operator= (SkinnedEffect&&) noexcept = default;
+SkinnedEffect::~SkinnedEffect() = default;
 
 
 // IEffect methods.
@@ -429,7 +427,7 @@ void SkinnedEffect::DisableSpecular()
     // Set specular color to black, power to 1
     // Note: Don't use a power of 0 or the shader will generate strange highlights on non-specular materials
 
-    pImpl->constants.specularColorAndPower = g_XMIdentityR3; 
+    pImpl->constants.specularColorAndPower = g_XMIdentityR3;
 
     pImpl->dirtyFlags |= EffectDirtyFlags::ConstantBuffer;
 }
@@ -532,17 +530,22 @@ void SkinnedEffect::SetTexture(D3D12_GPU_DESCRIPTOR_HANDLE srvDescriptor, D3D12_
 void SkinnedEffect::SetBoneTransforms(_In_reads_(count) XMMATRIX const* value, size_t count)
 {
     if (count > MaxBones)
-        throw std::out_of_range("count parameter out of range");
+        throw std::invalid_argument("count parameter exceeds MaxBones");
 
     auto boneConstant = pImpl->constants.bones;
 
     for (size_t i = 0; i < count; i++)
     {
+    #if DIRECTX_MATH_VERSION >= 313
+        XMStoreFloat3x4A(reinterpret_cast<XMFLOAT3X4A*>(&boneConstant[i]), value[i]);
+    #else
+            // Xbox One XDK has an older version of DirectXMath
         XMMATRIX boneMatrix = XMMatrixTranspose(value[i]);
 
         boneConstant[i][0] = boneMatrix.r[0];
         boneConstant[i][1] = boneMatrix.r[1];
         boneConstant[i][2] = boneMatrix.r[2];
+    #endif
     }
 
     pImpl->dirtyFlags |= EffectDirtyFlags::ConstantBuffer;
@@ -553,7 +556,7 @@ void SkinnedEffect::ResetBoneTransforms()
 {
     auto boneConstant = pImpl->constants.bones;
 
-    for(size_t i = 0; i < MaxBones; ++i)
+    for (size_t i = 0; i < MaxBones; ++i)
     {
         boneConstant[i][0] = g_XMIdentityR0;
         boneConstant[i][1] = g_XMIdentityR1;

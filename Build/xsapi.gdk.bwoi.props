@@ -104,6 +104,14 @@
     <VCTargetsPath16>$(_AlternativeVCTargetsPath160)</VCTargetsPath16>
   </PropertyGroup>
 
+  <!-- for x64/ARM64 that are not Gaming.something -->
+  <PropertyGroup Condition="'$(Console_SdkIncludeRoot)' == ''">
+    <Console_SdkIncludeRoot>$(GameDKLatest)windows\include\</Console_SdkIncludeRoot>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Console_SdkLibPath)' == ''">
+    <Console_SdkLibPath>$(GameDKLatest)windows\lib\$(Platform)</Console_SdkLibPath>
+  </PropertyGroup>
+	
   <!--
   ****************************************************************************************************
   Debugging
@@ -127,9 +135,13 @@
     <Message Importance="High" Text="    VCTargetsPath16              = '$(VCTargetsPath16)'" />
     <Message Importance="High" Text="    DurangoXdkInstallPath        = '$(DurangoXdkInstallPath)'" />
     <Message Importance="High" Text="    GamingWindowsSDKDir          = '$(GamingWindowsSDKDir)'" />
-    <Message Importance="High" Text="    LibraryPath          	      = '$(LibraryPath)'" />
+    <Message Importance="High" Text="    LibraryPath                  = '$(LibraryPath)'" />
     <Message Importance="High" Text="    IncludePath                  = '$(IncludePath)'" />
     <Message Importance="High" Text="    ExecutablePath               = '$(ExecutablePath)'" />
+    <Message Importance="High" Text=" " />
+    <Message Importance="High" Text="    ConsoleSdkIncludeRoot        = '$(Console_SdkIncludeRoot)'" />
+    <Message Importance="High" Text="    ConsoleSdkLibPath            = '$(Console_SdkLibPath)'" />
+    <Message Importance="High" Text="    XsapiPlatform                = '$(XsapiPlatform)'" />	  
     <Message Importance="High" Text=" " />
   </Target>
 

@@ -1,7 +1,7 @@
 //------------------------------------- -------------------------------------------------
 // File: BufferHelpers.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -38,7 +38,7 @@ HRESULT DirectX::CreateStaticBuffer(
     if (!device || !ptr || !count || !stride)
         return E_INVALIDARG;
 
-    uint64_t sizeInbytes = uint64_t(count) * uint64_t(stride);
+    const uint64_t sizeInbytes = uint64_t(count) * uint64_t(stride);
 
     static constexpr uint64_t c_maxBytes = D3D12_REQ_RESOURCE_SIZE_IN_MEGABYTES_EXPRESSION_A_TERM * 1024u * 1024u;
 
@@ -48,16 +48,16 @@ HRESULT DirectX::CreateStaticBuffer(
         return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
     }
 
-    auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeInbytes, resFlags);
+    const auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeInbytes, resFlags);
 
-    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+    const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
 
     ComPtr<ID3D12Resource> res;
     HRESULT hr = device->CreateCommittedResource(
         &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &desc,
-        D3D12_RESOURCE_STATE_COPY_DEST,
+        c_initialCopyTargetState,
         nullptr,
         IID_GRAPHICS_PPV_ARGS(res.GetAddressOf()));
     if (FAILED(hr))
@@ -78,6 +78,112 @@ HRESULT DirectX::CreateStaticBuffer(
     catch (...)
     {
         return E_FAIL;
+    }
+
+    *pBuffer = res.Detach();
+
+    return S_OK;
+}
+
+
+//--------------------------------------------------------------------------------------
+_Use_decl_annotations_
+HRESULT DirectX::CreateUAVBuffer(
+    ID3D12Device* device,
+    uint64_t bufferSize,
+    ID3D12Resource** pBuffer,
+    D3D12_RESOURCE_STATES initialState,
+    D3D12_RESOURCE_FLAGS additionalResFlags) noexcept
+{
+    if (!pBuffer)
+        return E_INVALIDARG;
+
+    *pBuffer = nullptr;
+
+    if (!device || !bufferSize)
+        return E_INVALIDARG;
+
+    static constexpr uint64_t c_maxBytes = D3D12_REQ_RESOURCE_SIZE_IN_MEGABYTES_EXPRESSION_A_TERM * 1024u * 1024u;
+
+    if (bufferSize > c_maxBytes)
+    {
+        DebugTrace("ERROR: Resource size too large for DirectX 12 (size %llu)\n", bufferSize);
+        return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+    }
+
+    const auto desc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS | additionalResFlags);
+
+    const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+
+    ComPtr<ID3D12Resource> res;
+    HRESULT hr = device->CreateCommittedResource(
+        &heapProperties,
+        D3D12_HEAP_FLAG_NONE,
+        &desc,
+        initialState,
+        nullptr,
+        IID_GRAPHICS_PPV_ARGS(res.GetAddressOf()));
+    if (FAILED(hr))
+        return hr;
+
+    *pBuffer = res.Detach();
+
+    return S_OK;
+}
+
+
+//--------------------------------------------------------------------------------------
+_Use_decl_annotations_
+HRESULT DirectX::CreateUploadBuffer(
+    ID3D12Device* device,
+    const void* ptr,
+    size_t count,
+    size_t stride,
+    ID3D12Resource** pBuffer,
+    D3D12_RESOURCE_FLAGS resFlags) noexcept
+{
+    if (!pBuffer)
+        return E_INVALIDARG;
+
+    *pBuffer = nullptr;
+
+    if (!device || !count || !stride)
+        return E_INVALIDARG;
+
+    const uint64_t sizeInbytes = uint64_t(count) * uint64_t(stride);
+
+    static constexpr uint64_t c_maxBytes = D3D12_REQ_RESOURCE_SIZE_IN_MEGABYTES_EXPRESSION_A_TERM * 1024u * 1024u;
+
+    if (sizeInbytes > c_maxBytes)
+    {
+        DebugTrace("ERROR: Resource size too large for DirectX 12 (size %llu)\n", sizeInbytes);
+        return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+    }
+
+    const auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeInbytes, resFlags);
+
+    const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_UPLOAD);
+
+    ComPtr<ID3D12Resource> res;
+    HRESULT hr = device->CreateCommittedResource(
+        &heapProperties,
+        D3D12_HEAP_FLAG_NONE,
+        &desc,
+        D3D12_RESOURCE_STATE_GENERIC_READ,
+        nullptr,
+        IID_GRAPHICS_PPV_ARGS(res.GetAddressOf()));
+    if (FAILED(hr))
+        return hr;
+
+    if (ptr)
+    {
+        void* mappedPtr = nullptr;
+        hr = res->Map(0, nullptr, &mappedPtr);
+        if (FAILED(hr))
+            return hr;
+
+        memcpy(mappedPtr, ptr, static_cast<const size_t>(sizeInbytes));
+        res->Unmap(0, nullptr);
     }
 
     *pBuffer = res.Detach();
@@ -114,16 +220,16 @@ HRESULT DirectX::CreateTextureFromMemory(
         return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
     }
 
-    auto desc = CD3DX12_RESOURCE_DESC::Tex1D(format, static_cast<UINT64>(width), 1u, 1u, resFlags);
+    const auto desc = CD3DX12_RESOURCE_DESC::Tex1D(format, static_cast<UINT64>(width), 1u, 1u, resFlags);
 
-    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+    const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
 
     ComPtr<ID3D12Resource> res;
     HRESULT hr = device->CreateCommittedResource(
         &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &desc,
-        D3D12_RESOURCE_STATE_COPY_DEST,
+        c_initialCopyTargetState,
         nullptr,
         IID_GRAPHICS_PPV_ARGS(res.GetAddressOf()));
     if (FAILED(hr))
@@ -190,17 +296,17 @@ HRESULT DirectX::CreateTextureFromMemory(
         }
     }
 
-    auto desc = CD3DX12_RESOURCE_DESC::Tex2D(format, static_cast<UINT64>(width), static_cast<UINT>(height),
+    const auto desc = CD3DX12_RESOURCE_DESC::Tex2D(format, static_cast<UINT64>(width), static_cast<UINT>(height),
         1u, mipCount, 1u, 0u, resFlags);
 
-    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+    const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
 
     ComPtr<ID3D12Resource> res;
     HRESULT hr = device->CreateCommittedResource(
         &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &desc,
-        D3D12_RESOURCE_STATE_COPY_DEST,
+        c_initialCopyTargetState,
         nullptr,
         IID_GRAPHICS_PPV_ARGS(res.GetAddressOf()));
     if (FAILED(hr))
@@ -262,18 +368,18 @@ HRESULT DirectX::CreateTextureFromMemory(
         return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
     }
 
-    auto desc = CD3DX12_RESOURCE_DESC::Tex3D(format,
+    const auto desc = CD3DX12_RESOURCE_DESC::Tex3D(format,
         static_cast<UINT64>(width), static_cast<UINT>(height), static_cast<UINT16>(depth),
         1u, resFlags);
 
-    CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
+    const CD3DX12_HEAP_PROPERTIES heapProperties(D3D12_HEAP_TYPE_DEFAULT);
 
     ComPtr<ID3D12Resource> res;
     HRESULT hr = device->CreateCommittedResource(
         &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &desc,
-        D3D12_RESOURCE_STATE_COPY_DEST,
+        c_initialCopyTargetState,
         nullptr,
         IID_GRAPHICS_PPV_ARGS(res.GetAddressOf()));
     if (FAILED(hr))

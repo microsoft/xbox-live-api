@@ -614,7 +614,6 @@ public:
         auto xboxLiveContext = env.CreateMockXboxLiveContext(xuid);
         auto& mockRtaService{ MockRealTimeActivityService::Instance() };
 
-        const uint32_t subId{ 321 };
         const char* statName{ "Stat" };
         xsapi_internal_stringstream statsRtaUri;
         statsRtaUri << statsServer << "/users/xuid(" << xuid << ")/scids/" << rtaScid << "/stats/" << statName;

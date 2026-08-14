@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: TeapotData.inc
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
@@ -50,7 +50,7 @@ const TeapotPatch TeapotPatches[] =
 
 
 // Static array defines the control point positions that make up the teapot.
-const DirectX::XMVECTORF32 TeapotControlPoints[] = 
+const DirectX::XMVECTORF32 TeapotControlPoints[] =
 {
     { { { 0, 0.345f, -0.05f, 0 } } },
     { { { -0.028f, 0.345f, -0.05f, 0 } } },

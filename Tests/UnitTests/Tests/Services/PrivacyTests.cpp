@@ -636,6 +636,183 @@ public:
 
         VerifyBatchPermissionsCheckResultCpp(result.payload(), defaultCheckMultiplePermissionsResponseJson);
     }
+
+    DEFINE_TEST_CASE(TestRTAMuteListChanged)
+    {
+        TEST_LOG(L"Test starting: TestRTAMuteListChanged");
+
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
+
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
+        {
+            xsapi_internal_stringstream expectedUri;
+            expectedUri << "https://privacy.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/mutelist";
+            VERIFY_ARE_EQUAL_STR(uri, expectedUri.str());
+
+            mockRtaService.CompleteSubscribeHandshake(n);
+
+            // Immediately raise an event
+            mockRtaService.RaiseEvent(uri, R"({ "NotificationType": "Added", "Xuids": [ "12345", "67890" ] })");
+        });
+
+        struct HandlerContext
+        {
+            Event notificationReceived;
+            XblPrivacyListChangeType changeType{};
+            std::vector<uint64_t> affectedXuids;
+        } context;
+
+        auto handlerToken = XblPrivacyAddMuteListChangedHandler(xboxLiveContext.get(),
+            [](const XblPrivacyMuteListChangeEventArgs* args, void* context)
+            {
+                auto c{ static_cast<HandlerContext*>(context) };
+                c->changeType = args->changeType;
+                c->affectedXuids = std::vector<uint64_t>(args->xuids, args->xuids + args->xuidsCount);
+                c->notificationReceived.Set();
+            },
+            &context
+        );
+
+        context.notificationReceived.Wait();
+
+        VERIFY_IS_TRUE(context.changeType == XblPrivacyListChangeType::Added);
+        VERIFY_ARE_EQUAL_INT(2u, context.affectedXuids.size());
+        VERIFY_ARE_EQUAL_INT(12345, context.affectedXuids[0]);
+        VERIFY_ARE_EQUAL_INT(67890, context.affectedXuids[1]);
+
+        VERIFY_SUCCEEDED(XblPrivacyRemoveMuteListChangedHandler(xboxLiveContext.get(), handlerToken));
+    }
+
+    DEFINE_TEST_CASE(TestRTABlockListChanged)
+    {
+        TEST_LOG(L"Test starting: TestRTABlockListChanged");
+
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
+
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
+        {
+            xsapi_internal_stringstream expectedUri;
+            expectedUri << "https://privacy.xboxlive.com/users/xuid(" << xboxLiveContext->Xuid() << ")/neverlist";
+            VERIFY_ARE_EQUAL_STR(uri, expectedUri.str());
+
+            mockRtaService.CompleteSubscribeHandshake(n);
+
+            mockRtaService.RaiseEvent(uri, R"({ "NotificationType": "Removed", "Xuids": [ "99999" ] })");
+        });
+
+        struct HandlerContext
+        {
+            Event notificationReceived;
+            XblPrivacyListChangeType changeType{};
+            std::vector<uint64_t> affectedXuids;
+        } context;
+
+        auto handlerToken = XblPrivacyAddBlockListChangedHandler(xboxLiveContext.get(),
+            [](const XblPrivacyBlockListChangeEventArgs* args, void* context)
+            {
+                auto c{ static_cast<HandlerContext*>(context) };
+                c->changeType = args->changeType;
+                c->affectedXuids = std::vector<uint64_t>(args->xuids, args->xuids + args->xuidsCount);
+                c->notificationReceived.Set();
+            },
+            &context
+        );
+
+        context.notificationReceived.Wait();
+
+        VERIFY_IS_TRUE(context.changeType == XblPrivacyListChangeType::Removed);
+        VERIFY_ARE_EQUAL_INT(1u, context.affectedXuids.size());
+        VERIFY_ARE_EQUAL_INT(99999, context.affectedXuids[0]);
+
+        VERIFY_SUCCEEDED(XblPrivacyRemoveBlockListChangedHandler(xboxLiveContext.get(), handlerToken));
+    }
+
+    DEFINE_TEST_CASE(TestRTAMuteListHandlerAddRemove)
+    {
+        TEST_LOG(L"Test starting: TestRTAMuteListHandlerAddRemove");
+
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
+
+        uint32_t subscribeCount{ 0 };
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
+        {
+            ++subscribeCount;
+            mockRtaService.CompleteSubscribeHandshake(n);
+        });
+
+        // Add first handler - should trigger subscription
+        auto token1 = XblPrivacyAddMuteListChangedHandler(xboxLiveContext.get(),
+            [](const XblPrivacyMuteListChangeEventArgs*, void*) {},
+            nullptr
+        );
+        VERIFY_IS_TRUE(token1 != 0);
+
+        // Add second handler - should NOT create a new subscription
+        auto token2 = XblPrivacyAddMuteListChangedHandler(xboxLiveContext.get(),
+            [](const XblPrivacyMuteListChangeEventArgs*, void*) {},
+            nullptr
+        );
+        VERIFY_IS_TRUE(token2 != 0);
+        VERIFY_IS_TRUE(token1 != token2);
+        VERIFY_ARE_EQUAL_INT(1u, subscribeCount);
+
+        // Remove first handler - subscription should remain
+        VERIFY_SUCCEEDED(XblPrivacyRemoveMuteListChangedHandler(xboxLiveContext.get(), token1));
+
+        // Remove second handler - subscription should be removed
+        VERIFY_SUCCEEDED(XblPrivacyRemoveMuteListChangedHandler(xboxLiveContext.get(), token2));
+    }
+
+    DEFINE_TEST_CASE(TestRTAMuteListRemoveHandlerWithinCallback)
+    {
+        TEST_LOG(L"Test starting: TestRTAMuteListRemoveHandlerWithinCallback");
+
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+        auto& mockRtaService{ MockRealTimeActivityService::Instance() };
+
+        mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
+        {
+            mockRtaService.CompleteSubscribeHandshake(n);
+            mockRtaService.RaiseEvent(uri, R"({ "NotificationType": "Added", "Xuids": [ "12345" ] })");
+        });
+
+        struct HandlerContext
+        {
+            Event notificationReceived;
+            XblContextHandle xblContext{ nullptr };
+            XblFunctionContext handlerToken{ 0 };
+            bool handlerFired{ false };
+        } context;
+
+        context.xblContext = xboxLiveContext.get();
+
+        // Register handler that removes itself from within the callback
+        context.handlerToken = XblPrivacyAddMuteListChangedHandler(xboxLiveContext.get(),
+            [](const XblPrivacyMuteListChangeEventArgs* args, void* ctx)
+            {
+                auto c{ static_cast<HandlerContext*>(ctx) };
+                c->handlerFired = true;
+
+                // Remove handler from within the callback - this previously caused a crash
+                // due to iterator invalidation in Connection::EventHandler
+                XblPrivacyRemoveMuteListChangedHandler(c->xblContext, c->handlerToken);
+
+                c->notificationReceived.Set();
+            },
+            &context
+        );
+
+        context.notificationReceived.Wait();
+
+        VERIFY_IS_TRUE(context.handlerFired);
+    }
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_END

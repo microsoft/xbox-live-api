@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -26,7 +26,7 @@ cbuffer Constants : register(b0)
 
     float3 LightDirection[3]        : packoffset(c16);
     float3 LightColor[3]            : packoffset(c19);   // "Specular and diffuse light" in PBR
- 
+
     float3 ConstantAlbedo           : packoffset(c22);   // Constant values if not a textured effect
     float  Alpha                    : packoffset(c22.w);
     float  ConstantMetallic         : packoffset(c23.x);
@@ -35,15 +35,21 @@ cbuffer Constants : register(b0)
     int NumRadianceMipLevels        : packoffset(c23.z);
 
     // Size of render target
-    float TargetWidth               : packoffset(c23.w);
-    float TargetHeight              : packoffset(c24.x);
+    float TargetWidth : packoffset(c23.w);
+    float TargetHeight : packoffset(c24.x);
 };
+
+cbuffer SkinningParameters : register(b1)
+{
+    float4x3 Bones[72];
+}
 
 
 #include "Structures.fxh"
 #include "PBRCommon.fxh"
 #include "RootSig.fxh"
 #include "Utilities.fxh"
+#include "Skinning.fxh"
 
 
 // Vertex shader: pbr
@@ -53,7 +59,27 @@ VSOutputPixelLightingTx VSConstant(VSInputNmTx vin)
     VSOutputPixelLightingTx vout;
 
     CommonVSOutputPixelLighting cout = ComputeCommonVSOutputPixelLighting(vin.Position, vin.Normal);
-    
+
+    vout.PositionPS = cout.Pos_ps;
+    vout.PositionWS = float4(cout.Pos_ws, 1);
+    vout.NormalWS = cout.Normal_ws;
+    vout.Diffuse = float4(ConstantAlbedo, Alpha);
+    vout.TexCoord = vin.TexCoord;
+
+    return vout;
+}
+
+
+// Vertex shader: pbr + instancing
+[RootSignature(PBREffectRS)]
+VSOutputPixelLightingTx VSConstantInst(VSInputNmTxInst vin)
+{
+    VSOutputPixelLightingTx vout;
+
+    CommonInstancing inst = ComputeCommonInstancing(vin.Position, vin.Normal, vin.Transform);
+
+    CommonVSOutputPixelLighting cout = ComputeCommonVSOutputPixelLighting(inst.Position, inst.Normal);
+
     vout.PositionPS = cout.Pos_ps;
     vout.PositionWS = float4(cout.Pos_ws, 1);
     vout.NormalWS = cout.Normal_ws;
@@ -71,7 +97,7 @@ VSOut_Velocity VSConstantVelocity(VSInputNmTx vin)
     VSOut_Velocity vout;
 
     CommonVSOutputPixelLighting cout = ComputeCommonVSOutputPixelLighting(vin.Position, vin.Normal);
-    
+
     vout.current.PositionPS = cout.Pos_ps;
     vout.current.PositionWS = float4(cout.Pos_ws, 1);
     vout.current.NormalWS = cout.Normal_ws;
@@ -103,6 +129,28 @@ VSOutputPixelLightingTx VSConstantBn(VSInputNmTx vin)
 }
 
 
+// Vertex shader: pbr + instancing (biased normal)
+[RootSignature(PBREffectRS)]
+VSOutputPixelLightingTx VSConstantBnInst(VSInputNmTxInst vin)
+{
+    VSOutputPixelLightingTx vout;
+
+    float3 normal = BiasX2(vin.Normal);
+
+    CommonInstancing inst = ComputeCommonInstancing(vin.Position, normal, vin.Transform);
+
+    CommonVSOutputPixelLighting cout = ComputeCommonVSOutputPixelLighting(inst.Position, inst.Normal);
+
+    vout.PositionPS = cout.Pos_ps;
+    vout.PositionWS = float4(cout.Pos_ws, 1);
+    vout.NormalWS = cout.Normal_ws;
+    vout.Diffuse = float4(ConstantAlbedo, Alpha);
+    vout.TexCoord = vin.TexCoord;
+
+    return vout;
+}
+
+
 // Vertex shader: pbr + velocity (biased normal)
 [RootSignature(PBREffectRS)]
 VSOut_Velocity VSConstantVelocityBn(VSInputNmTx vin)
@@ -120,6 +168,48 @@ VSOut_Velocity VSConstantVelocityBn(VSInputNmTx vin)
     vout.current.TexCoord = vin.TexCoord;
 
     vout.prevPosition = mul(vin.Position, PrevWorldViewProj);
+
+    return vout;
+}
+
+
+// Vertex shader: pbr + skinning (four bones)
+[RootSignature(PBREffectRS)]
+VSOutputPixelLightingTx VSSkinned(VSInputNmTxWeights vin)
+{
+    VSOutputPixelLightingTx vout;
+
+    float3 normal = Skin(vin, vin.Normal, 4);
+
+    CommonVSOutputPixelLighting cout = ComputeCommonVSOutputPixelLighting(vin.Position, normal);
+
+    vout.PositionPS = cout.Pos_ps;
+    vout.PositionWS = float4(cout.Pos_ws, 1);
+    vout.NormalWS = cout.Normal_ws;
+    vout.Diffuse = float4(ConstantAlbedo, Alpha);
+    vout.TexCoord = vin.TexCoord;
+
+    return vout;
+}
+
+
+// Vertex shader: pbr + skinning (four bones) (biased normal)
+[RootSignature(PBREffectRS)]
+VSOutputPixelLightingTx VSSkinnedBn(VSInputNmTxWeights vin)
+{
+    VSOutputPixelLightingTx vout;
+
+    float3 normal = BiasX2(vin.Normal);
+
+    normal = Skin(vin, normal, 4);
+
+    CommonVSOutputPixelLighting cout = ComputeCommonVSOutputPixelLighting(vin.Position, normal);
+
+    vout.PositionPS = cout.Pos_ps;
+    vout.PositionWS = float4(cout.Pos_ws, 1);
+    vout.NormalWS = cout.Normal_ws;
+    vout.Diffuse = float4(ConstantAlbedo, Alpha);
+    vout.TexCoord = vin.TexCoord;
 
     return vout;
 }

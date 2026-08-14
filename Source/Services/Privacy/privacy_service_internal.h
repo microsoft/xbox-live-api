@@ -4,6 +4,7 @@
 #pragma once
 
 #include "xsapi-c/privacy_c.h"
+#include "privacy_list_change_subscription.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRIVACY_CPP_BEGIN
 
@@ -37,8 +38,11 @@ class PrivacyService : public std::enable_shared_from_this<PrivacyService>
 public:
     PrivacyService(
         _In_ User&& user,
-        _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings
+        _In_ std::shared_ptr<xbox::services::XboxLiveContextSettings> contextSettings,
+        _In_ std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> rtaManager
     ) noexcept;
+
+    ~PrivacyService() noexcept;
 
     HRESULT GetAvoidList(
         _In_ AsyncContext<Result<xsapi_internal_vector<uint64_t>>> async
@@ -67,6 +71,22 @@ public:
         _In_ AsyncContext<Result<xsapi_internal_vector<PermissionCheckResult>>> async
     ) const noexcept;
 
+    XblFunctionContext AddMuteListChangedHandler(
+        _In_ MuteListChangedHandler handler
+    ) noexcept;
+
+    XblFunctionContext AddBlockListChangedHandler(
+        _In_ BlockListChangedHandler handler
+    ) noexcept;
+
+    void RemoveMuteListChangedHandler(
+        _In_ XblFunctionContext token
+    ) noexcept;
+
+    void RemoveBlockListChangedHandler(
+        _In_ XblFunctionContext token
+    ) noexcept;
+
 private:
     enum class PrivacyListType
     {
@@ -91,6 +111,11 @@ private:
 
     User m_user;
     std::shared_ptr<xbox::services::XboxLiveContextSettings> m_contextSettings;
+    std::shared_ptr<xbox::services::real_time_activity::RealTimeActivityManager> m_rtaManager;
+
+    std::shared_ptr<MuteListChangeSubscription> m_muteListSubscription;
+    std::shared_ptr<BlockListChangeSubscription> m_blockListSubscription;
+    mutable std::mutex m_rtaLock;
 };
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_PRIVACY_CPP_END

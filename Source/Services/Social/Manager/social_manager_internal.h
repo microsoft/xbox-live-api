@@ -59,9 +59,9 @@ public:
 
 private:
     // Controls access to m_events, which is only be written during DoWork
-    mutable std::mutex m_eventsMutex;
+    mutable DefaultUnnamedMutex m_eventsMutex;
     // Controls access to all other state, which may be updated from non-UI threads and is read by UI-thread (DoWork)
-    mutable std::mutex m_mutex;
+    mutable DefaultUnnamedMutex m_mutex;
 
     Vector<XblSocialManagerEvent> m_events;
     // Maintain lifetime for local users and XblSocialManagerUsers referenced in m_events

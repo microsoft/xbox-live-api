@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: EffectCommon.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -28,7 +28,7 @@ void XM_CALLCONV IEffectMatrices::SetMatrices(FXMMATRIX world, CXMMATRIX view, C
 // Constructor initializes default matrix values.
 EffectMatrices::EffectMatrices() noexcept
 {
-    XMMATRIX id = XMMatrixIdentity();
+    const XMMATRIX id = XMMatrixIdentity();
     world = id;
     view = id;
     projection = id;
@@ -44,7 +44,7 @@ _Use_decl_annotations_ void EffectMatrices::SetConstants(int& dirtyFlags, XMMATR
         worldView = XMMatrixMultiply(world, view);
 
         worldViewProjConstant = XMMatrixTranspose(XMMatrixMultiply(worldView, projection));
-                
+
         dirtyFlags &= ~EffectDirtyFlags::WorldViewProj;
         dirtyFlags |= EffectDirtyFlags::ConstantBuffer;
     }
@@ -56,8 +56,7 @@ EffectFog::EffectFog() noexcept :
     enabled(false),
     start(0),
     end(1.f)
-{
-}
+{}
 
 
 // Lazily recomputes the derived vector used by shader fog calculations.
@@ -81,13 +80,14 @@ void XM_CALLCONV EffectFog::SetConstants(int& dirtyFlags, FXMMATRIX worldView, X
                 // Z value, then scale and offset according to the fog start/end distances.
                 // Because we only care about the Z component, the shader can do all this
                 // with a single dot product, using only the Z row of the world+view matrix.
-        
+
                 // _13, _23, _33, _43
-                XMVECTOR worldViewZ = XMVectorMergeXY(XMVectorMergeZW(worldView.r[0], worldView.r[2]),
-                                                      XMVectorMergeZW(worldView.r[1], worldView.r[3]));
+                const XMVECTOR worldViewZ = XMVectorMergeXY(
+                    XMVectorMergeZW(worldView.r[0], worldView.r[2]),
+                    XMVectorMergeZW(worldView.r[1], worldView.r[3]));
 
                 // 0, 0, 0, fogStart
-                XMVECTOR wOffset = XMVectorSwizzle<1, 2, 3, 0>(XMLoadFloat(&start));
+                const XMVECTOR wOffset = XMVectorSwizzle<1, 2, 3, 0>(XMLoadFloat(&start));
 
                 // (worldViewZ + wOffset) / (start - end);
                 fogVectorConstant = XMVectorDivide(XMVectorAdd(worldViewZ, wOffset), XMVectorReplicate(start - end));
@@ -115,8 +115,7 @@ void XM_CALLCONV EffectFog::SetConstants(int& dirtyFlags, FXMMATRIX worldView, X
 EffectColor::EffectColor() noexcept :
     diffuseColor(g_XMOne),
     alpha(1.f)
-{
-}
+{}
 
 
 // Lazily recomputes the material color parameter for shaders that do not support realtime lighting.
@@ -124,7 +123,7 @@ void EffectColor::SetConstants(_Inout_ int& dirtyFlags, _Inout_ XMVECTOR& diffus
 {
     if (dirtyFlags & EffectDirtyFlags::MaterialColor)
     {
-        XMVECTOR alphaVector = XMVectorReplicate(alpha);
+        const XMVECTOR alphaVector = XMVectorReplicate(alpha);
 
         // xyz = diffuse * alpha, w = alpha.
         diffuseColorConstant = XMVectorSelect(alphaVector, XMVectorMultiply(diffuseColor, alphaVector), g_XMSelect1110);
@@ -161,14 +160,14 @@ _Use_decl_annotations_ void EffectLights::InitializeConstants(XMVECTOR& specular
 {
     static const XMVECTORF32 defaultSpecular = { { { 1, 1, 1, 16 } } };
     static const XMVECTORF32 defaultLightDirection = { { { 0, -1, 0, 0 } } };
-    
+
     specularColorAndPowerConstant = defaultSpecular;
 
     for (int i = 0; i < MaxDirectionalLights; i++)
     {
         lightDirectionConstant[i] = defaultLightDirection;
 
-        lightDiffuseConstant[i]  = lightEnabled[i] ? lightDiffuseColor[i]  : g_XMZero;
+        lightDiffuseConstant[i] = lightEnabled[i] ? lightDiffuseColor[i] : g_XMZero;
         lightSpecularConstant[i] = lightEnabled[i] ? lightSpecularColor[i] : g_XMZero;
     }
 }
@@ -189,7 +188,7 @@ void EffectLights::SetConstants(int& dirtyFlags, EffectMatrices const& matrices,
         {
             worldConstant = XMMatrixTranspose(matrices.world);
 
-            XMMATRIX worldInverse = XMMatrixInverse(nullptr, matrices.world);
+            const XMMATRIX worldInverse = XMMatrixInverse(nullptr, matrices.world);
 
             worldInverseTransposeConstant[0] = worldInverse.r[0];
             worldInverseTransposeConstant[1] = worldInverse.r[1];
@@ -203,7 +202,7 @@ void EffectLights::SetConstants(int& dirtyFlags, EffectMatrices const& matrices,
         if (dirtyFlags & EffectDirtyFlags::EyePosition)
         {
             XMMATRIX viewInverse = XMMatrixInverse(nullptr, matrices.view);
-        
+
             eyePositionConstant = viewInverse.r[3];
 
             dirtyFlags &= ~EffectDirtyFlags::EyePosition;
@@ -235,7 +234,7 @@ void EffectLights::SetConstants(int& dirtyFlags, EffectMatrices const& matrices,
     if (dirtyFlags & EffectDirtyFlags::MaterialColor)
     {
         XMVECTOR diffuse = diffuseColor;
-        XMVECTOR alphaVector = XMVectorReplicate(alpha);
+        const XMVECTOR alphaVector = XMVectorReplicate(alpha);
 
         if (lightingEnabled)
         {
@@ -303,7 +302,7 @@ int XM_CALLCONV EffectLights::SetLightDiffuseColor(int whichLight, FXMVECTOR val
     if (lightEnabled[whichLight])
     {
         lightDiffuseConstant[whichLight] = value;
-        
+
         return EffectDirtyFlags::ConstantBuffer;
     }
 
@@ -327,7 +326,7 @@ int XM_CALLCONV EffectLights::SetLightSpecularColor(int whichLight, FXMVECTOR va
 
         return EffectDirtyFlags::ConstantBuffer;
     }
-    
+
     return 0;
 }
 
@@ -341,7 +340,7 @@ void EffectLights::ValidateLightIndex(int whichLight)
 {
     if (whichLight < 0 || whichLight >= MaxDirectionalLights)
     {
-        throw std::out_of_range("whichLight parameter out of range");
+        throw std::invalid_argument("whichLight parameter invalid");
     }
 }
 
@@ -385,15 +384,17 @@ void EffectLights::EnableDefaultLighting(_In_ IEffectLights* effect)
 
 
 // Gets or lazily creates the specified root signature.
-ID3D12RootSignature* EffectDeviceResources::DemandCreateRootSig(_Inout_ Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSig, D3D12_ROOT_SIGNATURE_DESC const& desc)
+ID3D12RootSignature* EffectDeviceResources::DemandCreateRootSig(
+    _Inout_ ComPtr<ID3D12RootSignature>& rootSig,
+    D3D12_ROOT_SIGNATURE_DESC const& desc)
 {
     return DemandCreate(rootSig, mMutex, [&](ID3D12RootSignature** pResult) noexcept -> HRESULT
-    {
-        HRESULT hr = CreateRootSignature(mDevice.Get(), &desc, pResult);
+        {
+            HRESULT hr = CreateRootSignature(mDevice.Get(), &desc, pResult);
 
-        if (SUCCEEDED(hr))
-            SetDebugObjectName(*pResult, L"DirectXTK:Effect");
+            if (SUCCEEDED(hr))
+                SetDebugObjectName(*pResult, L"DirectXTK:Effect");
 
-        return hr;
-    });
+            return hr;
+        });
 }

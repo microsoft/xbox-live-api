@@ -606,7 +606,8 @@ STDAPI XblAchievementsResultHasNext(
 /// </summary>
 /// <param name="resultHandle">Handle to the achievement result.</param>
 /// <param name="maxItems">The maximum number of items that the result can contain.  
-/// Pass 0 to attempt to retrieve all items.</param>
+/// Pass 0 to attempt to retrieve all items.  
+/// The service may provide a default value if maxItems is 0, and may return fewer than maxItems, even if the last page of results has not yet been returned</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>
@@ -646,7 +647,8 @@ STDAPI XblAchievementsResultGetNextResult(
 /// <param name="orderBy">Controls how the list of achievements is ordered.</param>
 /// <param name="skipItems">The number of achievements to skip.</param>
 /// <param name="maxItems">The maximum number of achievements the result can contain.  
-/// Pass 0 to attempt to retrieve all items.</param>
+/// Pass 0 to attempt to retrieve all items.  
+/// The service may provide a default value if maxItems is 0, and may return fewer than maxItems, even if the last page of results has not yet been returned</param>
 /// <param name="async">Caller allocated AsyncBlock.</param>
 /// <returns>HRESULT return code for this API operation.</returns>
 /// <remarks>

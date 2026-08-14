@@ -77,6 +77,5 @@ private:
 
     bool m_loaded{ false };
     bool m_updated{ false };
-
-    mutable std::mutex m_mutex;
+    mutable DefaultUnnamedMutex m_mutex;
 };

@@ -8,6 +8,11 @@
 
   <!--Reuse libHttpClient platform detection logic-->  
   <Import Condition="'$(HCPlatform)' == ''" Project="$(XsapiRoot)External\xal\External\libHttpClient\platform_select.props" />
+  <PropertyGroup Condition="$([System.String]::Copy('$(MSBuildProjectName)').Contains('.GDK.'))">
+    <!-- Force GDK projects -->
+    <HCPlatform>GDK</HCPlatform>
+  </PropertyGroup>
+
   <PropertyGroup>
     <XsapiPlatform>$(HCPlatform)</XsapiPlatform>
   </PropertyGroup>

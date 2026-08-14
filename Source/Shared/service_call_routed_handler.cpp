@@ -61,16 +61,19 @@ String ServiceCallRoutedHandler::GetFormattedResponse(
     HCHttpCallResponseGetHeader(call, AUTH_HEADER, &token);
     if (token)
     {
-        response << "\r\n[Authorization Header]: ";
-        response << token;
+        // SDL: the Authorization header carries the user's auth token and must never be
+        // disclosed in diagnostic output. It is set with tracing disabled elsewhere; redact
+        // its value here so the token cannot leak into call-routed handlers or logs.
+        response << "\r\n[Authorization Header]: [redacted]";
     }
 
     const char* signature{ nullptr };
     HCHttpCallResponseGetHeader(call, SIG_HEADER, &signature);
     if (signature)
     {
-        response << "\r\n[Signature Header]: ";
-        response << signature;
+        // SDL: the request signature is security-sensitive and must never be disclosed in
+        // diagnostic output. Redact its value.
+        response << "\r\n[Signature Header]: [redacted]";
     }
 
     uint32_t httpStatus{ 0 };

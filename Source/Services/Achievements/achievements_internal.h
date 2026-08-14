@@ -30,7 +30,7 @@ protected:
 private:
     Map<XblFunctionContext, AchievementProgressChangeHandler> m_handlers;
     XblFunctionContext m_nextHandlerToken{ 1 };
-    mutable std::mutex m_lock;
+    mutable DefaultUnnamedMutex m_lock;
 
     uint64_t m_userId;
 };
@@ -127,7 +127,7 @@ private:
     std::weak_ptr<XblContext> m_xboxLiveContextImpl;
 
     std::shared_ptr<AchievementProgressChangeSubscription> m_achievementProgressChangeSubscription;
-    mutable std::mutex m_lock;
+    mutable DefaultUnnamedMutex m_lock;
 
 #if HC_PLATFORM == HC_PLATFORM_XDK
     static HRESULT WriteOfflineUpdateAchievement(

@@ -3,7 +3,7 @@
 //
 // Functions for loading audio data from Wave Banks
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
@@ -61,6 +61,8 @@ namespace DirectX
         HRESULT GetSeekTable(_In_ uint32_t index, _Out_ const uint32_t** pData, _Out_ uint32_t& dataCount, _Out_ uint32_t& tag) const noexcept;
 
         HANDLE GetAsyncHandle() const noexcept;
+
+        uint32_t GetWaveAlignment() const noexcept;
 
         struct Metadata
         {

@@ -122,7 +122,7 @@ private:
             [
                 &, expectedStatsJson
             ]
-        (HttpMock*, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
+        (HttpMock*, xsapi_internal_string /*requestUrl*/, xsapi_internal_string requestBody)
         {
             JsonDocument requestJson;
             requestJson.Parse(requestBody.data());

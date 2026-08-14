@@ -1327,7 +1327,7 @@ int utils::utf8_from_char_t(
     int len = (int)strlen(inArray);
     if (len < cchOutArray && outArray != nullptr)
     {
-        strcpy(outArray, len + 1, inArray);
+        strcpy(outArray, cchOutArray, inArray);
     }
     else if (cchOutArray > 0)
     {
@@ -1375,7 +1375,7 @@ int utils::char_t_from_utf8(
     int len = (int)strlen(inArray);
     if (len < cchOutArray && outArray != nullptr)
     {
-        strcpy(outArray, len + 1, inArray);
+        strcpy(outArray, cchOutArray, inArray);
     }
     else if (cchOutArray > 0)
     {

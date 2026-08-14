@@ -49,9 +49,16 @@ namespace
 
 
 #pragma region Implementations
-#if (defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_GAMES)) || (defined(_GAMING_DESKTOP) && (_GRDK_EDITION >= 220600))
+#ifdef USING_GAMEINPUT
 
 #include <GameInput.h>
+
+#if defined(GAMEINPUT_API_VERSION) && (GAMEINPUT_API_VERSION == 1)
+using namespace GameInput::v1;
+#elif defined(GAMEINPUT_API_VERSION) && (GAMEINPUT_API_VERSION == 2)
+using namespace GameInput::v2;
+#endif
+
 
 //======================================================================================
 // GameInput
@@ -73,16 +80,30 @@ public:
 
         s_keyboard = this;
 
-        ThrowIfFailed(GameInputCreate(mGameInput.GetAddressOf()));
-
-        ThrowIfFailed(mGameInput->RegisterDeviceCallback(
-            nullptr,
-            GameInputKindKeyboard,
-            GameInputDeviceConnected,
-            GameInputBlockingEnumeration,
-            this,
-            OnGameInputDevice,
-            &mDeviceToken));
+        HRESULT hr = GameInputCreate(mGameInput.GetAddressOf());
+        if (SUCCEEDED(hr))
+        {
+            ThrowIfFailed(mGameInput->RegisterDeviceCallback(
+                nullptr,
+                GameInputKindKeyboard,
+                GameInputDeviceConnected,
+                GameInputBlockingEnumeration,
+                this,
+                OnGameInputDevice,
+                &mDeviceToken));
+        }
+        else
+        {
+            DebugTrace("ERROR: GameInputCreate [keyboard] failed with %08X\n", static_cast<unsigned int>(hr));
+        #ifdef _GAMING_XBOX
+            ThrowIfFailed(hr);
+        #elif defined(_DEBUG)
+            DebugTrace(
+                "\t**** Check that the 'GameInput Service' is running on this system.     ****\n"
+                "\t**** NOTE: No keys will be returned and IsConnected will return false. ****\n"
+            );
+        #endif
+        }
     }
 
     Impl(Impl&&) = default;
@@ -97,7 +118,11 @@ public:
         {
             if (mGameInput)
             {
+            #if defined(GAMEINPUT_API_VERSION) && (GAMEINPUT_API_VERSION >= 1)
+                if (!mGameInput->UnregisterCallback(mDeviceToken))
+            #else
                 if (!mGameInput->UnregisterCallback(mDeviceToken, UINT64_MAX))
+            #endif
                 {
                     DebugTrace("ERROR: GameInput::UnregisterCallback [keyboard] failed");
                 }
@@ -112,6 +137,9 @@ public:
     void GetState(State& state) const
     {
         state = {};
+
+        if (!mGameInput)
+            return;
 
         ComPtr<IGameInputReading> reading;
         if (SUCCEEDED(mGameInput->GetCurrentReading(GameInputKindKeyboard, nullptr, reading.GetAddressOf())))
@@ -138,8 +166,7 @@ public:
     }
 
     void Reset() noexcept
-    {
-    }
+    {}
 
     bool IsConnected() const
     {
@@ -165,15 +192,18 @@ private:
         _In_ IGameInputDevice *,
         _In_ uint64_t,
         _In_ GameInputDeviceStatus currentStatus,
-        _In_ GameInputDeviceStatus) noexcept
+        _In_ GameInputDeviceStatus previousStatus) noexcept
     {
         auto impl = reinterpret_cast<Keyboard::Impl*>(context);
 
-        if (currentStatus & GameInputDeviceConnected)
+        const bool wasConnected = (previousStatus & GameInputDeviceConnected) != 0;
+        const bool isConnected = (currentStatus & GameInputDeviceConnected) != 0;
+
+        if (isConnected && !wasConnected)
         {
             ++impl->mConnected;
         }
-        else if (impl->mConnected > 0)
+        else if (!isConnected && wasConnected && impl->mConnected > 0)
         {
             --impl->mConnected;
         }
@@ -184,7 +214,7 @@ private:
 Keyboard::Impl* Keyboard::Impl::s_keyboard = nullptr;
 
 
-void Keyboard::ProcessMessage(UINT, WPARAM, LPARAM)
+void Keyboard::ProcessMessage(UINT, WPARAM, LPARAM) noexcept
 {
     // GameInput for Keyboard doesn't require Win32 messages, but this simplifies integration.
 }
@@ -505,7 +535,7 @@ public:
 Keyboard::Impl* Keyboard::Impl::s_keyboard = nullptr;
 
 
-void Keyboard::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam)
+void Keyboard::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam) noexcept
 {
     auto pImpl = Impl::s_keyboard;
 
@@ -554,6 +584,9 @@ void Keyboard::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam)
             vk = LOWORD(MapVirtualKeyW(static_cast<UINT>(scanCode), MAPVK_VSC_TO_VK_EX));
         }
         break;
+
+    default:
+        break;
     }
 
     if (down)
@@ -569,13 +602,14 @@ void Keyboard::ProcessMessage(UINT message, WPARAM wParam, LPARAM lParam)
 #endif
 #pragma endregion
 
+#ifdef _MSC_VER
 #pragma warning( disable : 4355 )
+#endif
 
 // Public constructor.
 Keyboard::Keyboard() noexcept(false)
     : pImpl(std::make_unique<Impl>(this))
-{
-}
+{}
 
 
 // Move constructor.

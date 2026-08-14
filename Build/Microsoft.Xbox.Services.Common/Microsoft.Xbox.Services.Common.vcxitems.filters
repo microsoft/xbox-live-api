@@ -543,6 +543,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\privacy_service_internal.h">
       <Filter>Source\Services\Privacy</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\privacy_list_change_subscription.h">
+      <Filter>Source\Services\Privacy</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\presence_internal.h">
       <Filter>Source\Services\Presence</Filter>
     </ClInclude>
@@ -929,6 +932,9 @@
       <Filter>Source\Services\Privacy</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\privacy_service.cpp">
+      <Filter>Source\Services\Privacy</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Privacy\privacy_list_change_subscription.cpp">
       <Filter>Source\Services\Privacy</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Source\Services\Presence\device_presence_change_subscription.cpp">

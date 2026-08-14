@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{07ca2a5d-1d84-40a8-8cc2-6047a4f42997}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests">
+      <UniqueIdentifier>{0d7b21c1-74da-483b-bcc1-c6452b0ab4c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests\Support">
+      <UniqueIdentifier>{af676435-1405-4651-bb26-73c7ccb7b577}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\UnitTests\Support\TE">
+      <UniqueIdentifier>{6c425782-0562-4f99-8160-3855258cb0b3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Tests\UnitTests\Support\TE\UnitTestHelpers_TE.cpp">
+      <Filter>Tests\UnitTests\Support\TE</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\TE\UnitTestHelpers_TE.h">
+      <Filter>Tests\UnitTests\Support\TE</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Tests\UnitTests\Support\TE\UnitTestIncludes_TE.h">
+      <Filter>Tests\UnitTests\Support\TE</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: DescriptorHeap.cpp
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkID=615561
@@ -25,21 +25,30 @@ namespace
 
     static const DescriptorHeapDesc c_DescriptorHeapDescs[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES] =
     {
-        { D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,	D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE },
-        { D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE },
-        { D3D12_DESCRIPTOR_HEAP_TYPE_RTV,			D3D12_DESCRIPTOR_HEAP_FLAG_NONE },
-        { D3D12_DESCRIPTOR_HEAP_TYPE_DSV,			D3D12_DESCRIPTOR_HEAP_FLAG_NONE }
+        { D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,   D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE },
+        { D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,       D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE },
+        { D3D12_DESCRIPTOR_HEAP_TYPE_RTV,           D3D12_DESCRIPTOR_HEAP_FLAG_NONE },
+        { D3D12_DESCRIPTOR_HEAP_TYPE_DSV,           D3D12_DESCRIPTOR_HEAP_FLAG_NONE }
     };
 }
 
 _Use_decl_annotations_
 DescriptorHeap::DescriptorHeap(
-    ID3D12DescriptorHeap* pExistingHeap) noexcept
+    ID3D12DescriptorHeap* pExistingHeap)
     : m_pHeap(pExistingHeap)
 {
+    if (!pExistingHeap)
+        throw std::invalid_argument("Heap is null");
+
+#if defined(_MSC_VER) || !defined(_WIN32)
     m_hCPU = pExistingHeap->GetCPUDescriptorHandleForHeapStart();
     m_hGPU = pExistingHeap->GetGPUDescriptorHandleForHeapStart();
     m_desc = pExistingHeap->GetDesc();
+#else
+    std::ignore = pExistingHeap->GetCPUDescriptorHandleForHeapStart(&m_hCPU);
+    std::ignore = pExistingHeap->GetGPUDescriptorHandleForHeapStart(&m_hGPU);
+    std::ignore = pExistingHeap->GetDesc(&m_desc);
+#endif
 
     ComPtr<ID3D12Device> device;
     pExistingHeap->GetDevice(IID_GRAPHICS_PPV_ARGS(device.GetAddressOf()));
@@ -50,7 +59,7 @@ DescriptorHeap::DescriptorHeap(
 _Use_decl_annotations_
 DescriptorHeap::DescriptorHeap(
     ID3D12Device* device,
-    const D3D12_DESCRIPTOR_HEAP_DESC* pDesc) noexcept(false) :
+    const D3D12_DESCRIPTOR_HEAP_DESC* pDesc) :
     m_desc{},
     m_hCPU{},
     m_hGPU{},
@@ -64,14 +73,14 @@ DescriptorHeap::DescriptorHeap(
     ID3D12Device* device,
     D3D12_DESCRIPTOR_HEAP_TYPE type,
     D3D12_DESCRIPTOR_HEAP_FLAGS flags,
-    size_t count) noexcept(false) :
+    size_t count) :
     m_desc{},
     m_hCPU{},
     m_hGPU{},
     m_increment(0)
 {
     if (count > UINT32_MAX)
-        throw std::exception("Too many descriptors");
+        throw std::invalid_argument("Too many descriptors");
 
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
     desc.Flags = flags;
@@ -91,7 +100,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeap::WriteDescriptors(
 {
     assert((size_t(offsetIntoHeap) + size_t(totalDescriptorCount)) <= size_t(m_desc.NumDescriptors));
 
-    D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCpuHandle(offsetIntoHeap);
+    const D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCpuHandle(offsetIntoHeap);
 
     device->CopyDescriptors(
         1,
@@ -149,6 +158,9 @@ void DescriptorHeap::Create(
     ID3D12Device* pDevice,
     const D3D12_DESCRIPTOR_HEAP_DESC* pDesc)
 {
+    if (!pDevice)
+        throw std::invalid_argument("Direct3D device is null");
+
     assert(pDesc != nullptr);
 
     m_desc = *pDesc;
@@ -168,11 +180,19 @@ void DescriptorHeap::Create(
 
         SetDebugObjectName(m_pHeap.Get(), L"DescriptorHeap");
 
+    #if defined(_MSC_VER) || !defined(_WIN32)
         m_hCPU = m_pHeap->GetCPUDescriptorHandleForHeapStart();
-
         if (pDesc->Flags & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE)
+        {
             m_hGPU = m_pHeap->GetGPUDescriptorHandleForHeapStart();
-
+        }
+    #else
+        std::ignore = m_pHeap->GetCPUDescriptorHandleForHeapStart(&m_hCPU);
+        if (pDesc->Flags & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE)
+        {
+            std::ignore = m_pHeap->GetGPUDescriptorHandleForHeapStart(&m_hGPU);
+        }
+    #endif
     }
 }
 
@@ -197,7 +217,7 @@ void DescriptorPile::AllocateRange(size_t numDescriptors, _Out_ IndexType& start
     // make sure we didn't allocate zero
     if (numDescriptors == 0)
     {
-        throw std::out_of_range("Can't allocate zero descriptors");
+        throw std::invalid_argument("Can't allocate zero descriptors");
     }
 
     // get the current top
@@ -211,6 +231,6 @@ void DescriptorPile::AllocateRange(size_t numDescriptors, _Out_ IndexType& start
     if (m_top > Count())
     {
         DebugTrace("DescriptorPile has %zu of %zu descriptors; failed request for %zu more\n", start, Count(), numDescriptors);
-        throw std::exception("Can't allocate more descriptors");
+        throw std::runtime_error("Can't allocate more descriptors");
     }
 }

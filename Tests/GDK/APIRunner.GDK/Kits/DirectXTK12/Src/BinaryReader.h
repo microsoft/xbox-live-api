@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: BinaryReader.h
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
@@ -29,7 +29,7 @@ namespace DirectX
 
         BinaryReader(BinaryReader const&) = delete;
         BinaryReader& operator= (BinaryReader const&) = delete;
-        
+
         // Reads a single value.
         template<typename T> T const& Read()
         {
@@ -40,7 +40,7 @@ namespace DirectX
         // Reads an array of values.
         template<typename T> T const* ReadArray(size_t elementCount)
         {
-            static_assert(std::is_pod<T>::value, "Can only read plain-old-data types");
+            static_assert(std::is_standard_layout<T>::value, "Can only read plain-old-data types");
 
             uint8_t const* newPos = mPos + sizeof(T) * elementCount;
 
@@ -48,7 +48,7 @@ namespace DirectX
                 throw std::overflow_error("ReadArray");
 
             if (newPos > mEnd)
-                throw std::exception("End of file");
+                throw std::runtime_error("End of file");
 
             auto result = reinterpret_cast<T const*>(mPos);
 

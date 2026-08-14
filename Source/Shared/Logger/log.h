@@ -130,7 +130,7 @@ protected:
     virtual xsapi_internal_string format_log(_In_ const log_entry& entry);
 
 private:
-    mutable std::mutex m_mutex;
+    mutable DefaultUnnamedMutex m_mutex;
 };
 
 class logger

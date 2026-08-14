@@ -500,7 +500,7 @@ public:
 
 private:
     xsapi_internal_vector<XblMultiplayerEvent> m_events;
-    mutable std::mutex m_lock;
+    mutable DefaultUnnamedMutex m_lock;
 };
 
 class MultiplayerManager
@@ -619,8 +619,7 @@ private:
     bool m_isDirty = false;
     void SetMultiplayerGameSession(_In_ std::shared_ptr<MultiplayerGameSession> gameSession);
     void SetMultiplayerLobbySession(_In_ std::shared_ptr<MultiplayerLobbySession> multiplayerLobby);
-
-    mutable std::mutex m_lock;
+    mutable DefaultUnnamedMutex m_lock;
     XblMultiplayerJoinability m_joinability = XblMultiplayerJoinability::None;
     std::shared_ptr<MultiplayerLobbySession> m_multiplayerLobbySession;
     std::shared_ptr<MultiplayerGameSession> m_multiplayerGameSession;
@@ -820,14 +819,14 @@ private:
     // resync
     bool m_isResyncTaskInProgress{ false };
     XblFunctionContext m_handleResyncEventCounter{ 0 };
-    std::mutex m_resyncLock;
+    DefaultUnnamedMutex m_resyncLock;
 
-    std::mutex m_stateLock;
+    DefaultUnnamedMutex m_stateLock;
     XblFunctionContext m_sessionUpdateEventHandlerCounter{ 1 };
     UnorderedMap<uint32_t, Callback<const std::shared_ptr<XblMultiplayerSession>>> m_sessionUpdateEventHandler;
 
     uint64_t m_id{ 0 }; // used to ignore calls made before resetting the state via destory()
-    std::mutex m_synchronizeWriteWithTapLock;
+    DefaultUnnamedMutex m_synchronizeWriteWithTapLock;
     uint64_t m_tapChangeNumber{ 0 };
     bool m_isTapReceived{ false };
     uint64_t m_numOfWritesInProgress{ 0 };
@@ -935,7 +934,7 @@ private:
     ) const noexcept;
 
     TaskQueue m_queue;
-    mutable std::mutex m_clientRequestLock;
+    mutable DefaultUnnamedMutex m_clientRequestLock;
     std::atomic<bool> m_pendingCommitInProgress{ false };
     String m_gameSessionTemplateName;
     uint64_t m_updateNumber{ 0 };
@@ -1120,7 +1119,7 @@ private:
 
     uint64_t m_updateNumber{ 0 };
     XblMultiplayerJoinability m_joinability{ XblMultiplayerJoinability::None };
-    mutable std::mutex m_clientRequestLock;
+    mutable DefaultUnnamedMutex m_clientRequestLock;
     Queue<std::shared_ptr<MultiplayerClientPendingRequest>> m_pendingRequestQueue;
     MultiplayerEventQueue m_multiplayerEventQueue;
     std::shared_ptr<MultiplayerSessionWriter> m_sessionWriter;
@@ -1219,7 +1218,7 @@ private:
     TaskQueue m_queue;
     bool m_autoFillMembers;
     MultiplayerEventQueue m_multiplayerEventQueue;
-    mutable std::mutex m_clientRequestLock;
+    mutable DefaultUnnamedMutex m_clientRequestLock;
     std::shared_ptr<MultiplayerLobbyClient> m_lobbyClient;
     std::shared_ptr<MultiplayerGameClient> m_gameClient;
     std::shared_ptr<xbox::services::multiplayer::manager::MultiplayerMatchClient> m_matchClient;
@@ -1325,7 +1324,7 @@ public:
     void RemoveRtaResyncHandler(_In_ XblFunctionContext context);
 
 private:
-    std::mutex m_lock;
+    DefaultUnnamedMutex m_lock;
 
     void OnConnectionIdChanged();
 
@@ -1341,8 +1340,7 @@ private:
         );
 
     void OnResyncMessageReceived();
-
-    std::mutex m_subscriptionLock;
+    DefaultUnnamedMutex m_subscriptionLock;
 	XblFunctionContext m_sessionChangeEventHandlerCounter{ 1 };
 	XblFunctionContext m_multiplayerConnectionIdChangedEventHandlerCounter{ 1 };
 	XblFunctionContext m_multiplayerSubscriptionLostEventHandlerCounter{ 1 };
@@ -1541,9 +1539,8 @@ private:
         _In_ XblMultiplayerEventType eventType,
         _In_ XblMultiplayerSessionType sessionType
         );
-
-    mutable std::mutex m_clientRequestLock;
-    std::mutex m_synchronizeWriteWithTapLock;
+    mutable DefaultUnnamedMutex m_clientRequestLock;
+    DefaultUnnamedMutex m_synchronizeWriteWithTapLock;
     std::atomic<bool> m_subscriptionsLostFired;
 
     bool m_autoFillMembers{ false };
@@ -1644,15 +1641,15 @@ private:
     ) noexcept;
 
     TaskQueue m_queue;
-    std::mutex m_lock;
-    std::mutex m_getSessionLock;
+    DefaultUnnamedMutex m_lock;
+    DefaultUnnamedMutex m_getSessionLock;
     xbox::services::datetime m_nextTimerToFetchSession;
     String m_hopperName;
     JsonDocument m_attributes;
     std::chrono::seconds m_timeout{};
     bool m_preservingMatchmakingSession{ false };
     std::atomic<XblMultiplayerMatchStatus> m_matchStatus{ XblMultiplayerMatchStatus::None };
-    mutable std::mutex m_multiplayerEventQueueLock;
+    mutable DefaultUnnamedMutex m_multiplayerEventQueueLock;
     MultiplayerEventQueue m_multiplayerEventQueue;
     XblCreateMatchTicketResponse m_matchTicketResponse{};
     XblMultiplayerSessionReference m_matchTicketSessionRef{};

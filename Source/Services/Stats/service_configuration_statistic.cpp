@@ -50,6 +50,10 @@ ServiceConfigurationStatistic::Deserialize(
 
     xsapi_internal_string scid;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "scid", scid, true));
+    if (scid.size() >= sizeof(XblServiceConfigurationStatistic::serviceConfigurationId))
+    {
+        return Result<ServiceConfigurationStatistic>(returnResult, WEB_E_INVALID_JSON_STRING);
+    }
     xsapi_internal_vector<Statistic> stats;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<Statistic>(Statistic::Deserialize, json, "stats", stats, true));
     returnResult = ServiceConfigurationStatistic(
@@ -76,7 +80,20 @@ ServiceConfigurationStatistic::SizeOf() const
 char*
 ServiceConfigurationStatistic::Serialize(XblServiceConfigurationStatistic* serviceConfigStat, char* buffer) const
 {
-    utils::strcpy(serviceConfigStat->serviceConfigurationId, m_serviceConfigurationId.size() + 1, m_serviceConfigurationId.c_str());
+    // serviceConfigurationId is a fixed-size inline array within XblServiceConfigurationStatistic,
+    // and SizeOf() accounts for it at that fixed size. Bound the copy by the destination rather
+    // than by the source so an oversized id can never write past the flat result buffer.
+    if (m_serviceConfigurationId.size() < sizeof(serviceConfigStat->serviceConfigurationId))
+    {
+        utils::strcpy(serviceConfigStat->serviceConfigurationId, sizeof(serviceConfigStat->serviceConfigurationId), m_serviceConfigurationId.c_str());
+    }
+    else
+    {
+        // Serialize cannot report failure, so an over-long id is surfaced as an empty one.
+        // Deserialize rejects these up front; ids supplied directly via SetServiceConfigurationId
+        // are not yet validated at their own entry point, so this branch remains reachable.
+        serviceConfigStat->serviceConfigurationId[0] = '\0';
+    }
 
     serviceConfigStat->statisticsCount = (uint32_t)m_stats.size();
     serviceConfigStat->statistics = reinterpret_cast<XblStatistic*>(buffer);

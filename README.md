@@ -9,7 +9,81 @@ To learn more about these programs, please refer to the [developer program overv
 *   Xbox Live Features - profile, social, presence, leaderboards, achievements, multiplayer, matchmaking, title storage
 *   Xbox Live Authentication Library (XAL) public headers - Note that this repository does not contain full XAL source, it only contains XAL source files needed to support building with the Microsoft GDK.
 *   Platforms - Microsoft GDK (targeting both PC and Console). Installing the Microsoft GDK is a prerequisite for building XSAPI. Additionally, source and projects for XDK and UWP platforms can be found at https://github.com/microsoft/xbox-live-api/tree/1807_xdk_qfe_preview
-*   Support for Visual Studio 2017 and 2019
+*   Support for Visual Studio 2019 (v142) and Visual Studio 2022 (v143)
+
+## Breaking changes in this release
+
+This release updates the repo to a current Microsoft GDK. If you are upgrading from a previous version, the toolsets and the output binary names have both changed.
+
+**Visual Studio 2017 (v141) is no longer supported.** `Microsoft.Xbox.Services.GDK.VS2017.sln` and the `Microsoft.Xbox.Services.141.GDK.C` static library project have been removed, matching the toolsets supported by the current GDK. Use Visual Studio 2019 (v142) or Visual Studio 2022 (v143). A v143 project, `Microsoft.Xbox.Services.143.GDK.C`, has been added.
+
+**Output binaries no longer carry the `.GDK.` segment.** The library file names have changed even though the project and folder names still contain `.GDK.`. If you link by file name, update your references:
+
+| | Previous | Current |
+| --- | --- | --- |
+| Static library | `Microsoft.Xbox.Services.142.GDK.C.lib` | `Microsoft.Xbox.Services.142.C.lib` |
+| Thunks DLL | `Microsoft.Xbox.Services.141.GDK.C.Thunks.dll` | `Microsoft.Xbox.Services.C.Thunks.dll` |
+
+To keep the previous `.GDK.` names, build with `/p:XsapiUseLegacyGdkSegment=true`, which produces `Microsoft.Xbox.Services.142.GDK.C.lib` and `Microsoft.Xbox.Services.GDK.C.Thunks.dll`. A custom segment can be supplied with `/p:XsapiGdkSegment=.YourTag`.
+
+**The Thunks project has moved and is no longer tied to a single toolset.** It was previously v141-only; it now builds from either solution:
+
+    Build\Microsoft.Xbox.Services.141.GDK.C.Thunks\   ->   Build\Microsoft.Xbox.Services.GDK.C.Thunks\
+
+## How to build
+
+Install the [Microsoft GDK](https://github.com/microsoft/GDK) first - it is a prerequisite, and the build resolves headers and libraries from the installed GDK.
+
+Open the solution matching your toolset and build the library project you need:
+
+| Visual Studio | Solution | Static library project |
+| --- | --- | --- |
+| 2019 (v142) | `Microsoft.Xbox.Services.GDK.VS2019.sln` | `Microsoft.Xbox.Services.142.GDK.C` |
+| 2022 (v143) | `Microsoft.Xbox.Services.GDK.VS2022.sln` | `Microsoft.Xbox.Services.143.GDK.C` |
+
+Build for the **`x64`** or **`ARM64`** platform. These are the only platforms the projects define - do not select a `Gaming.Desktop.*` or `Gaming.Xbox.*` platform, as those are not configured here and will fail to build.
+
+From the command line:
+
+    msbuild Build\Microsoft.Xbox.Services.143.GDK.C\Microsoft.Xbox.Services.143.GDK.C.vcxproj /p:Configuration=Debug /p:Platform=x64
+
+Build output goes to `Bins\Binaries\<Configuration>\<Platform>\<ProjectName>\`, so the command above writes to `Bins\Binaries\Debug\x64\Microsoft.Xbox.Services.143.GDK.C\`. Note that the library file itself is named `Microsoft.Xbox.Services.143.C.lib` - the folder keeps the `.GDK.` segment but the binary does not. See [Breaking changes in this release](#breaking-changes-in-this-release).
+
+The static library depends on libHttpClient, which is built from the `External\Xal\External\libHttpClient` submodule and copied next to the XSAPI library. On a completely clean tree the first build copies `libHttpClient.GDK.dll` but not its import library `libHttpClient.GDK.lib`, so linking against a freshly built XSAPI can fail with:
+
+    LNK1181: cannot open input file 'libHttpClient.GDK.lib'
+
+Running the build a second time copies it. Alternatively, take the import library directly from where libHttpClient builds it:
+
+    External\Xal\External\libHttpClient\Out\<Platform>\<Configuration>\libHttpClient.GDK\
+
+### Building the Thunks DLL
+
+**Linking XSAPI statically is the recommended configuration and is what most titles should use.** The Thunks DLL exists for titles that cannot link statically, or prefer not to.
+
+The usual reason is the C runtime. The static library links the C runtime dynamically (`/MD`), so a title that uses the static C runtime (`/MT`) cannot link it without a runtime library mismatch. The Thunks DLL puts XSAPI behind a DLL boundary, which isolates its C runtime from your title's.
+
+    msbuild Build\Microsoft.Xbox.Services.GDK.C.Thunks\Microsoft.Xbox.Services.GDK.C.Thunks.vcxproj /p:Configuration=Debug /p:Platform=x64
+
+This produces `Microsoft.Xbox.Services.C.Thunks.dll` and its import library `Microsoft.Xbox.Services.C.Thunks.lib` in `Bins\Binaries\Debug\x64\Microsoft.Xbox.Services.GDK.C.Thunks\`. Link against the import library and ship the DLL alongside your title.
+
+Note that the Microsoft GDK also ships a `Microsoft.Xbox.Services.C.Thunks.lib` under the same name. Link against the one you built here by full path, or the linker may quietly pick up the other.
+
+The DLL depends on `libHttpClient.GDK.dll`, which is built by a separate project and must be deployed with it:
+
+    msbuild External\Xal\External\libHttpClient\Build\libHttpClient.GDK\libHttpClient.GDK.vcxproj /p:Configuration=Debug /p:Platform=x64
+
+That project writes to `External\Xal\External\libHttpClient\Out\<Platform>\<Configuration>\libHttpClient.GDK\` rather than to `Bins`.
+
+Note that the Thunks DLL exports the XSAPI **C** API (`xsapi-c`) only. It does not export the C++ wrapper (`xsapi-cpp`), which is header-only and compiles into your title.
+
+The exported function list is generated from the public headers by the `Microsoft.Xbox.Services.ThunksGenerator` project. That project is C#, so it does not restore automatically as part of a native solution build - pass `-restore` when building it directly:
+
+    msbuild Build\Microsoft.Xbox.Services.GDK.C.Thunks\generator\ThunksGenerator\ThunksGenerator.csproj -restore
+
+### Validating a build
+
+`Tests\BuildValidation` contains checks that confirm a build exposes the full public API surface, and that the Thunks DLL's exports have not drifted from the headers. See [Tests/BuildValidation/README.md](Tests/BuildValidation/README.md).
 
 ## How to use the Xbox Live Services API (XSAPI)
 
@@ -18,6 +92,10 @@ The best way to learn the API and see the best practices is to look at the Xbox 
 ## How to clone repo
 
 This repo contains submodules.  There are two ways to make sure you get submodules.
+
+On Windows, enable long path support before cloning, or the recursive clone will fail partway through. See [Long paths on Windows](#long-paths-on-windows) below.
+
+    git config --global core.longpaths true
 
 When initially cloning, make sure you use the `--recursive` option. IE:
 
@@ -29,6 +107,18 @@ If you already cloned the repo, you can initialize submodules with:
     git submodule update --init --recursive
 
 **Note that using GitHub's feature to "Download Zip" does not contain the submodules and will not properly build.  Please clone recursively instead.**
+
+### Long paths on Windows
+
+Some nested submodules contain paths longer than the legacy 260 character limit. If long path support is not enabled, the recursive clone fails partway through with `Filename too long` and leaves the submodules incompletely checked out:
+
+    error: unable to create file ...: Filename too long
+    fatal: Unable to checkout '...' in submodule path 'External/Xal/External/libHttpClient'
+
+If you already hit this, enable the setting and then re-run the submodule update to finish the checkout:
+
+    git config --global core.longpaths true
+    git submodule update --init --recursive
 
 ## How to link your project against source
 
@@ -42,7 +132,7 @@ Big or small we'd like to take your contributions back to help improve the Xbox 
 
 ## Having Trouble?
 
-We'd love to get your review score, whether good or bad, but even more than that, we want to fix your problem. If you submit your issue as a Review, we won't be able to respond to your problem and ask any follow-up questions that may be necessary. The most efficient way to do that is to open a an issue in our [issue tracker](https://github.com/Microsoft/xbox-live-api/issues).  The Xbox Live team will be engaged with the community and be continually improving our APIs, tools, and documentation based on the feedback received.
+We'd love to get your review score, whether good or bad, but even more than that, we want to fix your problem. If you submit your issue as a Review, we won't be able to respond to your problem and ask any follow-up questions that may be necessary. The most efficient way to do that is to open an issue in our [issue tracker](https://github.com/Microsoft/xbox-live-api/issues).  The Xbox Live team will be engaged with the community and be continually improving our APIs, tools, and documentation based on the feedback received.
 
 ### Xbox Live GitHub projects
 *   [Xbox Live Service API for C++](https://github.com/Microsoft/xbox-live-api)

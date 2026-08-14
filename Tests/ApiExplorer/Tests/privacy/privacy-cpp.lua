@@ -28,6 +28,10 @@ end
 
 function OnPrivacyServiceGetAvoidOrMuteList()
     print("OnPrivacyServiceGetAvoidOrMuteList")
+    PrivacyServiceAddMuteListChangedHandler()
+    PrivacyServiceRemoveMuteListChangedHandler()
+    PrivacyServiceAddBlockListChangedHandler()
+    PrivacyServiceRemoveBlockListChangedHandler()
     test.stopTest();
 end
 

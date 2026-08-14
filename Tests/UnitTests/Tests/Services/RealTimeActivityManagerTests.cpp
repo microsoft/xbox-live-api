@@ -105,7 +105,7 @@ public:
         auto& mockRta{ MockRealTimeActivityService::Instance() };
 
         Event completeSubscribeHandshake;
-        mockRta.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
+        mockRta.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string /*uri*/)
         {
             completeSubscribeHandshake.Wait();
             mockRta.CompleteSubscribeHandshake(n);
@@ -148,7 +148,7 @@ public:
         auto xboxLiveContext = env.CreateMockXboxLiveContext();
         auto& mockRta{ MockRealTimeActivityService::Instance() };
 
-        mockRta.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
+        mockRta.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string /*uri*/)
         {
             mockRta.CompleteSubscribeHandshake(n);
         });
@@ -158,7 +158,7 @@ public:
         RtaConnectionMonitor connectionMonitor{ xboxLiveContext.get() };
 
         constexpr size_t subscriptionCount{ 100 };
-        std::array<std::shared_ptr<TestSubscription>, 100> subscriptions;
+        std::array<std::shared_ptr<TestSubscription>, subscriptionCount> subscriptions;
         for (size_t i = 0; i < subscriptions.size(); ++i)
         {
             Stringstream uri;
@@ -276,7 +276,7 @@ public:
         auto rtaManager{ GlobalState::Get()->RTAManager() };
 
         auto& mockRta{ MockRealTimeActivityService::Instance() };
-        mockRta.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
+        mockRta.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string /*uri*/)
         {
             mockRta.CompleteSubscribeHandshake(n);
         });
@@ -316,7 +316,7 @@ public:
         auto rtaManager{ GlobalState::Get()->RTAManager() };
 
         auto& mockRta{ MockRealTimeActivityService::Instance() };
-        mockRta.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
+        mockRta.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string /*uri*/)
         {
             mockRta.CompleteSubscribeHandshake(n);
         });
@@ -349,7 +349,7 @@ public:
         auto& mockRta{ MockRealTimeActivityService::Instance() };
         uint8_t subscribeAttempts{ 0 };
 
-        mockRta.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
+        mockRta.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string /*uri*/)
         {
             if (subscribeAttempts++ == 0)
             {

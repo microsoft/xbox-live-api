@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: SharedResourcePool.h
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248929
@@ -28,7 +28,7 @@ namespace DirectX
     public:
         SharedResourcePool() noexcept(false)
             : mResourceMap(std::make_shared<ResourceMap>())
-        { }
+        {}
 
         SharedResourcePool(SharedResourcePool const&) = delete;
         SharedResourcePool& operator= (SharedResourcePool const&) = delete;
@@ -79,7 +79,7 @@ namespace DirectX
                 : TData(key, args...),
                 mKey(key),
                 mResourceMap(resourceMap)
-            { }
+            {}
 
             WrappedData(WrappedData&&) = default;
             WrappedData& operator= (WrappedData&&) = default;
@@ -89,9 +89,9 @@ namespace DirectX
 
             ~WrappedData()
             {
-                std::lock_guard<std::mutex> lock(mResourceMap->mutex);
+                const std::lock_guard<std::mutex> lock(mResourceMap->mutex);
 
-                auto pos = mResourceMap->find(mKey);
+                const auto pos = mResourceMap->find(mKey);
 
                 // Check for weak reference expiry before erasing, in case DemandCreate runs on
                 // a different thread at the same time as a previous instance is being destroyed.
