@@ -74,7 +74,7 @@ public:
     {
         if (m_callable != nullptr)
         {
-            return (*m_callable)(args...);
+            return (*m_callable)(std::forward<Args>(args)...);
         }
         else
         {
@@ -111,7 +111,7 @@ private:
 
         Ret operator()(Args... args) override
         {
-            return m_functor(args...);
+            return m_functor(std::forward<Args>(args)...);
         }
 
         UniquePtr<ICallable> Copy() override
@@ -253,9 +253,15 @@ public:
     AsyncContext& operator=(const AsyncContext& other) = default;
     ~AsyncContext() = default;
 
+    // args are by-value parameters local to this call, so forwarding them onward is safe and avoids
+    // a full copy of the payload at each hop. Function::operator() and Callable::operator() forward
+    // for the same reason; together those three hops used to copy the payload three times. This
+    // matters for large payloads: a Peoplehub response for a 500-friend graph carries ~2.7MB of
+    // XblSocialManagerUser, so each redundant copy added ~2.7MB to peak working set (AB#63480128).
+    // Collapse still gives every context its own copy, since it invokes Complete in a loop.
     void Complete(Args... args) const noexcept
     {
-        m_callback(args...);
+        m_callback(std::forward<Args>(args)...);
     }
 
     const TaskQueue& Queue() const noexcept

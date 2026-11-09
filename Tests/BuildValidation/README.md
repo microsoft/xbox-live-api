@@ -28,6 +28,23 @@ so it is validated on request:
 .\Tests\BuildValidation\Test-Linkage.ps1 -Linkage Dynamic
 ```
 
+The Thunks DLL links libHttpClient from source by default. To validate the build
+that consumes the libHttpClient which ships in the GDK instead, build with the
+property and assert that the resulting binary really imports it:
+
+```powershell
+msbuild Build\Microsoft.Xbox.Services.GDK.C.Thunks\Microsoft.Xbox.Services.GDK.C.Thunks.vcxproj `
+    /p:Configuration=Debug /p:Platform=x64 /p:LibHttpClientBuildFromSource=false
+.\Tests\BuildValidation\Test-Linkage.ps1 -Linkage Dynamic -ExpectLibHttpClient InBox
+```
+
+`-ExpectLibHttpClient` reads the import table of the Thunks DLL and fails if it
+does not name the expected libHttpClient. Without it the script reports which one
+it found but accepts either, so pass it whenever the linkage is the thing under
+test. The script also clears its output folder on every run, because a
+libHttpClient left behind by a previous run would otherwise satisfy the loader
+and turn a broken build into a pass.
+
 The dynamic run also launches the executable. Linking only proves the import
 library lists the export; loading proves the export is present in the DLL
 itself, and an exit code of `0xC0000139` means it is not.
@@ -46,6 +63,17 @@ msbuild Build\Microsoft.Xbox.Services.GDK.C.Thunks\Microsoft.Xbox.Services.GDK.C
 static library is built against the dynamic C runtime, so the static
 configuration compiles the consumer with `/MD`. The dynamic configuration uses
 `/MT`, because the Thunks DLL keeps its own C runtime behind the DLL boundary.
+
+The two configurations also differ in how they reach libHttpClient. The static
+configuration pulls libHttpClient symbols into the consumer, so it links the
+source-built `libHttpClient.GDK.lib` and builds it on demand if it is missing.
+The Thunks DLL links the libHttpClient that ships in the GDK and keeps it behind
+the DLL boundary, so the dynamic consumer references libHttpClient not at all -
+that is what a title sees, and linking it there would hide a regression. Because
+the consumer is a plain executable rather than a packaged title, the script
+stages the in-box `libHttpClient.dll` from `windows\bin\<platform>` next to the
+executable; a packaged title gets it from the Gaming Runtime instead. An exit
+code of `0xC0000135` means that staging did not happen.
 
 ## Check-ThunksExports.ps1
 

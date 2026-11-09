@@ -220,6 +220,38 @@ public:
         return S_OK;
     }
 
+    // As ExtractJsonVector, but for element types large enough that returning them by value is a
+    // stack-size hazard (see AB#63508132). 'deserialize' has signature
+    // HRESULT(const JsonValue&, T&) and fills a vector element in place, so no copy of T is ever
+    // materialized on the stack.
+    template<typename T, typename F>
+    static HRESULT ExtractJsonVectorInPlace(
+        _In_ F deserialize,
+        _In_ const JsonValue& json,
+        _Inout_ xsapi_internal_vector<T>& outVector
+    )
+    {
+        outVector = xsapi_internal_vector<T>();
+        if (!json.IsArray())
+        {
+            return WEB_E_INVALID_JSON_STRING;
+        }
+
+        outVector.reserve(json.Size());
+        for (auto it = json.Begin(); it != json.End(); ++it)
+        {
+            outVector.emplace_back();
+            HRESULT hr = deserialize(*it, outVector.back());
+            if (FAILED(hr))
+            {
+                outVector.pop_back();
+                return hr;
+            }
+        }
+
+        return S_OK;
+    }
+
     static Result<xsapi_internal_string> JsonStringExtractor(_In_ const JsonValue& json);
 
     static void JsonStringSerializer(_In_ const xsapi_internal_string& value, _Out_ JsonValue& json, _In_ JsonDocument::AllocatorType& allocator);

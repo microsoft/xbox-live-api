@@ -191,7 +191,7 @@ TitleStorageService::GetBlobMetadata(
 
 HRESULT
 TitleStorageService::DeleteBlob(
-    _In_ XblTitleStorageBlobMetadata blobMetadata,
+    _In_ const XblTitleStorageBlobMetadata& blobMetadata,
     _In_ bool deleteOnlyIfEtagMatches,
     _In_ AsyncContext<HRESULT> async
     )
@@ -245,7 +245,7 @@ TitleStorageService::DeleteBlob(
 
 HRESULT
 TitleStorageService::DownloadBlob(
-    _In_ XblTitleStorageBlobMetadata blobMetadata,
+    _In_ const XblTitleStorageBlobMetadata& blobMetadata,
     _In_ uint8_t* blobBuffer,
     _In_ size_t blobBufferSize,
     _In_ XblTitleStorageETagMatchCondition etagMatchCondition,
@@ -387,7 +387,7 @@ HRESULT TitleStorageService::DownloadBlobHelper(
 
 HRESULT
 TitleStorageService::UploadBlob(
-    _In_ XblTitleStorageBlobMetadata blobMetadata,
+    _In_ const XblTitleStorageBlobMetadata& blobMetadata,
     _In_ const uint8_t* blobBuffer,
     _In_ size_t blobBufferSize,
     _In_ XblTitleStorageETagMatchCondition etagMatchCondition,

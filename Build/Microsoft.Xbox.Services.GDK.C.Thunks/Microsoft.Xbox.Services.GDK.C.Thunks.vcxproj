@@ -55,7 +55,10 @@
   </ItemGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalDependencies>%(XboxExtensionsDependencies)Appnotify.lib;crypt32.lib;xgameruntime.lib;WINHTTP.LIB;RUNTIMEOBJECT.LIB;ADVAPI32.LIB;ole32.lib;</AdditionalDependencies>
+      <!-- %(XboxExtensionsDependencies) needs a trailing separator, and %(AdditionalDependencies)
+           must be preserved so libraries contributed by the imported props are not discarded,
+           including the libHttpClient import library that xsapi.staticlib.props adds. -->
+      <AdditionalDependencies>%(XboxExtensionsDependencies);Appnotify.lib;crypt32.lib;xgameruntime.lib;WINHTTP.LIB;RUNTIMEOBJECT.LIB;ADVAPI32.LIB;ole32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>$(ProjectDir)dll\Microsoft.Xbox.Services.GDK.C.Thunks.def</ModuleDefinitionFile>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/profile /opt:ref /opt:icf /guard:cf /DYNAMICBASE /CETCOMPAT %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">/profile /opt:ref /opt:icf /guard:cf /DYNAMICBASE %(AdditionalOptions)</AdditionalOptions>

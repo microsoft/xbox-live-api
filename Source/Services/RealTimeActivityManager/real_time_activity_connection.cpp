@@ -660,8 +660,12 @@ void Connection::ConnectCompleteHandler(WebsocketResult result) noexcept
     if (SUCCEEDED(result.hr))
     {
         // Ignore resync messages for 5 minutes after connecting to
-        // avoid overwhelming the service with update requests
+        // avoid overwhelming the service with update requests.
+        // Unit tests raise resyncs right after connecting to exercise the resync paths, so the window is
+        // compiled out there (otherwise every resync test would wait forever for a dropped message).
+#ifndef XSAPI_UNIT_TESTS
         m_ignoreResyncTimer = xbox::services::datetime::utc_now() + xbox::services::datetime::from_minutes(5);
+#endif
 
         m_state = XblRealTimeActivityConnectionState::Connected;
         m_connectTime = std::chrono::system_clock::now();

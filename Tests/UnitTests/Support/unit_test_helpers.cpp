@@ -118,6 +118,17 @@ TestEnvironment::TestEnvironment(const XblInitArgs* args)
 
 TestEnvironment::~TestEnvironment() noexcept
 {
+    Cleanup();
+}
+
+void TestEnvironment::Cleanup() noexcept
+{
+    if (m_cleanedUp)
+    {
+        return;
+    }
+    m_cleanedUp = true;
+
     XAsyncBlock asyncBlock{};
     VERIFY_SUCCEEDED(XblCleanupAsync(&asyncBlock));
     VERIFY_SUCCEEDED(XAsyncGetStatus(&asyncBlock, true));

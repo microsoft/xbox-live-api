@@ -76,7 +76,7 @@ XblTitleStorageBlobMetadataResult::Deserialize(_In_ const JsonValue& json)
     if (json.IsObject() && json.HasMember("blobs"))
     {
         const JsonValue& blobs = json["blobs"];
-        RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVector<XblTitleStorageBlobMetadata>(
+        RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonVectorInPlace<XblTitleStorageBlobMetadata>(
             DeserializeXblTitleStorageBlobMetadata,
             blobs,
             titleStorageBlobMetadataResult->m_items
@@ -127,31 +127,39 @@ XblTitleStorageBlobMetadataResult::ConvertStringToTitleStorageBlobType(
     return XblTitleStorageBlobType::Unknown;
 }
 
-Result<XblTitleStorageBlobMetadata> 
-XblTitleStorageBlobMetadataResult::DeserializeXblTitleStorageBlobMetadata(_In_ const JsonValue& json)
+HRESULT
+XblTitleStorageBlobMetadataResult::DeserializeXblTitleStorageBlobMetadata(
+    _In_ const JsonValue& json,
+    _Out_ XblTitleStorageBlobMetadata& metadata
+)
 {
-    XblTitleStorageBlobMetadata returnObject{};
-    if (json.IsNull()) return Result<XblTitleStorageBlobMetadata>(returnObject);
+    // Filling the caller's storage means a partial write would survive an early exit. memset rather
+    // than 'metadata = XblTitleStorageBlobMetadata{}' is deliberate: the latter can materialize a
+    // ~1.2KB temporary and defeat the point of the out parameter.
+    memset(&metadata, 0, sizeof(metadata));
 
-    HRESULT errc = S_OK;
+    if (json.IsNull())
+    {
+        return S_OK;
+    }
 
-    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonTimeT(json, "clientFileTime", returnObject.clientTimestamp));
+    RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonTimeT(json, "clientFileTime", metadata.clientTimestamp));
 
     xsapi_internal_string displayName;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "displayName", displayName));
-    utils::strcpy(returnObject.displayName, sizeof(returnObject.displayName), displayName.c_str());
+    utils::strcpy(metadata.displayName, sizeof(metadata.displayName), displayName.c_str());
 
     xsapi_internal_string etag;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "etag", etag));
-    if (etag.size() >= sizeof(returnObject.eTag))
+    if (etag.size() >= sizeof(metadata.eTag))
     {
-        return Result<XblTitleStorageBlobMetadata>(returnObject, WEB_E_INVALID_JSON_STRING);
+        return WEB_E_INVALID_JSON_STRING;
     }
-    utils::strcpy(returnObject.eTag, sizeof(returnObject.eTag), etag.c_str());
+    utils::strcpy(metadata.eTag, sizeof(metadata.eTag), etag.c_str());
 
     uint64_t size = 0;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonUInt64(json, "size", size));
-    returnObject.length = static_cast<size_t>(size);
+    metadata.length = static_cast<size_t>(size);
 
     xsapi_internal_string fileName;
     RETURN_HR_IF_FAILED(JsonUtils::ExtractJsonString(json, "fileName", fileName));
@@ -160,18 +168,18 @@ XblTitleStorageBlobMetadataResult::DeserializeXblTitleStorageBlobMetadata(_In_ c
         auto nPos = fileName.find(',');
         if (nPos == std::string::npos)
         {
-            return Result<XblTitleStorageBlobMetadata>(returnObject, WEB_E_INVALID_JSON_STRING);
+            return WEB_E_INVALID_JSON_STRING;
         }
 
         xsapi_internal_string smartBlobType = fileName.substr(nPos + 1);
-        returnObject.blobType = ConvertStringToTitleStorageBlobType(smartBlobType);
+        metadata.blobType = ConvertStringToTitleStorageBlobType(smartBlobType);
         fileName.resize(nPos);
-        if (fileName.size() >= sizeof(returnObject.blobPath))
+        if (fileName.size() >= sizeof(metadata.blobPath))
         {
-            return Result<XblTitleStorageBlobMetadata>(returnObject, WEB_E_INVALID_JSON_STRING);
+            return WEB_E_INVALID_JSON_STRING;
         }
-        utils::strcpy(returnObject.blobPath, sizeof(returnObject.blobPath), fileName.c_str());
+        utils::strcpy(metadata.blobPath, sizeof(metadata.blobPath), fileName.c_str());
     }
 
-    return Result<XblTitleStorageBlobMetadata>(returnObject, xbox::services::legacy::ConvertHr(errc));
+    return S_OK;
 }

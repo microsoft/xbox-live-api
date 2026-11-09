@@ -96,9 +96,11 @@ private:
         _In_ std::shared_ptr<real_time_activity::RealTimeActivityManager> rtaManager
     ) noexcept;
 
-    // Generate Graph Updates based on the result of a PeopleHub service call
+    // Generate Graph Updates based on the result of a PeopleHub service call. For users in
+    // unresolvedRelationshipXuids, the relationship fields of an already-known profile are kept.
     void PeoplehubResultHandler(
-        const Vector<XblSocialManagerUser>& users
+        const Vector<XblSocialManagerUser>& users,
+        const UnorderedSet<uint64_t>& unresolvedRelationshipXuids = {}
     ) noexcept;
 
     // Generate Graph Updates based on the result of a Presence service call
@@ -135,8 +137,21 @@ private:
         const XblSocialManagerUser& updated
     ) noexcept;
 
-    static XblSocialManagerPresenceRecord ConvertPresenceRecord(
-        std::shared_ptr<XblPresenceRecord> presenceRecord
+    // Field-wise comparison of the valid portion of two presence records. A raw memcmp is not safe
+    // here: the strings are populated by different routines (strcpy_s vs memcpy), and the Debug CRT's
+    // strcpy_s fills the unused tail of the destination with 0xFE, so byte-identical content is not
+    // guaranteed even when every field matches.
+    static bool PresenceRecordsEqual(
+        const XblSocialManagerPresenceRecord& lhs,
+        const XblSocialManagerPresenceRecord& rhs
+    ) noexcept;
+
+    // Converts a service presence record into its Social Manager representation. Fills the caller's
+    // storage rather than returning by value; XblSocialManagerPresenceRecord is ~3.7KB and returning
+    // it left three live copies in the /O2 frame of the caller (see AB#63508132).
+    static void ConvertPresenceRecord(
+        _In_ const std::shared_ptr<XblPresenceRecord>& presenceRecord,
+        _Out_ XblSocialManagerPresenceRecord& smPresenceRecord
     ) noexcept;
 
     std::shared_ptr<User> m_user;

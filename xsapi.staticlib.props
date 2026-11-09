@@ -48,6 +48,15 @@
     <XsapiBuildFromSource>true</XsapiBuildFromSource> <!--Support for older GDKs which still use the XsapiBuildFromSource prop -->
   </PropertyGroup>
   <PropertyGroup Condition="'$(LibHttpClientBuildFromSource)' == ''">
+    <!--Default is unchanged: libHttpClient is built from source. Setting this to false makes a
+        project link the libHttpClient that ships in the GDK instead, so a title does not have to
+        deploy libHttpClient.GDK.dll.
+
+        Set it globally (for example /p:LibHttpClientBuildFromSource=false), not per project. It is
+        an ordinary property and does not flow across ProjectReference boundaries, so a project that
+        sets it locally would disagree with the static lib it references: that lib would still take
+        the source reference, and would be built a second time under a different set of global
+        properties.-->
     <LibHttpClientBuildFromSource>true</LibHttpClientBuildFromSource>
   </PropertyGroup>
 
@@ -84,7 +93,7 @@
   </PropertyGroup>
   
   <ItemDefinitionGroup>
-    <!-- If you're updating here, check to see if you also need to update Utilities/GDK/Xbox.Services.API.C.props -->
+    <!-- If you're updating here, check to see if you also need to update Xbox.Services.API.C.props, which is maintained in the os.2020 repo at xbox/devex/vs/extensionSdks/xsapi/c/xdkbuild -->
     <ClCompile>
       <PreprocessorDefinitions>_NO_ASYNCRTIMP;_NO_PPLXIMP;_NO_XSAPIIMP;XBL_API_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(XsapiPlatform)' == 'GDK'">HC_WINHTTP_WEBSOCKETS;HC_PLATFORM_IS_MICROSOFT=1;HC_PLATFORM_GDK=4;HC_PLATFORM=HC_PLATFORM_GDK;HC_DATAMODEL=HC_DATAMODEL_LLP64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -93,6 +102,13 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies Condition="'$(XsapiPlatform)'!='XDK' AND '$(XsapiPlatform)'!='Android'">Appnotify.lib;crypt32.lib;Winhttp.lib;Bcrypt.lib;pathcch.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <!-- When the source libHttpClient reference is skipped, put the in-box import library in its
+           place here rather than in each consuming project, so that a consumer cannot end up with
+           neither. It is left unqualified on purpose so it resolves off the GDK library search path,
+           which already points at the correct windows or xbox lib folder for the target. GDK only:
+           this import library is shipped by the GDK, and there is no equivalent to substitute on the
+           other platforms. -->
+      <AdditionalDependencies Condition="'$(LibHttpClientBuildFromSource)' == 'false' AND '$(XsapiPlatform)' == 'GDK'">libHttpClient.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
 
@@ -155,14 +171,79 @@
   <PropertyGroup>
     <HCPlatform Condition="'$(XsapiPlatform)' == 'DesktopBridge'">HC_PLATFORM_WIN32</HCPlatform>
   </PropertyGroup>
-  <Import Project="$(XsapiRoot)External\xal\External\libHttpClient\Build\libHttpClient.import.props" />
+  <!--Always bring in the libHttpClient paths so $(HCIncludeDir) is available for the include path
+      below, whether or not we build libHttpClient from source.-->
+  <Import Condition="'$(HCPathsImported)' != 'true'" Project="$(XsapiRoot)External\xal\External\libHttpClient\Build\libHttpClient.paths.props" />
 
-  <!-- Ensure libHttpClient headers are on the include path for GDK builds -->
-  <ItemDefinitionGroup Condition="'$(HCPlatform)' == 'GDK'">
+  <!--Only take a source reference to libHttpClient when building it from source. Setting
+      LibHttpClientBuildFromSource=false skips the project reference so the consuming project can
+      link a prebuilt libHttpClient instead.-->
+  <Import Condition="'$(LibHttpClientBuildFromSource)' != 'false'" Project="$(XsapiRoot)External\xal\External\libHttpClient\Build\libHttpClient.import.props" />
+
+  <!-- Ensure libHttpClient headers are on the include path. libHttpClient.import.props adds them
+       itself for non-GDK platforms, so this covers GDK, plus any platform where the import above
+       was skipped because we are not building libHttpClient from source. -->
+  <ItemDefinitionGroup Condition="'$(HCPlatform)' == 'GDK' OR '$(LibHttpClientBuildFromSource)' == 'false'">
     <ClCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(HCIncludeDir)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
+
+  <!-- When linking a prebuilt libHttpClient, explain the problem instead of leaving a bare LNK1181
+       if the import library is not on the library search path. This tests the search path rather
+       than a GDK edition number or a fixed location on purpose: the in-box library appeared under
+       windows\lib in GDK 251001, gained an arm64 flavor in the 260400 release, and only shows up
+       under xbox\lib when it actually differs from the windows copy. Any hardcoded edition or path
+       check would be wrong for some combination of those and would fail builds that should succeed.
+
+       Only property-based search paths are inspected. %(Link.AdditionalLibraryDirectories) cannot be
+       used here: batching over the Link items produces nothing, because those items are the linker
+       inputs and do not carry the ItemDefinitionGroup default metadata. Console_SdkLibPath is
+       included because that, not LibraryPath, is how the GDK library directory reaches the linker
+       under BWOI. This runs only when LibHttpClientBuildFromSource has been set to false explicitly,
+       so it fails the build outright: the caller has asked for the in-box library, and stopping here
+       with an explanation is more useful than the bare LNK1181 that would otherwise follow. -->
+  <Target Name="XsapiVerifyPrebuiltLibHttpClient" BeforeTargets="Link"
+          Condition="'$(LibHttpClientBuildFromSource)' == 'false' AND '$(XsapiPlatform)' == 'GDK'">
+    <ItemGroup>
+      <_XsapiLibSearchDir Include="$(LibraryPath)" />
+      <_XsapiLibSearchDir Include="$(LIB)" />
+      <_XsapiLibSearchDir Include="$(Console_SdkLibPath)" />
+      <_XsapiPrebuiltLibHttpClient Include="%(_XsapiLibSearchDir.Identity)\libHttpClient.lib"
+                                   Condition="Exists('%(_XsapiLibSearchDir.Identity)\libHttpClient.lib')" />
+      <!-- A title may instead name its own copy with a full path. That is visible here, unlike
+           AdditionalLibraryDirectories, which carries no metadata at this point in the build. -->
+      <_XsapiLinkDependency Include="%(Link.AdditionalDependencies)" />
+      <_XsapiPrebuiltLibHttpClient Include="@(_XsapiLinkDependency)"
+                                   Condition="'%(Filename)%(Extension)' == 'libHttpClient.lib' AND Exists('%(Identity)')" />
+    </ItemGroup>
+    <Error Condition="'@(_XsapiPrebuiltLibHttpClient)' == ''"
+           Text="LibHttpClientBuildFromSource is false, but libHttpClient.lib was not found on the library search path, so the link is expected to fail with LNK1181. The Microsoft GDK ships this import library under windows\lib from edition 251001 for x64 and from the 260400 release for arm64. Either target a GDK edition that includes it, or set LibHttpClientBuildFromSource=true to build libHttpClient from source." />
+  </Target>
+
+  <!-- Build\vcpkg_src is restored by Build\vcpkg\Restore-Vcpkg.ps1 (or restore-vcpkg.sh), not by the
+       build. A pull or branch switch that moves a dependency (vcpkg.json, the registry baseline in
+       vcpkg-configuration.json, or the vcpkg tool pin) touches one of those files, so a restore stamp
+       older than any of them means Build\vcpkg_src may hold the wrong XAL/libHttpClient/rapidjson.
+       Fail rather than silently build against it. Skipped where there is no Build\vcpkg.json (the
+       public GitHub mirror uses External\ instead). Set XsapiSkipVcpkgRestoreCheck=true to bypass. -->
+  <Target Name="XsapiVerifyVcpkgRestore" BeforeTargets="PrepareForBuild"
+          Condition="'$(XsapiSkipVcpkgRestoreCheck)' != 'true' AND Exists('$(XsapiRoot)Build\vcpkg.json')">
+    <PropertyGroup>
+      <_XsapiVcpkgStamp>$(XsapiRoot)Build\vcpkg_src\.vcpkg-restore.stamp</_XsapiVcpkgStamp>
+      <_XsapiVcpkgRestoreHint>Run Build\vcpkg\Restore-Vcpkg.ps1 (or Build/vcpkg/restore-vcpkg.sh) from the XSAPI root, then rebuild.</_XsapiVcpkgRestoreHint>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(_XsapiVcpkgStamp)')"
+           Text="XSAPI's vcpkg dependencies have not been restored ($(_XsapiVcpkgStamp) is missing). $(_XsapiVcpkgRestoreHint)" />
+    <PropertyGroup Condition="Exists('$(_XsapiVcpkgStamp)')">
+      <_XsapiVcpkgStampTicks>$([System.IO.File]::GetLastWriteTime('$(_XsapiVcpkgStamp)').Ticks)</_XsapiVcpkgStampTicks>
+      <_XsapiVcpkgStale Condition="$([System.IO.File]::GetLastWriteTime('$(XsapiRoot)Build\vcpkg.json').Ticks) &gt; $(_XsapiVcpkgStampTicks)">vcpkg.json</_XsapiVcpkgStale>
+      <_XsapiVcpkgStale Condition="$([System.IO.File]::GetLastWriteTime('$(XsapiRoot)Build\vcpkg-configuration.json').Ticks) &gt; $(_XsapiVcpkgStampTicks)">$(_XsapiVcpkgStale) vcpkg-configuration.json</_XsapiVcpkgStale>
+      <_XsapiVcpkgStale Condition="$([System.IO.File]::GetLastWriteTime('$(XsapiRoot)Build\vcpkg\vcpkg-pin.json').Ticks) &gt; $(_XsapiVcpkgStampTicks)">$(_XsapiVcpkgStale) vcpkg\vcpkg-pin.json</_XsapiVcpkgStale>
+    </PropertyGroup>
+    <Error Condition="'$(_XsapiVcpkgStale)' != ''"
+           Text="XSAPI's vcpkg dependencies are out of date: Build\$(_XsapiVcpkgStale.Trim().Replace(' ', ', Build\')) changed after the last restore. $(_XsapiVcpkgRestoreHint)" />
+  </Target>
 
   <!--CompactCoreCLL dependency-->
   <PropertyGroup Condition="'$(XsapiCllRefs)' == 'true'">

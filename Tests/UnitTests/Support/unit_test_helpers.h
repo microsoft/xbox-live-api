@@ -52,8 +52,16 @@ public:
 
     system::MockRealTimeActivityService& MockRtaService() const noexcept;
 
+protected:
+    // Runs XblCleanupAsync and waits for it; later calls are no-ops. Derived environments whose
+    // members back in-flight work (e.g. HttpMocks matched by pending HTTP calls) should call this
+    // from their own destructor, since members are destroyed before ~TestEnvironment runs and
+    // XblCleanupAsync is what waits for outstanding calls to finish.
+    void Cleanup() noexcept;
+
 private:
     std::shared_ptr<ITaskQueueDispatcher> m_dispatcher{ nullptr };
+    bool m_cleanedUp{ false };
 };
 
 inline bool VerifyTime(

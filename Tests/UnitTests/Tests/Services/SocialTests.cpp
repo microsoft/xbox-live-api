@@ -46,6 +46,7 @@ private:
             ]
         (HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
             {
+                UNREFERENCED_PARAMETER(requestBody); // only referenced by assert(), compiled out in Release
                 assert(requestBody.empty());
 
                 xbox::services::uri url(requestUrl.data());
@@ -144,6 +145,7 @@ private:
             ]
         (HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody)
         {
+            UNREFERENCED_PARAMETER(requestBody); // only referenced by assert(), compiled out in Release
             assert(requestBody.empty());
 
             xbox::services::uri url(requestUrl.data());

@@ -18,6 +18,7 @@ NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 const char defaultPeoplehubTemplate[] = R"(
 {
     "xuid": "1",
+    "isFriend": true,
     "isFavorite": false,
     "isFollowingCaller": true,
     "isFollowedByCaller": true,
@@ -75,7 +76,7 @@ const char onlinePresenceResponseTemplate[] = R"(
             "titles": [
                 {
                     "id": "1234",
-                    "name": "awesomeGame",
+                    "name": "Home",
                     "lastModified": "2013-02-01T00:00:00Z",
                     "state": "active",
                     "placement": "Full",
@@ -244,6 +245,98 @@ struct ScopedHungCallReleaser
 
 #define NUM_USERS 100
 
+// Peak-allocation tracking for TestLargeGraphPeakMemory (AB#63480128). These have to live at file
+// scope because XblMemSetFunctions takes plain function pointers and a local class cannot hold the
+// static state they need.
+namespace PeakMemory
+{
+    // XSAPI allocates from its task queue threads as well as the caller's, so this state must be
+    // synchronized. std::map/std::mutex use the default allocator, not the hook, so there is no
+    // reentrancy risk here.
+    std::mutex g_mutex;
+    std::map<void*, size_t> g_allocations;
+    size_t g_liveBytes{ 0 };
+    size_t g_peakBytes{ 0 };
+
+    // These hooks must be interchangeable with XSAPI's DefaultAlloc/DefaultFree (malloc/free),
+    // because memory crosses the hook window in both directions: process-lifetime mocks such as
+    // MockRealTimeActivityService lazily free strings earlier tests allocated through the default
+    // hook, and strings allocated here outlive the tracker and are later freed by DefaultFree.
+    _Ret_maybenull_ _Post_writable_byte_size_(size) void* STDAPIVCALLTYPE AllocHook(
+        _In_ size_t size,
+        _In_ HCMemoryType memType
+    )
+    {
+        UNREFERENCED_PARAMETER(memType);
+        if (size == 0)
+        {
+            return nullptr;
+        }
+
+        void* ptr{ malloc(size) };
+        if (ptr)
+        {
+            std::lock_guard<std::mutex> lock{ g_mutex };
+            g_allocations[ptr] = size;
+            g_liveBytes += size;
+            g_peakBytes = std::max(g_peakBytes, g_liveBytes);
+        }
+        return ptr;
+    }
+
+    void STDAPIVCALLTYPE FreeHook(
+        _In_ void* address,
+        _In_ HCMemoryType memType
+    )
+    {
+        UNREFERENCED_PARAMETER(memType);
+        if (!address)
+        {
+            return;
+        }
+
+        {
+            // Pointers allocated before the tracker was installed are expected here (see above);
+            // they are freed normally but don't affect the live-byte count.
+            std::lock_guard<std::mutex> lock{ g_mutex };
+            auto iter{ g_allocations.find(address) };
+            if (iter != g_allocations.end())
+            {
+                g_liveBytes -= iter->second;
+                g_allocations.erase(iter);
+            }
+        }
+        free(address);
+    }
+
+    size_t PeakBytes() noexcept
+    {
+        std::lock_guard<std::mutex> lock{ g_mutex };
+        return g_peakBytes;
+    }
+
+    // RAII installer. Hooks must be set before XblInitialize, so declare this before the
+    // SMTestEnvironment it is measuring.
+    struct ScopedTracker
+    {
+        ScopedTracker() noexcept
+        {
+            {
+                std::lock_guard<std::mutex> lock{ g_mutex };
+                g_allocations.clear();
+                g_liveBytes = 0;
+                g_peakBytes = 0;
+            }
+            VERIFY_SUCCEEDED(XblMemSetFunctions(AllocHook, FreeHook));
+        }
+
+        ~ScopedTracker() noexcept
+        {
+            VERIFY_SUCCEEDED(XblMemSetFunctions(nullptr, nullptr));
+        }
+    };
+}
+
 DEFINE_TEST_CLASS(SocialManagerTests)
 {
 public:
@@ -284,6 +377,11 @@ private:
 #if ENABLE_PERF_PROFILING
             TEST_LOG(Utils::StringTFromUtf8(detail::PerfTester::Instance().FormatStats().data()).data());
 #endif
+
+            // Presence polls (and other HTTP calls) can still be in flight here. Clean up XSAPI now,
+            // which waits for them, so the HttpMocks they match and the state the mock callbacks
+            // capture are still alive; ~TestEnvironment's cleanup then becomes a no-op.
+            Cleanup();
         }
 
         // CPP helpers wrapping SocialManager APIs
@@ -403,11 +501,12 @@ private:
             return userCount;
         }
 
-        // Configure Mocks used by SocialManager
+        // Configure Mocks used by SocialManager. PeoplehubService derives isFollowedByCaller and
+        // isFollowingUser from the response's isFriend, so isFriend controls the relationship.
         void SetPeoplehubMock(
             bool online = true,
             bool isFavorite = false,
-            bool isFollowedByCaller = true
+            bool isFriend = true
         ) noexcept
         {
             // No HTTP method so it matches both batch and get friends calls
@@ -418,7 +517,7 @@ private:
                     this,
                     online,
                     isFavorite,
-                    isFollowedByCaller
+                    isFriend
                 ]
             (HttpMock* mock, xsapi_internal_string /*requestUrl*/, xsapi_internal_string requestBody)
                 {
@@ -451,7 +550,7 @@ private:
                         JsonUtils::SetMember(jsonBlob, "xuid", JsonValue(utils::uint64_to_internal_string(xuid).c_str(), allocator));
                         JsonUtils::SetMember(jsonBlob, "presenceState", JsonValue((online ? "Online" : "Offline"), allocator));
                         JsonUtils::SetMember(jsonBlob, "isFavorite", JsonValue(isFavorite));
-                        JsonUtils::SetMember(jsonBlob, "isFollowedByCaller", JsonValue(isFollowedByCaller));
+                        JsonUtils::SetMember(jsonBlob, "isFriend", JsonValue(isFriend));
                         peopleArray.PushBack(jsonBlob, allocator);
                     }
 
@@ -468,14 +567,11 @@ private:
         // fetch is retried by SocialGraph (c_failureRetryIntervalMs) and the graph recovers.
         void SetPeoplehubMockFailFirstFollowedUsersCall() noexcept
         {
-            auto followedUsersCallCount = std::make_shared<std::atomic<int>>(0);
-
             m_peoplehubMock = std::make_shared<HttpMock>("", "https://peoplehub.xboxlive.com");
 
             m_peoplehubMock->SetMockMatchedCallback(
                 [
-                    this,
-                    followedUsersCallCount
+                    this
                 ]
             (HttpMock* mock, xsapi_internal_string /*requestUrl*/, xsapi_internal_string requestBody)
                 {
@@ -484,8 +580,9 @@ private:
                     auto jsonRequest = Utils::ParseJson(requestBody.data());
                     if (jsonRequest.is_null())
                     {
-                        // Followed-users (initial graph) fetch. Fail only the very first one.
-                        if (followedUsersCallCount->fetch_add(1) == 0)
+                        // Followed-users (initial graph) fetch. Count every one (so a test can assert a
+                        // retry occurred) and fail only the very first.
+                        if (this->m_followedUsersCallCount.fetch_add(1) == 0)
                         {
                             mock->SetResponseHttpStatus(404);
                             mock->ClearReponseBody();
@@ -513,7 +610,7 @@ private:
                         JsonUtils::SetMember(jsonBlob, "xuid", JsonValue(utils::uint64_to_internal_string(xuid).c_str(), allocator));
                         JsonUtils::SetMember(jsonBlob, "presenceState", JsonValue("Online", allocator));
                         JsonUtils::SetMember(jsonBlob, "isFavorite", JsonValue(false));
-                        JsonUtils::SetMember(jsonBlob, "isFollowedByCaller", JsonValue(true));
+                        JsonUtils::SetMember(jsonBlob, "isFriend", JsonValue(true));
                         peopleArray.PushBack(jsonBlob, allocator);
                     }
 
@@ -531,6 +628,57 @@ private:
             m_peoplehubMock.reset();
         }
 
+        // Peoplehub mock that serves the default profile for every user, then lets 'mutator' rewrite
+        // individual profiles (null, over-long, wrong-typed, or missing fields) before the response is
+        // sent. Backs the tests that one malformed profile cannot block the whole social graph.
+        using PeoplehubProfileMutator = std::function<void(uint64_t xuid, JsonDocument& profile)>;
+        void SetPeoplehubMockWithProfileMutator(PeoplehubProfileMutator mutator) noexcept
+        {
+            m_peoplehubMock = std::make_shared<HttpMock>("", "https://peoplehub.xboxlive.com");
+
+            m_peoplehubMock->SetMockMatchedCallback(
+                [
+                    this,
+                    mutator
+                ]
+            (HttpMock* mock, xsapi_internal_string /*requestUrl*/, xsapi_internal_string requestBody)
+                {
+                    std::vector<uint64_t> xuids;
+
+                    auto jsonRequest = Utils::ParseJson(requestBody.data());
+                    if (jsonRequest.is_null())
+                    {
+                        ++this->m_followedUsersCallCount;
+                        xuids = this->FollowedXuids;
+                    }
+                    else
+                    {
+                        auto xuidArray = jsonRequest[L"xuids"];
+                        for (size_t i = 0; i < xuidArray.size(); ++i)
+                        {
+                            xuids.push_back(Utils::Uint64FromStringT(xuidArray[i].as_string()));
+                        }
+                    }
+
+                    JsonDocument responseBody(rapidjson::kObjectType);
+                    JsonDocument::AllocatorType& allocator = responseBody.GetAllocator();
+
+                    JsonValue peopleArray(rapidjson::kArrayType);
+                    for (auto& xuid : xuids)
+                    {
+                        JsonDocument jsonBlob(&allocator);
+                        jsonBlob.Parse(defaultPeoplehubTemplate);
+                        JsonUtils::SetMember(jsonBlob, "xuid", JsonValue(utils::uint64_to_internal_string(xuid).c_str(), allocator));
+                        mutator(xuid, jsonBlob);
+                        peopleArray.PushBack(jsonBlob, allocator);
+                    }
+
+                    responseBody.AddMember("people", peopleArray, allocator);
+                    mock->SetResponseHttpStatus(200);
+                    mock->SetResponseBody(responseBody);
+                });
+        }
+
         // Presence service will respond that all users are online except for those specified in offlineXuids
         void SetPresenceMock(
             const std::vector<uint64_t>& offlineXuids = {},
@@ -542,12 +690,20 @@ private:
             m_presenceMock->SetMockMatchedCallback(
                 [
                     offlineXuids = std::unordered_set<uint64_t>{ offlineXuids.begin(), offlineXuids.end() },
-                    titleId
+                    titleId,
+                    requestCount = m_presenceRequestCount
                 ]
             (HttpMock* mock, xsapi_internal_string requestUrl, xsapi_internal_string requestBody) mutable
                 {
+                    ++(*requestCount);
                     SetPresenceResponse(mock, requestUrl, requestBody, std::move(offlineXuids), titleId);
                 });
+        }
+
+        // Number of presence service requests served by the presence mock since the environment was created
+        size_t PresenceRequestCount() const noexcept
+        {
+            return m_presenceRequestCount->load();
         }
 
         void FireDevicePresenceChangeRtaEvent(
@@ -601,8 +757,9 @@ private:
         // Xuids Local Users follow
         std::vector<uint64_t> FollowedXuids;
 
-        // Number of "get followed users" People Hub calls (empty request body) served by the default
-        // mock. Lets a test assert the watchdog does not spuriously re-issue a healthy initial fetch.
+        // Number of "get followed users" People Hub calls (empty request body) served by the People Hub
+        // mocks. Lets a test assert the watchdog does not spuriously re-issue a healthy initial fetch, or
+        // that a failed initial fetch was retried.
         std::atomic<int> m_followedUsersCallCount{ 0 };
         int FollowedUsersCallCount() const noexcept { return m_followedUsersCallCount.load(); }
 
@@ -710,9 +867,28 @@ private:
         // Default mocks used by SocialManager
         std::shared_ptr<HttpMock> m_peoplehubMock;
         std::shared_ptr<HttpMock> m_presenceMock;
+        std::shared_ptr<std::atomic<size_t>> m_presenceRequestCount{ std::make_shared<std::atomic<size_t>>(0) };
     };
 
 public:
+    // Verifies every presence title record slot at or past presenceTitleRecordCount is entirely
+    // zero, so callers never see residual data past the valid records.
+    static void VerifyUnusedPresenceSlotsAreZeroed(
+        const XblSocialManagerPresenceRecord& record
+    ) noexcept
+    {
+        const XblSocialManagerPresenceTitleRecord zeroed{};
+        for (uint32_t i = record.presenceTitleRecordCount; i < XBL_NUM_PRESENCE_RECORDS; ++i)
+        {
+            if (memcmp(&record.presenceTitleRecords[i], &zeroed, sizeof(zeroed)) != 0)
+            {
+                LOGS_DEBUG << "Presence title record slot " << i << " is not zeroed";
+                VERIFY_FAIL();
+                return;
+            }
+        }
+    }
+
     DEFINE_TEST_CASE(TestAddLocalUser)
     {
         TEST_LOG(L"Test starting: TestAddLocalUser");
@@ -723,9 +899,16 @@ public:
     }
 
     // A COMPLETED failure (HTTP error) on the initial People Hub GetFollowedUsers must be retried by
-    // SocialGraph (c_failureRetryIntervalMs) so the graph still initializes and LocalUserAdded is
-    // raised. This is the control for the never-completing case (AB#63099583): a failed completion
-    // self-heals, whereas a request that never completes is recovered by the watchdog (tests below).
+    // SocialGraph so the graph still initializes and LocalUserAdded is raised. This is the control for the
+    // never-completing case (AB#63099583): a failed completion self-heals, whereas a request that never
+    // completes is recovered by the watchdog (tests below).
+    //
+    // The invariant is asserted functionally - recovery happened AND it required more than the initial
+    // (failed) fetch - via the followed-users call count, NOT via wall-clock timing. A completed failure
+    // can be recovered by either the 10s failure retry (c_failureRetryIntervalMs, the intended path) or,
+    // if the failing completion is delivered after the unit-test watchdog interval under load, by the 2s
+    // watchdog re-issue. Both are valid recovery, so a wall-clock lower bound on recovery time is racy and
+    // must not be asserted; the call count proves a retry occurred regardless of which timer fired.
     DEFINE_TEST_CASE(TestInitialFollowedUsersFailureIsRetried)
     {
         TEST_LOG(L"Test starting: TestInitialFollowedUsersFailureIsRetried");
@@ -739,10 +922,8 @@ public:
             xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
 
         // Drive DoWork with a bounded deadline so a genuine stall fails the test instead of hanging.
-        const auto start{ std::chrono::steady_clock::now() };
-        const auto deadline{ start + std::chrono::seconds(30) };
+        const auto deadline{ std::chrono::steady_clock::now() + std::chrono::seconds(30) };
         bool localUserAdded{ false };
-        int64_t elapsedMs{ 0 };
 
         while (std::chrono::steady_clock::now() < deadline && !localUserAdded)
         {
@@ -751,20 +932,21 @@ public:
                 if (e->eventType == XblSocialManagerEventType::LocalUserAdded)
                 {
                     localUserAdded = true;
-                    elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(
-                        std::chrono::steady_clock::now() - start).count();
                 }
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
 
-        LOGS_DEBUG << "LocalUserAdded received after " << elapsedMs << "ms (expected ~10000ms retry)";
+        LOGS_DEBUG << "localUserAdded: " << localUserAdded
+            << ", followed-users calls: " << env.FollowedUsersCallCount();
 
         // The graph recovered from a failed initial fetch: the failure path is self-healing.
         VERIFY_IS_TRUE(localUserAdded);
 
-        // Recovery came from the delayed retry, not the initial (failed) attempt.
-        VERIFY_IS_TRUE(elapsedMs >= 5000);
+        // Recovery required a retry: the initial fetch failed (404) and at least one later fetch was
+        // issued and succeeded. This proves the completed failure was retried, not that the first
+        // attempt happened to succeed.
+        VERIFY_IS_TRUE(env.FollowedUsersCallCount() >= 2);
     }
 
     DEFINE_TEST_CASE(TestInitialFollowedUsersHangIsRetriedByWatchdog)
@@ -920,7 +1102,7 @@ public:
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
-        VERIFY_ARE_EQUAL(1, localUserAddedCount);
+        VERIFY_ARE_EQUAL_INT(1, localUserAddedCount);
 
         // Keep pumping DoWork past a full watchdog interval (2s in unit-test builds) to prove the
         // watchdog does not re-issue the already-completed fetch and does not raise a second event.
@@ -941,10 +1123,287 @@ public:
             << ", LocalUserAdded events: " << localUserAddedCount;
 
         // The initial fetch completed on its own; the watchdog did not spuriously re-issue it.
-        VERIFY_ARE_EQUAL(1, env.FollowedUsersCallCount());
+        VERIFY_ARE_EQUAL_INT(1, env.FollowedUsersCallCount());
         // And exactly one LocalUserAdded event was raised (no duplicate handler invocation).
-        VERIFY_ARE_EQUAL(1, localUserAddedCount);
+        VERIFY_ARE_EQUAL_INT(1, localUserAddedCount);
     } // env dtor -> RemoveLocalUser + XblCleanup
+
+    // One profile that does not fit XSAPI's expectations (a null bool, an over-long name or URL, a
+    // wrong-typed field) used to fail deserialization of the ENTIRE PeopleHub response. Because the
+    // initial followed-users fetch is retried on failure and the graph only initializes on success,
+    // a single such friend left the graph uninitialized forever: no LocalUserAdded and an empty
+    // friends list with no error (AB#64511724). Each field must now be tolerated on its own and the
+    // graph must initialize from the FIRST fetch.
+    DEFINE_TEST_CASE(TestFollowedUsersToleratesInvalidProfileFields)
+    {
+        TEST_LOG(L"Test starting: TestFollowedUsersToleratesInvalidProfileFields");
+
+        const std::string longGamertag(60, 'g');
+        // 88 ASCII bytes + a 2-byte UTF-8 character = 90 bytes, one past the 89 usable bytes of
+        // displayName, so a naive cut would split the character.
+        const std::string longDisplayName{ std::string(88, 'd') + "\xC3\xA9" };
+        const std::string longPicUrl{ "http://images-eds.xboxlive.com/image?url=" + std::string(1000, 'p') };
+
+        SMTestEnvironment env{};
+        env.SetPeoplehubMockWithProfileMutator([&](uint64_t xuid, JsonDocument& profile)
+        {
+            auto& a{ profile.GetAllocator() };
+            switch (xuid)
+            {
+            case 1:
+                JsonUtils::SetMember(profile, "isFriend", JsonValue(rapidjson::kNullType));
+                JsonUtils::SetMember(profile, "isFavorite", JsonValue(rapidjson::kNullType));
+                JsonUtils::SetMember(profile, "useAvatar", JsonValue(rapidjson::kNullType));
+                break;
+            case 2:
+                JsonUtils::SetMember(profile, "gamertag", JsonValue(longGamertag.c_str(), a));
+                JsonUtils::SetMember(profile, "displayName", JsonValue(longDisplayName.c_str(), a));
+                break;
+            case 3:
+                JsonUtils::SetMember(profile, "displayPicRaw", JsonValue(longPicUrl.c_str(), a));
+                JsonUtils::SetMember(profile, "gamerScore", JsonValue(9001));
+                break;
+            case 4:
+                JsonUtils::SetMember(profile, "presenceState", JsonValue(42));
+                break;
+            default:
+                break;
+            }
+        });
+
+        auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+        VERIFY_SUCCEEDED(XblSocialManagerAddLocalUser(
+            xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
+
+        const auto deadline{ std::chrono::steady_clock::now() + std::chrono::seconds(30) };
+        bool localUserAdded{ false };
+        while (std::chrono::steady_clock::now() < deadline && !localUserAdded)
+        {
+            for (auto e : env.DoWork())
+            {
+                if (e->eventType == XblSocialManagerEventType::LocalUserAdded)
+                {
+                    VERIFY_SUCCEEDED(e->hr);
+                    localUserAdded = true;
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+
+        VERIFY_IS_TRUE(localUserAdded);
+        // Initialized from the first fetch - not by a retry of a response that can never succeed.
+        VERIFY_ARE_EQUAL_INT(1, env.FollowedUsersCallCount());
+
+        std::vector<uint64_t> xuids{ 1, 2, 3, 4, 5 };
+        XblSocialManagerUserGroupHandle listGroup{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromList(
+            xboxLiveContext->User().Handle(), xuids.data(), xuids.size(), &listGroup));
+
+        bool groupLoaded{ false };
+        while (std::chrono::steady_clock::now() < deadline && !groupLoaded)
+        {
+            for (auto e : env.DoWork())
+            {
+                groupLoaded |= e->eventType == XblSocialManagerEventType::SocialUserGroupLoaded && e->groupAffected == listGroup;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+        VERIFY_IS_TRUE(groupLoaded);
+
+        std::map<uint64_t, const XblSocialManagerUser*> users;
+        for (auto user : env.GetUsers(listGroup))
+        {
+            users[user->xboxUserId] = user;
+        }
+        VERIFY_ARE_EQUAL_UINT(xuids.size(), users.size());
+
+        // A null isFriend on the friends endpoint reads as true (being in that response is the
+        // relationship); other null bools read as false. The rest of the profile is intact.
+        VERIFY_IS_TRUE(users[1]->isFriend);
+        VERIFY_IS_TRUE(users[1]->isFollowedByCaller);
+        VERIFY_IS_FALSE(users[1]->isFavorite);
+        VERIFY_IS_FALSE(users[1]->useAvatar);
+        VERIFY_ARE_EQUAL_STR("TestGamerTag", users[1]->gamertag);
+
+        // Over-long display text is truncated to fit, never splitting a UTF-8 character. An over-long
+        // identifier is left empty rather than truncated into a different, wrong value.
+        VERIFY_ARE_EQUAL_STR("", users[2]->gamertag);
+        VERIFY_ARE_EQUAL_STR(std::string(88, 'd').c_str(), users[2]->displayName);
+        VERIFY_IS_TRUE(users[2]->isFriend);
+
+        VERIFY_ARE_EQUAL_STR("", users[3]->displayPicUrlRaw);
+        // A wrong-typed field is left empty rather than discarding the profile.
+        VERIFY_ARE_EQUAL_STR("", users[3]->gamerscore);
+        VERIFY_ARE_EQUAL_STR("TestGamerTag", users[3]->gamertag);
+
+        VERIFY_ARE_EQUAL_STR("TestGamerTag", users[4]->gamertag);
+        VERIFY_IS_TRUE(users[4]->isFriend);
+
+        VERIFY_ARE_EQUAL_STR("TestGamerTag", users[5]->gamertag);
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(listGroup));
+
+        // Every friend, including the one whose isFriend was null, is in the Friends filter group.
+        XblSocialManagerUserGroupHandle friendsGroup{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(), XblPresenceFilter::All, XblRelationshipFilter::Friends, &friendsGroup));
+
+        groupLoaded = false;
+        while (std::chrono::steady_clock::now() < deadline && !groupLoaded)
+        {
+            for (auto e : env.DoWork())
+            {
+                groupLoaded |= e->eventType == XblSocialManagerEventType::SocialUserGroupLoaded && e->groupAffected == friendsGroup;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+        VERIFY_IS_TRUE(groupLoaded);
+
+        auto friends{ env.GetUsers(friendsGroup) };
+        VERIFY_ARE_EQUAL_UINT(env.FollowedXuids.size(), friends.size());
+        VERIFY_IS_TRUE(std::any_of(friends.begin(), friends.end(), [](auto u) { return u->xboxUserId == 1; }));
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(friendsGroup));
+    }
+
+    // A batch re-poll (e.g. after a Changed relationship notification) whose isFriend is null must not
+    // overwrite a relationship the graph already knows; a genuine false still applies (AB#64511724).
+    DEFINE_TEST_CASE(TestBatchNullIsFriendKeepsKnownRelationship)
+    {
+        TEST_LOG(L"Test starting: TestBatchNullIsFriendKeepsKnownRelationship");
+
+        SMTestEnvironment env{};
+        auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+        env.AddLocalUser(xboxLiveContext->User());
+
+        XblSocialManagerUserGroupHandle group{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(), XblPresenceFilter::All, XblRelationshipFilter::Friends, &group));
+        env.AwaitEvents({ { XblSocialManagerEventType::SocialUserGroupLoaded, 1 } });
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), env.GetUsersCount(group));
+
+        const uint64_t nullFriendXuid{ 1 };
+        const uint64_t unfriendedXuid{ 2 };
+        env.SetPeoplehubMockWithProfileMutator([&](uint64_t xuid, JsonDocument& profile)
+        {
+            if (xuid == nullFriendXuid)
+            {
+                JsonUtils::SetMember(profile, "isFriend", JsonValue(rapidjson::kNullType));
+                // A real profile change, so the re-poll's result is observable as a ProfilesChanged event.
+                JsonUtils::SetMember(profile, "displayName", JsonValue("RenamedFriend", profile.GetAllocator()));
+            }
+            else if (xuid == unfriendedXuid)
+            {
+                JsonUtils::SetMember(profile, "isFriend", JsonValue(false));
+            }
+        });
+        env.FireSocialGraphChangedRtaEvent(xboxLiveContext->User(), XblSocialNotificationType::Changed, nullFriendXuid);
+        env.FireSocialGraphChangedRtaEvent(xboxLiveContext->User(), XblSocialNotificationType::Changed, unfriendedXuid);
+
+        bool nullFriendProfileChanged{ false };
+        bool unfriendedRelationshipChanged{ false };
+        const auto deadline{ std::chrono::steady_clock::now() + std::chrono::seconds(30) };
+        while (std::chrono::steady_clock::now() < deadline && !(nullFriendProfileChanged && unfriendedRelationshipChanged))
+        {
+            for (auto e : env.DoWork())
+            {
+                for (auto user : e->usersAffected)
+                {
+                    if (user == nullptr)
+                    {
+                        break;
+                    }
+                    if (e->eventType == XblSocialManagerEventType::SocialRelationshipsChanged)
+                    {
+                        // The null isFriend must not read as an unfriend.
+                        VERIFY_ARE_NOT_EQUAL(nullFriendXuid, user->xboxUserId);
+                        unfriendedRelationshipChanged |= user->xboxUserId == unfriendedXuid;
+                    }
+                    else if (e->eventType == XblSocialManagerEventType::ProfilesChanged)
+                    {
+                        nullFriendProfileChanged |= user->xboxUserId == nullFriendXuid;
+                    }
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+        VERIFY_IS_TRUE(nullFriendProfileChanged);
+        VERIFY_IS_TRUE(unfriendedRelationshipChanged);
+
+        auto friends{ env.GetUsers(group) };
+        VERIFY_ARE_EQUAL_UINT(env.FollowedXuids.size() - 1, friends.size());
+        auto nullFriend{ std::find_if(friends.begin(), friends.end(), [&](auto u) { return u->xboxUserId == nullFriendXuid; }) };
+        VERIFY_IS_TRUE(nullFriend != friends.end());
+        VERIFY_IS_TRUE((*nullFriend)->isFriend);
+        VERIFY_IS_TRUE((*nullFriend)->isFollowedByCaller);
+        VERIFY_ARE_EQUAL_STR("RenamedFriend", (*nullFriend)->displayName);
+        VERIFY_IS_FALSE(std::any_of(friends.begin(), friends.end(), [&](auto u) { return u->xboxUserId == unfriendedXuid; }));
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
+    }
+
+    // A profile that cannot be identified (missing, null, or non-object xuid) is skipped on its own;
+    // every other friend still loads and the graph initializes from the first fetch (AB#64511724).
+    DEFINE_TEST_CASE(TestFollowedUsersSkipsProfileWithoutXuid)
+    {
+        TEST_LOG(L"Test starting: TestFollowedUsersSkipsProfileWithoutXuid");
+
+        const std::set<uint64_t> badXuids{ 2, 3, 4 };
+
+        SMTestEnvironment env{};
+        env.SetPeoplehubMockWithProfileMutator([&](uint64_t xuid, JsonDocument& profile)
+        {
+            switch (xuid)
+            {
+            case 2:
+                profile.RemoveMember("xuid");
+                break;
+            case 3:
+                JsonUtils::SetMember(profile, "xuid", JsonValue(rapidjson::kNullType));
+                break;
+            case 4:
+                profile.SetNull();
+                break;
+            default:
+                break;
+            }
+        });
+
+        auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+        VERIFY_SUCCEEDED(XblSocialManagerAddLocalUser(
+            xboxLiveContext->User().Handle(), XblSocialManagerExtraDetailLevel::NoExtraDetail, nullptr));
+
+        XblSocialManagerUserGroupHandle filterGroup{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(), XblPresenceFilter::All, XblRelationshipFilter::Friends, &filterGroup));
+
+        const auto deadline{ std::chrono::steady_clock::now() + std::chrono::seconds(30) };
+        bool localUserAdded{ false };
+        bool groupLoaded{ false };
+        while (std::chrono::steady_clock::now() < deadline && !(localUserAdded && groupLoaded))
+        {
+            for (auto e : env.DoWork())
+            {
+                localUserAdded |= e->eventType == XblSocialManagerEventType::LocalUserAdded;
+                groupLoaded |= e->eventType == XblSocialManagerEventType::SocialUserGroupLoaded && e->groupAffected == filterGroup;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+
+        VERIFY_IS_TRUE(localUserAdded);
+        VERIFY_IS_TRUE(groupLoaded);
+        VERIFY_ARE_EQUAL_INT(1, env.FollowedUsersCallCount());
+
+        auto users{ env.GetUsers(filterGroup) };
+        VERIFY_ARE_EQUAL_UINT(env.FollowedXuids.size() - badXuids.size(), users.size());
+        for (auto user : users)
+        {
+            VERIFY_IS_TRUE(badXuids.find(user->xboxUserId) == badXuids.end());
+            VERIFY_IS_TRUE(user->xboxUserId != 0);
+        }
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(filterGroup));
+    }
 
     DEFINE_TEST_CASE(TestBasicCreateFilterGroup)
     {
@@ -1137,6 +1596,183 @@ public:
         }
 
         VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
+    }
+
+    // Regression test for spurious PresenceChanged events (found while fixing AB#63572198).
+    //
+    // Every RTA device/title presence event makes the graph re-poll the presence service, and the
+    // result is compared with the stored record (which People Hub populated). The two sides build
+    // their strings differently: strcpy_s on the presence-service path, memcpy + terminator on the
+    // People Hub path. The Debug CRT's strcpy_s fills the unused tail of the buffer with 0xFE, so a
+    // byte-wise memcmp of the record reported a change even when every field was identical, and every
+    // re-poll raised PresenceChanged for every affected user. Presence is now compared field-wise.
+    // The byte-level difference only exists with the Debug CRT, which is what the unit tests use.
+    DEFINE_TEST_CASE(TestUnchangedPresenceRepollRaisesNoEvent)
+    {
+        TEST_LOG(L"Test starting: TestUnchangedPresenceRepollRaisesNoEvent");
+
+        SMTestEnvironment env{};
+        auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+        env.AddLocalUser(xboxLiveContext->User());
+
+        XblSocialManagerUserGroupHandle group{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromFilters(
+            xboxLiveContext->User().Handle(),
+            XblPresenceFilter::All,
+            XblRelationshipFilter::Friends,
+            &group
+        ));
+        env.AwaitEvents({ { XblSocialManagerEventType::SocialUserGroupLoaded, 1 } });
+
+        auto users{ env.GetUsers(group) };
+        VERIFY_ARE_EQUAL_INT(env.FollowedXuids.size(), users.size());
+        for (auto user : users)
+        {
+            VERIFY_IS_TRUE(XblSocialManagerPresenceRecordIsUserPlayingTitle(&user->presenceRecord, MOCK_TITLEID));
+        }
+
+        // The default presence mock returns the same presence People Hub reported, so re-polling
+        // must not produce any events.
+        const size_t requestsBefore{ env.PresenceRequestCount() };
+        env.FireDevicePresenceChangeRtaEvent(env.FollowedXuids, true);
+
+        // Presence polls after the first are batched behind a short delay, so keep pumping for a while
+        // after the first re-poll is served to give every batched result time to be applied.
+        const auto deadline{ std::chrono::steady_clock::now() + std::chrono::seconds(30) };
+        std::chrono::steady_clock::time_point settleUntil{};
+        while (std::chrono::steady_clock::now() < deadline)
+        {
+            if (settleUntil == std::chrono::steady_clock::time_point{} && env.PresenceRequestCount() > requestsBefore)
+            {
+                settleUntil = std::chrono::steady_clock::now() + std::chrono::seconds(3);
+            }
+            if (settleUntil != std::chrono::steady_clock::time_point{} && std::chrono::steady_clock::now() >= settleUntil)
+            {
+                break;
+            }
+
+            for (auto event : env.DoWork())
+            {
+                LOGS_DEBUG << "Unexpected SocialManager Event " << static_cast<uint32_t>(event->eventType);
+                VERIFY_FAIL(L"Re-polling unchanged presence raised a SocialManager event");
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+
+        VERIFY_IS_TRUE(env.PresenceRequestCount() > requestsBefore);
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
+    }
+
+    // Regression test for AB#63508132 (stack-frame reduction follow-up).
+    //
+    // SocialGraph::ConvertPresenceRecord used to return XblSocialManagerPresenceRecord (~3.7KB) by
+    // value, which left three live copies in the /O2 frame of PresenceResultHandler - an 11,304-byte
+    // frame on the same stack-constrained XTaskQueue completion thread that produced the original
+    // crash. It now fills an _Out_ reference instead.
+    //
+    // Filling caller-owned storage means residual bytes in unused slots could survive and be handed
+    // to callers. This test pins the invariant that every slot at or past presenceTitleRecordCount is
+    // entirely zero - including after a transition that REDUCES the count from one to zero, which is
+    // where uninitialized storage would show up.
+    DEFINE_TEST_CASE(TestPresenceRecordUnusedSlotsAreZeroed)
+    {
+        TEST_LOG(L"Test starting: TestPresenceRecordUnusedSlotsAreZeroed");
+
+        SMTestEnvironment env{};
+        auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+        env.AddLocalUser(xboxLiveContext->User());
+
+        constexpr size_t c_trackedUserCount{ 5 };
+        VERIFY_IS_TRUE(env.FollowedXuids.size() >= c_trackedUserCount);
+        std::vector<uint64_t> trackedXuids{ env.FollowedXuids.begin(), env.FollowedXuids.begin() + c_trackedUserCount };
+
+        XblSocialManagerUserGroupHandle listGroup{ nullptr };
+        VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromList(
+            xboxLiveContext->User().Handle(),
+            trackedXuids.data(),
+            trackedXuids.size(),
+            &listGroup
+        ));
+
+        env.AwaitEvents({ { XblSocialManagerEventType::SocialUserGroupLoaded, 1 } });
+
+        // The default presence mock reports one active title, so exactly one slot is in use and the
+        // remaining XBL_NUM_PRESENCE_RECORDS - 1 must be zeroed.
+        auto users{ env.GetUsers(listGroup) };
+        VERIFY_ARE_EQUAL_UINT(trackedXuids.size(), users.size());
+
+        for (auto user : users)
+        {
+            VERIFY_ARE_EQUAL_UINT(1u, user->presenceRecord.presenceTitleRecordCount);
+            VerifyUnusedPresenceSlotsAreZeroed(user->presenceRecord);
+        }
+
+        // Now drive those users offline. The offline presence payload has no devices, so
+        // presenceTitleRecordCount drops to zero and EVERY slot must be zeroed - including the one
+        // that previously held an active title.
+        env.SetPresenceMock(trackedXuids);
+        env.FireDevicePresenceChangeRtaEvent(trackedXuids);
+
+        std::set<uint64_t> sawOffline;
+        std::set<uint64_t> trackedXuidsSet{ trackedXuids.begin(), trackedXuids.end() };
+
+        // Bounded by wall clock, matching the convention used by the watchdog tests above. The
+        // offline transition is driven by an RTA event plus a presence poll, so what is being waited
+        // on is elapsed time, not DoWork iterations - a pure iteration cap burns through 100k spins
+        // in well under a second and would fail a perfectly healthy run. A genuine stall now fails
+        // the test instead of spinning as a hung test host.
+        const auto deadline{ std::chrono::steady_clock::now() + std::chrono::seconds(30) };
+        while (std::chrono::steady_clock::now() < deadline && sawOffline.size() < trackedXuids.size())
+        {
+            for (auto event : env.DoWork())
+            {
+                if (event->eventType != XblSocialManagerEventType::PresenceChanged)
+                {
+                    continue;
+                }
+
+                for (uint32_t i = 0; i < XBL_SOCIAL_MANAGER_MAX_AFFECTED_USERS_PER_EVENT; ++i)
+                {
+                    auto affectedUser{ event->usersAffected[i] };
+                    if (affectedUser == nullptr)
+                    {
+                        break;
+                    }
+                    if (trackedXuidsSet.find(affectedUser->xboxUserId) == trackedXuidsSet.end())
+                    {
+                        continue;
+                    }
+
+                    // The invariant under test holds for every presence record, whatever the state.
+                    VerifyUnusedPresenceSlotsAreZeroed(affectedUser->presenceRecord);
+
+                    // A presence poll already in flight when the mock was swapped can still report
+                    // Online, so only count the offline transition, which is the case that reduces
+                    // presenceTitleRecordCount to zero and frees a previously populated slot.
+                    if (affectedUser->presenceRecord.userState == XblPresenceUserState::Offline)
+                    {
+                        VERIFY_ARE_EQUAL_UINT(0u, affectedUser->presenceRecord.presenceTitleRecordCount);
+                        sawOffline.insert(affectedUser->xboxUserId);
+                    }
+                }
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+
+        // A timed-out wait must fail here, with a message that names what was missing, rather than
+        // falling through to the group re-read below and failing on a less obvious assertion.
+        VERIFY_ARE_EQUAL_UINT(trackedXuids.size(), sawOffline.size());
+
+        // Re-read through the group so the assertion also covers the copy stored in the graph, not
+        // just the event payload.
+        for (auto user : env.GetUsers(listGroup))
+        {
+            VERIFY_ARE_EQUAL_UINT(0u, user->presenceRecord.presenceTitleRecordCount);
+            VerifyUnusedPresenceSlotsAreZeroed(user->presenceRecord);
+        }
+
+        VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(listGroup));
     }
 
     DEFINE_TEST_CASE(TestMultipleLocalUsers)
@@ -1624,7 +2260,9 @@ public:
             &group1
         ));
 
-        VERIFY_ARE_EQUAL(trackedXuids1.size(), env.GetTrackedUsersCount(group1));
+        // Tracked users are only reported once the group has loaded (see XblSocialManagerUserGroupGetUsersTrackedByGroup),
+        // so don't query them until then. Querying a list group before it loads also permanently empties its tracked-users
+        // view (AB#64300922), which would break the later assertions.
 
         auto groupLoaded{ false };
         size_t usersAddedToGraph{ 0 };
@@ -1664,6 +2302,7 @@ public:
         }
 
         VERIFY_ARE_EQUAL(trackedXuids1.size(), env.GetUsersCount(group1));
+        VERIFY_ARE_EQUAL(trackedXuids1.size(), env.GetTrackedUsersCount(group1));
 
         // Create a second group with partial graph overlap. No new users should be added to graph.
         std::vector<uint64_t> trackedXuids2{ 1, 2, 3, 4, 5, 101, 102, 103, 104, 105 };
@@ -1769,7 +2408,6 @@ public:
             std::vector<uint64_t>{ newTrackedXuids1.begin(), newTrackedXuids1.end() }.data(),
             newTrackedXuids1.size()
         ));
-        VERIFY_ARE_EQUAL(newTrackedXuids1.size(), env.GetTrackedUsersCount(group1));
 
         auto groupUpdated{ false };
         size_t usersRemovedFromGraph{ 0 };
@@ -1822,6 +2460,7 @@ public:
         }
 
         VERIFY_ARE_EQUAL(newTrackedXuids1.size(), env.GetUsersCount(group1));
+        VERIFY_ARE_EQUAL(newTrackedXuids1.size(), env.GetTrackedUsersCount(group1));
 
         VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group1));
     }
@@ -1848,7 +2487,7 @@ public:
             &group
         ));
 
-        VERIFY_ARE_EQUAL(trackedXuids.size(), env.GetTrackedUsersCount(group));
+        // Tracked users are only reported once the group has loaded; see TestMultipleListGroups.
 
         std::set<uint64_t> trackedXuidsSet{ trackedXuids.begin(), trackedXuids.end() };
 
@@ -1889,8 +2528,94 @@ public:
         }
 
         VERIFY_ARE_EQUAL(trackedXuids.size(), env.GetUsersCount(group));
+        VERIFY_ARE_EQUAL(trackedXuids.size(), env.GetTrackedUsersCount(group));
 
         VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
+    }
+
+    // End-to-end peak-allocation guard for AB#63480128.
+    //
+    // Playground reported ~8MB attributed to Social Manager for an automation account with ~500
+    // friends. XblSocialManagerUser is ~5.7KB, so the graph itself is only ~2.7MB at that size; the
+    // rest was redundant copies of the Peoplehub response made as it travelled through Result,
+    // AsyncContext and Function. This measures peak live bytes across a full graph load and pins it
+    // to a small multiple of the graph payload, so reintroducing a copy of the whole response shows
+    // up as a failure rather than as partner-reported memory pressure.
+    DEFINE_TEST_CASE(TestLargeGraphPeakMemory)
+    {
+        TEST_LOG(L"Test starting: TestLargeGraphPeakMemory");
+
+        constexpr size_t c_trackedUsers{ XBL_SOCIAL_MANAGER_MAX_USERS_FROM_LIST };
+        constexpr size_t c_graphPayloadBytes{ c_trackedUsers * sizeof(XblSocialManagerUser) };
+
+        size_t peakBytes{ 0 };
+        {
+            PeakMemory::ScopedTracker tracker{};
+
+            SMTestEnvironment env{};
+            auto xboxLiveContext{ env.CreateMockXboxLiveContext() };
+            env.AddLocalUser(xboxLiveContext->User());
+
+            std::vector<uint64_t> trackedXuids;
+            for (uint64_t xuid = 0; xuid < c_trackedUsers; ++xuid)
+            {
+                trackedXuids.push_back(xuid + 101); // Offset to make unique from our friends
+            }
+
+            XblSocialManagerUserGroupHandle group{ nullptr };
+            VERIFY_SUCCEEDED(XblSocialManagerCreateSocialUserGroupFromList(
+                xboxLiveContext->User().Handle(),
+                trackedXuids.data(),
+                trackedXuids.size(),
+                &group
+            ));
+
+            // Pump until the group is loaded and every tracked user has landed in the graph. Peak is
+            // measured across the whole load, which is where the redundant copies used to stack up.
+            bool groupLoaded{ false };
+            size_t usersAddedToGraph{ 0 };
+            size_t iterations{ 0 };
+            while (!groupLoaded || usersAddedToGraph < trackedXuids.size())
+            {
+                VERIFY_IS_TRUE(++iterations < 100000);
+
+                for (auto event : env.DoWork())
+                {
+                    if (event->eventType == XblSocialManagerEventType::SocialUserGroupLoaded)
+                    {
+                        groupLoaded = true;
+                    }
+                    else if (event->eventType == XblSocialManagerEventType::UsersAddedToSocialGraph)
+                    {
+                        for (auto affectedUser : event->usersAffected)
+                        {
+                            if (affectedUser)
+                            {
+                                ++usersAddedToGraph;
+                            }
+                        }
+                    }
+                }
+            }
+
+            VERIFY_ARE_EQUAL(c_trackedUsers, env.GetUsersCount(group));
+
+            peakBytes = PeakMemory::PeakBytes();
+
+            VERIFY_SUCCEEDED(XblSocialManagerDestroySocialUserGroup(group));
+        }
+
+        char summary[256]{};
+        sprintf_s(summary, "Graph payload %zu bytes, peak allocation %zu bytes (%.2fx payload)",
+            c_graphPayloadBytes,
+            peakBytes,
+            static_cast<double>(peakBytes) / static_cast<double>(c_graphPayloadBytes));
+        TEST_LOG(Utils::StringTFromUtf8(summary).data());
+
+        // Measured on this fixture: 9.38x payload before the copies were removed, 5.38x after -
+        // exactly four full copies of the response eliminated. 7x sits between the two with
+        // headroom for allocator noise, so this fails if any one of those copies comes back.
+        VERIFY_IS_TRUE(peakBytes < c_graphPayloadBytes * 7);
     }
 
     // Tests refresh for RTA resync
