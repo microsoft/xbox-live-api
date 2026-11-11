@@ -23,14 +23,14 @@ public:
 
     Result(HRESULT hr, String errorMessage = {}) : m_result{ hr }, m_errorMessage{ std::move(errorMessage) } {}
 
-    Result(T payload, HRESULT hr = S_OK, String errorMessage = {}) : m_result{ hr }, m_payload{ payload }, m_errorMessage{ std::move(errorMessage) } {}
+    Result(T payload, HRESULT hr = S_OK, String errorMessage = {}) : m_result{ hr }, m_payload{ std::move(payload) }, m_errorMessage{ std::move(errorMessage) } {}
 
     Result(std::error_code errc, String errorMessage = {}) : m_errorMessage{ std::move(errorMessage) }
     {
         m_result = utils::convert_xbox_live_error_code_to_hresult(errc);
     }
 
-    Result(T payload, std::error_code errc, String errorMessage = {}) : m_payload{ payload }, m_errorMessage{ std::move(errorMessage) }
+    Result(T payload, std::error_code errc, String errorMessage = {}) : m_payload{ std::move(payload) }, m_errorMessage{ std::move(errorMessage) }
     {
         m_result = utils::convert_xbox_live_error_code_to_hresult(errc);
     }

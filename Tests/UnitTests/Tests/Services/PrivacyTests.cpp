@@ -742,6 +742,7 @@ public:
         uint32_t subscribeCount{ 0 };
         mockRtaService.SetSubscribeHandler([&](uint32_t n, xsapi_internal_string uri)
         {
+            UNREFERENCED_PARAMETER(uri);
             ++subscribeCount;
             mockRtaService.CompleteSubscribeHandshake(n);
         });
@@ -797,6 +798,7 @@ public:
         context.handlerToken = XblPrivacyAddMuteListChangedHandler(xboxLiveContext.get(),
             [](const XblPrivacyMuteListChangeEventArgs* args, void* ctx)
             {
+                UNREFERENCED_PARAMETER(args);
                 auto c{ static_cast<HandlerContext*>(ctx) };
                 c->handlerFired = true;
 

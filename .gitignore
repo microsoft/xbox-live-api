@@ -6,6 +6,7 @@ Frameworks/
 
 # Ignore OpenSSL and Boost build files for iOS
 
+Out/
 .gitk
 .config/git/gitk
 
@@ -95,7 +96,6 @@ Archive/**/*.winmd
 Build/**/Debug/
 Build/**/Release/
 External/**/lib/
-!External/xal/External/OneDS/lib/
 External/**/bin/
 External/**/Debug/
 External/**/Release/

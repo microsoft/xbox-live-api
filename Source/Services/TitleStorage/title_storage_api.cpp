@@ -342,7 +342,7 @@ try
 
     VERIFY_XBL_INITIALIZED();
 
-    XblTitleStorageBlobMetadata cResult;
+    XblTitleStorageBlobMetadata cResult{};
 
     return RunAsync(async, __FUNCTION__,
         [
@@ -416,7 +416,7 @@ try
     RETURN_HR_INVALIDARGUMENT_IF_EMPTY_STRING(blobMetadata.blobPath);
     VERIFY_XBL_INITIALIZED();
 
-    XblTitleStorageBlobMetadata cResult;
+    XblTitleStorageBlobMetadata cResult{};
 
     return RunAsync(async, __FUNCTION__,
         [

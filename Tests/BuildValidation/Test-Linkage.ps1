@@ -48,7 +48,13 @@ param(
     [ValidateSet('x64', 'ARM64')]
     [string]$Platform = 'x64',
 
-    [string]$Toolset = '143'
+    [string]$Toolset = '143',
+
+    # Which libHttpClient the Thunks DLL is expected to import. Any accepts either
+    # and only reports what it found, which is the right default for a developer
+    # spot check. Source and InBox assert, which is what a build leg wants.
+    [ValidateSet('Any', 'Source', 'InBox')]
+    [string]$ExpectLibHttpClient = 'Any'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -75,6 +81,7 @@ Build the appropriate project first, for example:
 
 $gdkInclude = $null
 $gdkLib = $null
+$gdkBin = $null
 if ($env:GameDK) {
     # GameDK points at the install root, which contains one folder per installed
     # GDK edition. Use the newest edition present.
@@ -86,8 +93,10 @@ if ($env:GameDK) {
     if ($edition) {
         $candidateInclude = Join-Path $edition.FullName 'windows\include'
         $candidateLib = Join-Path $edition.FullName "windows\lib\$Platform"
+        $candidateBin = Join-Path $edition.FullName "windows\bin\$Platform"
         if (Test-Path $candidateInclude) { $gdkInclude = $candidateInclude }
         if (Test-Path $candidateLib) { $gdkLib = $candidateLib }
+        if (Test-Path $candidateBin) { $gdkBin = $candidateBin }
     }
 }
 if (-not $gdkInclude -or -not $gdkLib) {
@@ -114,6 +123,12 @@ Build the $Linkage configuration first, then re-run this script.
 "@
 }
 
+# Start from an empty folder. Anything left from an earlier run, in particular a
+# libHttpClient staged for a different linkage mode, would let the executable load
+# against a stale dependency and report a pass that the current build did not earn.
+if (Test-Path $outputDir) {
+    Remove-Item $outputDir -Recurse -Force
+}
 New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
 
 $exe = Join-Path $outputDir 'BuildValidation.exe'
@@ -145,26 +160,34 @@ function Resolve-LibHttpClientFile {
     return $null
 }
 
-if (-not (Resolve-LibHttpClientFile 'libHttpClient.GDK.lib')) {
-    Write-Host 'libHttpClient has not been built yet. Building it now...'
-    $hcProject = Join-Path $repoRoot 'External\Xal\External\libHttpClient\Build\libHttpClient.GDK\libHttpClient.GDK.vcxproj'
-    & msbuild $hcProject "/p:Configuration=$Configuration" "/p:Platform=$Platform" /v:minimal /nologo | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error 'libHttpClient failed to build, so the link inputs could not be resolved.'
+# The static configuration pulls libHttpClient symbols into the consumer, so it
+# still links the source-built libHttpClient. The Thunks DLL now links the
+# libHttpClient that ships in the GDK and keeps it behind the DLL boundary, so
+# the dynamic consumer must not reference libHttpClient at all. That is the
+# behavior a title sees, and linking it here would hide a regression.
+$httpClientLib = $null
+if ($Linkage -eq 'Static') {
+    if (-not (Resolve-LibHttpClientFile 'libHttpClient.GDK.lib')) {
+        Write-Host 'libHttpClient has not been built yet. Building it now...'
+        $hcProject = Join-Path $repoRoot 'External\Xal\External\libHttpClient\Build\libHttpClient.GDK\libHttpClient.GDK.vcxproj'
+        & msbuild $hcProject "/p:Configuration=$Configuration" "/p:Platform=$Platform" /v:minimal /nologo | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error 'libHttpClient failed to build, so the link inputs could not be resolved.'
+        }
     }
-}
 
-$httpClientLib = Resolve-LibHttpClientFile 'libHttpClient.GDK.lib'
-if (-not $httpClientLib) {
-    Write-Error 'libHttpClient.GDK.lib could not be located after building libHttpClient.'
+    $httpClientLib = Resolve-LibHttpClientFile 'libHttpClient.GDK.lib'
+    if (-not $httpClientLib) {
+        Write-Error 'libHttpClient.GDK.lib could not be located after building libHttpClient.'
+    }
 }
 
 # Link the XSAPI library by full path. The GDK ships a library with the same
 # name, and linking that one instead would defeat the purpose of the test.
 $linkInputs = @(
     "/LIBPATH:$gdkLib",
-    $xsapiLib,
-    $httpClientLib,
+    $xsapiLib
+) + @($httpClientLib | Where-Object { $_ }) + @(
     'xgameruntime.lib',
     'appnotify.lib',
     'winhttp.lib',
@@ -210,10 +233,48 @@ if ($Linkage -eq 'Static') {
 
 # Linking against the import library only proves the .def lists the export. The
 # executable has to load for the export to be proven present in the DLL itself.
-Copy-Item (Join-Path $libDir 'Microsoft.Xbox.Services.C.Thunks.dll') $outputDir -Force
-$httpClientDll = Resolve-LibHttpClientFile 'libHttpClient.GDK.dll'
-if ($httpClientDll) {
-    Copy-Item $httpClientDll $outputDir -Force
+$thunksDll = Join-Path $libDir 'Microsoft.Xbox.Services.C.Thunks.dll'
+Copy-Item $thunksDll $outputDir -Force
+
+# Which libHttpClient the Thunks DLL imports depends on how it was built, so read
+# it out of the binary rather than assuming. A source build imports
+# libHttpClient.GDK.dll, and a build with LibHttpClientBuildFromSource=false
+# imports the in-box libHttpClient.dll that ships in the GDK. A packaged title
+# gets the in-box copy from the Gaming Runtime, but this consumer is a plain
+# executable, so whichever one is needed has to be staged next to the exe.
+$imports = dumpbin /dependents $thunksDll 2>&1 |
+    Select-String -Pattern '^\s*(libHttpClient(\.GDK)?\.dll)\s*$' |
+    ForEach-Object { $_.Matches[0].Groups[1].Value }
+
+if (-not $imports) {
+    Write-Error "$thunksDll imports no libHttpClient at all, so it was linked against neither the source build nor the GDK in-box copy."
+}
+
+foreach ($import in $imports) {
+    if ($import -eq 'libHttpClient.dll') {
+        Write-Host "The Thunks DLL imports the GDK in-box $import."
+        $from = $gdkBin
+    }
+    else {
+        Write-Host "The Thunks DLL imports the source-built $import."
+        $from = $libDir
+    }
+
+    $dependency = if ($from) { Join-Path $from $import } else { $null }
+    if ($dependency -and (Test-Path $dependency)) {
+        Copy-Item $dependency $outputDir -Force
+    }
+    else {
+        Write-Error "The Thunks DLL imports $import, but it was not found in $from. The in-box import library and DLL are present from GDK edition 251001 for x64 and from the 260400 release for arm64."
+    }
+}
+
+if ($ExpectLibHttpClient -ne 'Any') {
+    $expected = if ($ExpectLibHttpClient -eq 'InBox') { 'libHttpClient.dll' } else { 'libHttpClient.GDK.dll' }
+    if ($imports -notcontains $expected) {
+        Write-Error "Expected the Thunks DLL to import $expected, but it imports $($imports -join ', ')."
+    }
+    Write-Host "PASS: the Thunks DLL imports $expected as expected." -ForegroundColor Green
 }
 
 Write-Host 'Loading the Thunks DLL...'
@@ -222,7 +283,7 @@ if ($process.ExitCode -ne 0) {
     $code = '0x{0:X8}' -f $process.ExitCode
     $hint = switch ($code) {
         '0xC0000139' { 'An export named by the import library is missing from the DLL, which is exactly the drift this test exists to catch.' }
-        '0xC0000135' { 'A dependent DLL could not be found. Confirm libHttpClient.GDK.dll is alongside the executable.' }
+        '0xC0000135' { 'A dependent DLL could not be found. Confirm the GDK in-box libHttpClient.dll is alongside the executable.' }
         default      { 'The executable failed to start.' }
     }
     Write-Error "FAIL: the consumer exited with $code. $hint"

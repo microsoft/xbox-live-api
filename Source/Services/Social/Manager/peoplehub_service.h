@@ -7,6 +7,15 @@
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SOCIAL_MANAGER_CPP_BEGIN
 
+// Result of a PeopleHub batch call.
+struct PeoplehubBatchResult
+{
+    Vector<XblSocialManagerUser> users;
+    // Users whose relationship (isFriend) the service returned as missing, null, or invalid. Their relationship fields
+    // in 'users' are defaults, not the service's answer, so callers that already know the relationship should keep it.
+    UnorderedSet<uint64_t> unresolvedRelationshipXuids;
+};
+
 class PeoplehubService
 {
 public:
@@ -26,7 +35,7 @@ public:
         _In_ uint64_t xuid,
         _In_ XblSocialManagerExtraDetailLevel decorations,
         _In_ const Vector<uint64_t>& xuids,
-        _In_ AsyncContext<Result<Vector<XblSocialManagerUser>>> async
+        _In_ AsyncContext<Result<PeoplehubBatchResult>> async
     ) const noexcept;
 
     // The configured HTTP timeout window (XblContextSettingsSetHttpTimeoutWindow) that bounds each HTTP
@@ -46,12 +55,17 @@ private:
         _In_ XblSocialManagerExtraDetailLevel decorations,
         _In_ RelationshipType relationshipType,
         _In_opt_ const Vector<uint64_t>& batchUsers,
-        _In_ AsyncContext<Result<Vector<XblSocialManagerUser>>> async
+        _In_ AsyncContext<Result<PeoplehubBatchResult>> async
     ) const noexcept;
 
-    static Result<XblSocialManagerUser> DeserializeUser(const JsonValue& json);
-    static Result<XblSocialManagerPresenceRecord> DeserializePresenceRecord(const JsonValue& json);
-    static Result<XblSocialManagerPresenceTitleRecord> DeserializePresenceTitleRecord(const JsonValue& json);
+    static HRESULT DeserializeUser(
+        const JsonValue& json,
+        _In_ RelationshipType relationshipType,
+        _Out_ XblSocialManagerUser& user,
+        _Out_ bool& relationshipResolved
+    );
+    static HRESULT DeserializePresenceRecord(const JsonValue& json, _Out_ XblSocialManagerPresenceRecord& record);
+    static HRESULT DeserializePresenceTitleRecord(const JsonValue& json, _Out_ XblSocialManagerPresenceTitleRecord& record);
     static Result<XblPreferredColor> DeserializePreferredColor(const JsonValue& json);
     static Result<XblTitleHistory> DeserializeTitleHistory(const JsonValue& json);
 

@@ -50,6 +50,7 @@ struct ServiceCallManager : public std::enable_shared_from_this<ServiceCallManag
     // Handlers invoked when Presence and Peoplehub Polls complete
     using PresenceResultHandler = std::function<void(Vector<std::shared_ptr<XblPresenceRecord>>&&)>;
     using PeopleHubResultHandler = std::function<void(Vector<XblSocialManagerUser>&&)>;
+    using PeopleHubBatchResultHandler = std::function<void(PeoplehubBatchResult&&)>;
 
     ServiceCallManager(
         const User& user,
@@ -58,7 +59,7 @@ struct ServiceCallManager : public std::enable_shared_from_this<ServiceCallManag
         std::shared_ptr<presence::PresenceService> presenceService,
         std::shared_ptr<PeoplehubService> peoplehubService,
         PresenceResultHandler presenceResultHandler,
-        PeopleHubResultHandler peopleHubResultHandler
+        PeopleHubBatchResultHandler peopleHubResultHandler
     ) noexcept;
 
     ~ServiceCallManager() noexcept;
@@ -96,7 +97,7 @@ private:
     // Peoplehub polling state
     UnorderedSet<uint64_t> m_usersPendingPeoplehub;
     bool m_peoplehubPollInProgress{ false };
-    PeopleHubResultHandler const m_peopleHubResultHandler;
+    PeopleHubBatchResultHandler const m_peopleHubResultHandler;
 
     std::shared_ptr<presence::PresenceService> m_presenceService;
     std::shared_ptr<PeoplehubService> m_peoplehubService;
@@ -189,11 +190,11 @@ Result<std::shared_ptr<SocialGraph>> SocialGraph::Make(
 
     auto presenceService = graph->m_xblContext->PresenceService();
 
-    auto peoplehubResultHandler = [weakGraph](Vector<XblSocialManagerUser>&& profiles)
+    auto peoplehubResultHandler = [weakGraph](PeoplehubBatchResult&& result)
     {
         if (auto graph{ weakGraph.lock() })
         {
-            graph->PeoplehubResultHandler(profiles);
+            graph->PeoplehubResultHandler(result.users, result.unresolvedRelationshipXuids);
         }
     };
 
@@ -512,14 +513,48 @@ void SocialGraph::SetRichPresencePolling(bool enabled) noexcept
 }
 
 void SocialGraph::PeoplehubResultHandler(
-    const Vector<XblSocialManagerUser>& users
+    const Vector<XblSocialManagerUser>& users,
+    const UnorderedSet<uint64_t>& unresolvedRelationshipXuids
 ) noexcept
 {
     PERF_START();
     std::unique_lock<std::recursive_mutex> lock{ m_mutex };
 
-    for (auto& profile : users)
+    for (auto& serviceProfile : users)
     {
+        const XblSocialManagerUser* updated{ &serviceProfile };
+        XblSocialManagerUser merged;
+        if (unresolvedRelationshipXuids.find(serviceProfile.xboxUserId) != unresolvedRelationshipXuids.end())
+        {
+            // The service didn't say whether this user is a friend. Keep the relationship we already know (the newest
+            // pending update, else the current profile) rather than overwriting it with the deserializer's default.
+            const XblSocialManagerUser* known{ nullptr };
+            auto pendingIter{ m_pendingUpdates.find(serviceProfile.xboxUserId) };
+            if (pendingIter != m_pendingUpdates.end() && pendingIter->second.second)
+            {
+                known = pendingIter->second.second.get();
+            }
+            else
+            {
+                auto profileIter{ m_profiles.find(serviceProfile.xboxUserId) };
+                if (profileIter != m_profiles.end())
+                {
+                    known = profileIter->second.get();
+                }
+            }
+
+            if (known)
+            {
+                merged = serviceProfile;
+                merged.isFriend = known->isFriend;
+                merged.isFollowedByCaller = known->isFollowedByCaller;
+                merged.isFollowingUser = known->isFollowingUser;
+                merged.isFavorite = known->isFavorite;
+                updated = &merged;
+            }
+        }
+        const XblSocialManagerUser& profile{ *updated };
+
         auto iter{ m_profiles.find(profile.xboxUserId) };
         if (iter == m_profiles.end())
         {
@@ -562,8 +597,9 @@ void SocialGraph::PresenceResultHandler(
         // when the associated Peoplehub call completes
         if (compareProfile)
         {
-            auto smRecord{ ConvertPresenceRecord(record) };
-            if (memcmp(&compareProfile->presenceRecord, &smRecord, sizeof(XblSocialManagerPresenceRecord)))
+            XblSocialManagerPresenceRecord smRecord;
+            ConvertPresenceRecord(record, smRecord);
+            if (!PresenceRecordsEqual(compareProfile->presenceRecord, smRecord))
             {
                 auto updatedProfile = MakeShared<XblSocialManagerUser>(*compareProfile);
                 memcpy(&updatedProfile->presenceRecord, &smRecord, sizeof(XblSocialManagerPresenceRecord));
@@ -730,7 +766,7 @@ ProfileChanges SocialGraph::CompareProfiles(
         changes |= ProfileChanges::RelationshipChanged;
     }
     // ProfileChanges::PresenceChange indicates a change in the presence record
-    if (memcmp(&old.presenceRecord, &updated.presenceRecord, sizeof(XblSocialManagerPresenceRecord)))
+    if (!PresenceRecordsEqual(old.presenceRecord, updated.presenceRecord))
     {
         changes |= ProfileChanges::PresenceChanged;
     }
@@ -756,11 +792,45 @@ ProfileChanges SocialGraph::CompareProfiles(
     return changes;
 }
 
-XblSocialManagerPresenceRecord SocialGraph::ConvertPresenceRecord(
-    std::shared_ptr<XblPresenceRecord> presenceRecord
+bool SocialGraph::PresenceRecordsEqual(
+    const XblSocialManagerPresenceRecord& lhs,
+    const XblSocialManagerPresenceRecord& rhs
 ) noexcept
 {
-    XblSocialManagerPresenceRecord smPresenceRecord{};
+    if (lhs.userState != rhs.userState || lhs.presenceTitleRecordCount != rhs.presenceTitleRecordCount)
+    {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < lhs.presenceTitleRecordCount && i < XBL_NUM_PRESENCE_RECORDS; ++i)
+    {
+        const auto& l{ lhs.presenceTitleRecords[i] };
+        const auto& r{ rhs.presenceTitleRecords[i] };
+        if (l.titleId != r.titleId ||
+            l.isTitleActive != r.isTitleActive ||
+            l.isBroadcasting != r.isBroadcasting ||
+            l.deviceType != r.deviceType ||
+            l.isPrimary != r.isPrimary ||
+            strncmp(l.titleName, r.titleName, sizeof(l.titleName)) != 0 ||
+            strncmp(l.presenceText, r.presenceText, sizeof(l.presenceText)) != 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+void SocialGraph::ConvertPresenceRecord(
+    _In_ const std::shared_ptr<XblPresenceRecord>& presenceRecord,
+    _Out_ XblSocialManagerPresenceRecord& smPresenceRecord
+) noexcept
+{
+    // Filling the caller's storage means a partial write would survive an early exit, and the record
+    // is handed to callers as-is, so zero it up front to keep unused slots clean.
+    // memset rather than 'smPresenceRecord = XblSocialManagerPresenceRecord{}' is deliberate: the
+    // latter can materialize a ~3.7KB temporary and defeat the point of the out parameter.
+    memset(&smPresenceRecord, 0, sizeof(smPresenceRecord));
+
     smPresenceRecord.userState = presenceRecord->UserState();
 
     for (auto& deviceRecord : presenceRecord->DeviceRecords())
@@ -783,7 +853,6 @@ XblSocialManagerPresenceRecord SocialGraph::ConvertPresenceRecord(
             break;
         }
     }
-    return smPresenceRecord;
 }
 
 /// -----------------------------------------------------------------------------------------------
@@ -828,7 +897,7 @@ ServiceCallManager::ServiceCallManager(
     std::shared_ptr<presence::PresenceService> presenceService,
     std::shared_ptr<PeoplehubService> peoplehubService,
     PresenceResultHandler presenceResultHandler,
-    PeopleHubResultHandler peoplehubResultHandler
+    PeopleHubBatchResultHandler peoplehubResultHandler
 ) noexcept
     : m_queue{ queue.DeriveWorkerQueue() },
     m_peoplehubDetailLevel{ peoplehubDetailLevel },
@@ -1038,7 +1107,7 @@ HRESULT ServiceCallManager::PollPeopleHubServiceCall(std::unique_lock<std::mutex
             this,
             pollXuids
         ]
-    (Result<Vector<XblSocialManagerUser>> result)
+    (Result<PeoplehubBatchResult> result)
     {
         if (auto sharedThis{ weakThis.lock() })
         {

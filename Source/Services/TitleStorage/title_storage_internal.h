@@ -31,7 +31,10 @@ public:
     HRESULT GetNext(_In_ uint32_t maxItems, _In_ xbox::services::AsyncContext<xbox::services::Result<std::shared_ptr<XblTitleStorageBlobMetadataResult>>> async);
 
     static xbox::services::Result<std::shared_ptr<XblTitleStorageBlobMetadataResult>> Deserialize(_In_ const JsonValue& json);
-    static xbox::services::Result<XblTitleStorageBlobMetadata> DeserializeXblTitleStorageBlobMetadata(_In_ const JsonValue& json);
+
+    // Fills the caller's storage rather than returning by value; XblTitleStorageBlobMetadata is
+    // ~1.2KB and returning it via Result<T> left three live copies in the /O2 frame (AB#63508132).
+    static HRESULT DeserializeXblTitleStorageBlobMetadata(_In_ const JsonValue& json, _Out_ XblTitleStorageBlobMetadata& metadata);
 
     static XblTitleStorageBlobType ConvertStringToTitleStorageBlobType(_In_ const xsapi_internal_string& value);
 
@@ -78,13 +81,13 @@ public:
     );
 
     HRESULT DeleteBlob(
-        _In_ XblTitleStorageBlobMetadata blobMetadata,
+        _In_ const XblTitleStorageBlobMetadata& blobMetadata,
         _In_ bool deleteOnlyIfEtagMatches,
         _In_ AsyncContext<HRESULT> async
     );
 
     HRESULT DownloadBlob(
-        _In_ XblTitleStorageBlobMetadata blobMetadata,
+        _In_ const XblTitleStorageBlobMetadata& blobMetadata,
         _In_ uint8_t* blobBuffer,
         _In_ size_t blobBufferSize,
         _In_ XblTitleStorageETagMatchCondition etagMatchCondition,
@@ -94,7 +97,7 @@ public:
     );
 
     HRESULT UploadBlob(
-        _In_ XblTitleStorageBlobMetadata blobMetadata,
+        _In_ const XblTitleStorageBlobMetadata& blobMetadata,
         _In_ const uint8_t* blobBuffer,
         _In_ size_t blobBufferSize,
         _In_ XblTitleStorageETagMatchCondition etagMatchCondition,

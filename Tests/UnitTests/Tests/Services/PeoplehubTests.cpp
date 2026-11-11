@@ -16,6 +16,7 @@ R"(
     "people": [
         {
             "xuid": "2814664990767463",
+            "isFriend": true,
             "isFavorite": true,
             "isFollowingCaller": true,
             "isFollowedByCaller": true,
@@ -61,6 +62,7 @@ R"(
         },
         {
             "xuid": "2814654081790887",
+            "isFriend": false,
             "isFavorite": true,
             "isFollowingCaller": false,
             "isFollowedByCaller": true,
@@ -106,6 +108,7 @@ R"(
         },
         {
             "xuid": "2814613569642996",
+            "isFriend": false,
             "isFavorite": false,
             "isFollowingCaller": false,
             "isFollowedByCaller": true,
@@ -151,6 +154,7 @@ R"(
         },
         {
             "xuid": "2814671404555632",
+            "isFriend": true,
             "isFavorite": false,
             "isFollowingCaller": true,
             "isFollowedByCaller": true,
@@ -299,9 +303,14 @@ public:
 
     static void VerifyXboxSocialUser(const XblSocialManagerUser & xboxSocialUser, JsonValue& jsonUser)
     {
-        VERIFY_ARE_EQUAL(xboxSocialUser.isFavorite, jsonUser["isFavorite"].GetBool());
-        VERIFY_ARE_EQUAL(xboxSocialUser.isFollowingUser, jsonUser["isFollowingCaller"].GetBool());
-        VERIFY_ARE_EQUAL(xboxSocialUser.isFollowedByCaller, jsonUser["isFollowedByCaller"].GetBool());
+        // PeoplehubService::DeserializeUser derives the legacy follower flags from isFriend (the
+        // service's friends model) and only reports isFavorite for friends; the raw
+        // isFollowingCaller/isFollowedByCaller fields in the response are ignored.
+        const bool isFriend{ jsonUser["isFriend"].GetBool() };
+        VERIFY_ARE_EQUAL(xboxSocialUser.isFriend, isFriend);
+        VERIFY_ARE_EQUAL(xboxSocialUser.isFavorite, jsonUser["isFavorite"].GetBool() && isFriend);
+        VERIFY_ARE_EQUAL(xboxSocialUser.isFollowingUser, isFriend);
+        VERIFY_ARE_EQUAL(xboxSocialUser.isFollowedByCaller, isFriend);
         VERIFY_ARE_EQUAL_STR(xboxSocialUser.displayName, jsonUser["displayName"].GetString());
         std::cout << xboxSocialUser.realName << " : " << jsonUser["realName"].GetString() << std::endl;
         VERIFY_ARE_EQUAL_STR(xboxSocialUser.realName, jsonUser["realName"].GetString());
@@ -337,10 +346,10 @@ public:
             );
 
         Event callComplete;
-        Result<Vector<XblSocialManagerUser>> result;
+        Result<PeoplehubBatchResult> result;
 
         env.PeoplehubService->GetSocialUsers(env.XboxLiveContext->Xuid(), XblSocialManagerExtraDetailLevel::PreferredColorLevel, { 1 }, {
-            [&] (Result<Vector<XblSocialManagerUser>> temp)
+            [&] (Result<PeoplehubBatchResult> temp)
             {
                 result = temp;
                 callComplete.Set();
@@ -351,10 +360,11 @@ public:
 
         VERIFY_SUCCEEDED(result.Hresult());
         JsonValue& userGroupArr = jsonResponse["people"];
-        VERIFY_ARE_EQUAL(result.Payload().size(), userGroupArr.Size());
+        VERIFY_ARE_EQUAL(result.Payload().users.size(), userGroupArr.Size());
+        VERIFY_IS_TRUE(result.Payload().unresolvedRelationshipXuids.empty());
 
         uint64_t counter{ 0 };
-        for (auto& user : result.Payload())
+        for (auto& user : result.Payload().users)
         {
             VerifyXboxSocialUser(user, userGroupArr[counter++]);
         }
@@ -370,7 +380,7 @@ public:
         jsonResponse.Parse(peoplehubResponse);
 
         xsapi_internal_stringstream url;
-        url << "https://peoplehub.xboxlive.com/users/xuid(" << env.XboxLiveContext->Xuid() << ")/people/social/decoration/presenceDetail";
+        url << "https://peoplehub.xboxlive.com/users/xuid(" << env.XboxLiveContext->Xuid() << ")/people/friends/decoration/presenceDetail";
 
         auto peoplehubMock = std::make_shared<HttpMock>(
             "GET",
@@ -486,7 +496,9 @@ public:
             });
 
         callComplete.Wait();
-        VERIFY_FAILED(result.Hresult());
+        // Malformed entries are skipped rather than failing the whole response, so a graph whose only
+        // entry is malformed yields an empty (but successful) result.
+        VERIFY_SUCCEEDED(result.Hresult());
         VERIFY_IS_TRUE(result.Payload().empty());
     }
 

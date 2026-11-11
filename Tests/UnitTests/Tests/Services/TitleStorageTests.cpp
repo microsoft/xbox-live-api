@@ -3,6 +3,7 @@
 
 #include "pch.h"
 #include "UnitTestIncludes.h"
+#include "title_storage_internal.h"
 
 NAMESPACE_MICROSOFT_XBOX_SERVICES_SYSTEM_CPP_BEGIN
 
@@ -59,6 +60,48 @@ const uint8_t binaryBlob[] = {
 const char continuationTokenJson[] = R"(
 {
     "continuationToken":"257e3886-cf73-4b52-8e89-2d7088d60bab-1"
+})";
+
+// A blobs array whose SECOND entry is malformed: "fileName" has no ',' separating the blob path
+// from the blob type, which DeserializeXblTitleStorageBlobMetadata rejects with
+// WEB_E_INVALID_JSON_STRING. The first entry is valid and carries distinctive, easily recognized
+// field values.
+//
+// This exercises the failure path of the in-place deserializer (AB#63508132): because metadata is
+// now written directly into caller-owned storage instead of a discarded temporary, the failure must
+// still propagate cleanly rather than yielding a truncated or partially populated result.
+const char blobMetadataMalformedSecondEntry[] = R"(
+{
+    "blobs": [
+        {
+            "fileName": "test/first-valid.json,json",
+            "etag": "\"0xFIRSTVALIDETAG\"",
+            "size": 4242
+        },
+        {
+            "fileName": "test/malformed-no-comma",
+            "etag": "\"0x8D1C76581F12853\"",
+            "size": 67
+        }
+    ],
+    "pagingInfo": {
+        "totalItems": 2
+    }
+})";
+
+// A blobs array with a single entry that omits every optional field. Nothing in this entry causes a
+// write to blobPath, blobType, length, or clientTimestamp, so all of them must read back zeroed
+// purely on the strength of the defensive memset in DeserializeXblTitleStorageBlobMetadata.
+const char blobMetadataSparseEntry[] = R"(
+{
+    "blobs": [
+        {
+            "etag": "\"0xSPARSEETAG\""
+        }
+    ],
+    "pagingInfo": {
+        "totalItems": 1
+    }
 })";
 
 DEFINE_TEST_CLASS(TitleStorageTests)
@@ -121,6 +164,21 @@ public:
     private:
         XblTitleStorageBlobMetadataResultHandle handle{ nullptr };
     };
+
+    // Returns true if a fixed-size buffer is zero across its entire width. Used to assert that
+    // fields absent from a service response are left fully zeroed when metadata is deserialized in
+    // place into caller-owned storage.
+    static bool IsBufferZeroed(const char* buffer, size_t size) noexcept
+    {
+        for (size_t i = 0; i < size; ++i)
+        {
+            if (buffer[i] != '\0')
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
     void VerifyBlobMetadata(const XblTitleStorageBlobMetadata& actual, JsonValue& expected)
     {
@@ -767,8 +825,151 @@ public:
         VERIFY_SUCCEEDED(XblTitleStorageUploadBlobResult(&async, &metadata));
     }
 
-    DEFINE_TEST_CASE(TitleStorageInvalidArgsTest)
+    // Direct regression test for the in-place deserializer's zeroing contract (AB#63508132).
+    //
+    // DeserializeXblTitleStorageBlobMetadata now writes into caller-owned storage instead of
+    // returning a Result<XblTitleStorageBlobMetadata> by value. That removed two ~1.2KB copies from
+    // the frame, but it also means a caller's pre-existing bytes survive anything the deserializer
+    // does not explicitly overwrite - so it must zero its out-param up front.
+    //
+    // The service call path happens to hide a regression here, because ExtractJsonVectorInPlace
+    // value-initializes each vector element before handing it over. This test calls the deserializer
+    // directly with deliberately dirtied storage so the memset itself is what is under test.
+    DEFINE_TEST_CASE(DeserializeBlobMetadataZeroesCallerStorageTest)
     {
+        TEST_LOG(L"Test starting: DeserializeBlobMetadataZeroesCallerStorageTest");
+
+        // Poison every byte the way a reused stack slot would be.
+        XblTitleStorageBlobMetadata metadata;
+        memset(&metadata, 0xCD, sizeof(metadata));
+
+        JsonDocument json;
+        json.Parse(R"({ "etag": "\"0xSPARSEETAG\"" })");
+        VERIFY_IS_FALSE(json.HasParseError());
+
+        VERIFY_SUCCEEDED(XblTitleStorageBlobMetadataResult::DeserializeXblTitleStorageBlobMetadata(json, metadata));
+
+        // Nothing in this payload writes blobPath, blobType, length or clientTimestamp, so all of
+        // them must come back zeroed rather than holding the caller's previous bytes.
+        //
+        // displayName is deliberately not byte-checked: the deserializer always calls utils::strcpy
+        // for it (with an empty string when the member is absent), and strcpy_s in debug CRT builds
+        // fills the remainder of the destination past the null terminator with 0xFE. That fill is
+        // deterministic, so it does not disturb the memcmp-based comparisons this zeroing protects.
+        VERIFY_IS_TRUE(IsBufferZeroed(metadata.blobPath, sizeof(metadata.blobPath)));
+        VERIFY_ARE_EQUAL_STR("", metadata.displayName);
+        VERIFY_IS_TRUE(metadata.blobType == XblTitleStorageBlobType::Unknown);
+        VERIFY_ARE_EQUAL_UINT(0u, metadata.length);
+        VERIFY_ARE_EQUAL_INT(0, static_cast<int>(metadata.clientTimestamp));
+        VERIFY_ARE_EQUAL_UINT(0u, metadata.xboxUserId);
+
+        // And the field that IS present still round-trips.
+        VERIFY_ARE_EQUAL_STR_IGNORE_CASE("\"0xSPARSEETAG\"", metadata.eTag);
+    }
+
+    // Companion to the above, exercised through the real service call path: a malformed entry must
+    // fail the whole request rather than yield a truncated or partially populated result.
+    //
+    // Scope note: this asserts only that the failure propagates out of the async call. The
+    // pop_back() in ExtractJsonVectorInPlace is NOT covered - XblTitleStorageBlobMetadataResult
+    // ::Deserialize discards the whole result on failure, so the partially written element is never
+    // observable from any caller. That pop_back is defense in depth for future callers that might
+    // read the vector before the error propagates; nothing currently tests it.
+    DEFINE_TEST_CASE(GetBlobMetadataMalformedEntryFailsTest)
+    {
+        TEST_LOG(L"Test starting: GetBlobMetadataMalformedEntryFailsTest");
+
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        auto mock = std::make_shared<HttpMock>("GET", "https://titlestorage.xboxlive.com");
+        JsonDocument responseJson;
+        responseJson.Parse(blobMetadataMalformedSecondEntry);
+        mock->SetResponseBody(responseJson);
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblTitleStorageGetBlobMetadataAsync(
+            xboxLiveContext.get(),
+            MOCK_SCID,
+            XblTitleStorageType::Universal,
+            "blobPath",
+            xboxLiveContext->Xuid(),
+            0,
+            0,
+            &async
+        ));
+
+        // The malformed entry must surface as a failure rather than a silently truncated or
+        // partially populated result.
+        HRESULT hr = XAsyncGetStatus(&async, true);
+        VERIFY_ARE_EQUAL_INT(WEB_E_INVALID_JSON_STRING, hr);
+
+        XblTitleStorageBlobMetadataResultHandle handle{ nullptr };
+        VERIFY_FAILED(XblTitleStorageGetBlobMetadataResult(&async, &handle));
+        VERIFY_IS_TRUE(handle == nullptr);
+    }
+
+    // Characterization test for the deserializer refactor: fields absent from the service response
+    // must read back zeroed through the real call path. Complements
+    // DeserializeBlobMetadataZeroesCallerStorageTest, which pins the same contract at the point
+    // where it can actually regress.
+    DEFINE_TEST_CASE(GetBlobMetadataSparseEntryIsZeroedTest)
+    {
+        TEST_LOG(L"Test starting: GetBlobMetadataSparseEntryIsZeroedTest");
+
+        TestEnvironment env{};
+        auto xboxLiveContext = env.CreateMockXboxLiveContext();
+
+        auto mock = std::make_shared<HttpMock>("GET", "https://titlestorage.xboxlive.com");
+        JsonDocument responseJson;
+        responseJson.Parse(blobMetadataSparseEntry);
+        mock->SetResponseBody(responseJson);
+
+        XAsyncBlock async{};
+        VERIFY_SUCCEEDED(XblTitleStorageGetBlobMetadataAsync(
+            xboxLiveContext.get(),
+            MOCK_SCID,
+            XblTitleStorageType::Universal,
+            "blobPath",
+            xboxLiveContext->Xuid(),
+            0,
+            0,
+            &async
+        ));
+        VERIFY_SUCCEEDED(XAsyncGetStatus(&async, true));
+
+        XblTitleStorageBlobMetadataResultHandle handle{ nullptr };
+        VERIFY_SUCCEEDED(XblTitleStorageGetBlobMetadataResult(&async, &handle));
+
+        BlobMetadataResult result{ handle };
+        auto items{ result.Items() };
+        VERIFY_ARE_EQUAL_UINT(1u, items.size());
+
+        const auto& metadata{ items[0] };
+
+        // Present in the response.
+        VERIFY_ARE_EQUAL_STR_IGNORE_CASE("\"0xSPARSEETAG\"", metadata.eTag);
+
+        // Absent from the response. Nothing in the deserializer writes these when their JSON members
+        // are missing, so they are zeroed only because the deserializer memsets its out-param up
+        // front. Without that, they would hold whatever was previously in caller-owned storage -
+        // and callers memcmp and copy the whole struct.
+        VERIFY_IS_TRUE(metadata.blobType == XblTitleStorageBlobType::Unknown);
+        VERIFY_ARE_EQUAL_UINT(0u, metadata.length);
+        VERIFY_ARE_EQUAL_INT(0, static_cast<int>(metadata.clientTimestamp));
+        VERIFY_ARE_EQUAL_STR("", metadata.blobPath);
+
+        // blobPath is never written for this payload, so it must be zero across its full width.
+        //
+        // This check is deliberately not applied to fields that ARE written, such as eTag:
+        // utils::strcpy resolves to strcpy_s, which in debug CRT builds intentionally fills the
+        // remainder of the destination buffer past the null terminator with 0xFE. That fill is
+        // deterministic for a given buffer, so it does not disturb the memcmp-based change detection
+        // this zeroing protects.
+        VERIFY_IS_TRUE(IsBufferZeroed(metadata.blobPath, sizeof(metadata.blobPath)));
+    }
+
+    DEFINE_TEST_CASE(TitleStorageInvalidArgsTest)    {
         TEST_LOG(L"Test starting: TitleStorageInvalidArgsTest");
 
         TestEnvironment env{};
